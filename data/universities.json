@@ -1,0 +1,4772 @@
+[
+  {
+    "institutie": "Universitatea Națională de Știință și Tehnologie Politehnica București",
+    "oras": "București",
+    "facultati": [
+      {
+        "nume": "Facultatea de Inginerie Electrică",
+        "specializari": [
+          "Electronică de putere și acționări electrice",
+          "Instrumentație și achiziții de date",
+          "Sisteme electrice",
+          "Informatică aplicată în inginerie electrică",
+          "Inginerie electrică și calculatoare (în limba engleză)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Energetică",
+        "specializari": [
+          "Energetică și tehnologii de mediu",
+          "Energetică și tehnologii nucleare",
+          "Energetică și tehnologii informatice",
+          "Ingineria sistemelor electroenergetice",
+          "Managementul energiei",
+          "Termoenergetică",
+          "Energetică și ingineria fluidelor"
+        ]
+      },
+      {
+        "nume": "Facultatea de Automatică și Calculatoare",
+        "specializari": ["Calculatoare", "Tehnologia informației", "Automatică și informatică aplicată"]
+      },
+      {
+        "nume": "Facultatea de Electronică, Telecomunicații și Tehnologia Informației",
+        "specializari": [
+          "Ingineria informației",
+          "Electronică aplicată",
+          "Electronică aplicată (în limba engleză)",
+          "Microelectronică, optoelectronică și nanotehnologii",
+          "Rețele și software de telecomunicații",
+          "Tehnologii și sisteme de telecomunicații",
+          "Tehnologii și sisteme de telecomunicații (în limba engleză)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Inginerie Mecanică și Mecatronică",
+        "specializari": [
+          "Design industrial",
+          "Echipamente pentru procese industriale",
+          "Mașini și sisteme hidraulice și pneumatice",
+          "Mecanică fină și nanotehnologii",
+          "Sisteme și echipamente termice",
+          "Inginerie economică în domeniul mecanic",
+          "Mecatronică",
+          "Optometrie"
+        ]
+      },
+      {
+        "nume": "Facultatea de Inginerie Industrială și Robotică",
+        "specializari": [
+          "Ingineria securității în industrie",
+          "Ingineria sudării",
+          "Ingineria și managementul calității",
+          "Logistică industrială",
+          "Sisteme de producție digitale",
+          "Tehnologia construcțiilor de mașini",
+          "Tehnologia construcțiilor de mașini (în limba engleză)",
+          "Inginerie integrată (în limba engleză)",
+          "Informatică aplicată în inginerie industrială",
+          "Tehnologii industriale inteligente"
+        ]
+      },
+      {
+        "nume": "Facultatea de Transporturi",
+        "specializari": [
+          "Autovehicule rutiere",
+          "Ingineria sistemelor de propulsie pentru autovehicule",
+          "Ingineria transporturilor și a traficului",
+          "Telecomenzi și electronică în transporturi",
+          "Vehicule pentru transportul feroviar"
+        ]
+      },
+      {
+        "nume": "Facultatea de Inginerie Aerospațială",
+        "specializari": [
+          "Construcții aerospațiale",
+          "Echipamente și instalații de aviație",
+          "Inginerie și management aeronautic",
+          "Navigație aeriană (în limba engleză)",
+          "Sisteme de propulsie",
+          "Design aeronautic"
+        ]
+      },
+      {
+        "nume": "Facultatea de Știința și Ingineria Materialelor",
+        "specializari": [
+          "Ingineria elaborării materialelor metalice",
+          "Ingineria procesării materialelor",
+          "Știința materialelor",
+          "Ingineria materialelor metalice",
+          "Ingineria și protecția mediului în industrie",
+          "Inginerie economică în industria chimică și de materiale",
+          "Inginerie medicală"
+        ]
+      },
+      {
+        "nume": "Facultatea de Inginerie Chimică și Biotehnologii",
+        "specializari": [
+          "Bioinginerie",
+          "Dezvoltare durabilă în ingineria de proces",
+          "Inginerie farmaceutică",
+          "Nanoștiințe",
+          "Ingineria și protecția mediului în industria chimică și petrochimică",
+          "Controlul și expertiza produselor alimentare",
+          "Chimia și ingineria substanțelor organice, petrochimie și carbochimie",
+          "Chimie alimentară și tehnologii biochimice",
+          "Ingineria și informatica proceselor chimice și biochimice",
+          "Știința și ingineria materialelor oxidice și nanomateriale",
+          "Știința și ingineria polimerilor"
+        ]
+      },
+      {
+        "nume": "Facultatea de Inginerie în Limbi Străine",
+        "specializari": [
+          "Ingineria informației (în limba engleză)",
+          "Ingineria informației (în limba franceză)",
+          "Ingineria internetului dispozitivelor inteligente (în limba franceză)",
+          "Ingineria internetului dispozitivelor inteligente (în limba engleză)",
+          "Inginerie chimică (în limba engleză)",
+          "Electronică aplicată (în limba engleză)",
+          "Electronică aplicată (în limba franceză)",
+          "Electronică aplicată (în limba germană)",
+          "Inginerie mecanică (în limba engleză)",
+          "Inginerie mecanică (în limba franceză)",
+          "Informatică aplicată în inginerie industrială (în limba germană)",
+          "Inginerie economică în domeniul electric, electronic și energetic (în limba germană)",
+          "Inginerie economică în domeniul mecanic (în limba germană)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Științe Aplicate",
+        "specializari": ["Inginerie fizică", "Matematică și informatică aplicată în inginerie"]
+      },
+      {
+        "nume": "Facultatea de Inginerie Medicală",
+        "specializari": [
+          "Biomateriale și dispozitive medicale",
+          "Echipamente și sisteme medicale",
+          "Inginerie medicală"
+        ]
+      },
+      {
+        "nume": "Facultatea de Antreprenoriat, Ingineria și Managementul Afacerilor",
+        "specializari": [
+          "Ingineria și managementul afacerilor",
+          "Ingineria și managementul afacerilor (în limba engleză)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Științe, Educație Fizică și Informatică",
+        "specializari": [
+          "Biologie",
+          "Chimie",
+          "Horticultură",
+          "Ingineria mediului",
+          "Kinetoterapie și motricitate specială",
+          "Psihologie",
+          "Asistență medicală generală",
+          "Ecologie și protecția mediului",
+          "Energetică și tehnologii nucleare",
+          "Educație fizică și sportivă",
+          "Sport și performanță motrică",
+          "Informatică",
+          "Matematică"
+        ]
+      },
+      {
+        "nume": "Facultatea de Mecanică și Tehnologie",
+        "specializari": [
+          "Autovehicule rutiere",
+          "Ingineria transporturilor și a traficului",
+          "Tehnologia construcțiilor de mașini",
+          "Inginerie economică industrială"
+        ]
+      },
+      {
+        "nume": "Facultatea de Electronică, Comunicații și Calculatoare",
+        "specializari": [
+          "Calculatoare",
+          "Electromecanică",
+          "Electronică aplicată",
+          "Rețele și software de telecomunicații"
+        ]
+      },
+      {
+        "nume": "Facultatea de Științe Economice și Drept",
+        "specializari": [
+          "Administrarea afacerilor",
+          "Economia comerțului, turismului și serviciilor",
+          "Contabilitate și informatică de gestiune",
+          "Finanțe și bănci",
+          "Management",
+          "Drept",
+          "Administrație publică"
+        ]
+      },
+      {
+        "nume": "Facultatea de Științe ale Educației, Științe Sociale și Psihologie",
+        "specializari": [
+          "Pedagogia învățământului primar și preșcolar",
+          "Pedagogia învățământului primar și preșcolar (la Alexandria)",
+          "Pedagogia învățământului primar și preșcolar (la Câmpulung)",
+          "Pedagogia învățământului primar și preșcolar (la Râmnicu Vâlcea)",
+          "Pedagogia învățământului primar și preșcolar (la Slatina)",
+          "Asistență socială",
+          "Psihologie",
+          "Jurnalism",
+          "Resurse umane"
+        ]
+      },
+      {
+        "nume": "Facultatea de Teologie, Litere, Istorie și Arte",
+        "specializari": [
+          "Teologie ortodoxă asistență socială",
+          "Limba și literatura română – Limba și literatura modernă (franceză/engleză)",
+          "Limba și literatura engleză – Limba și literatura modernă (franceză/spaniolă/germană)",
+          "Limbi moderne aplicate (engleză; franceză)",
+          "Istorie",
+          "Muzică",
+          "Artă sacră",
+          "Artele spectacolului (Actorie)"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "Universitatea Tehnică de Construcții din București",
+    "oras": "București",
+    "facultati": [
+      {
+        "nume": "Facultatea de Construcții Civile, Industriale și Agricole",
+        "specializari": [
+          "Construcții civile, industriale și agricole",
+          "Inginerie urbană și dezvoltare regională",
+          "Inginerie și management în construcții"
+        ]
+      },
+      {
+        "nume": "Facultatea de Hidrotehnică",
+        "specializari": [
+          "Ingineria mediului",
+          "Automatică și informatică aplicată",
+          "Amenajări și construcții hidrotehnice",
+          "Construcții pentru sisteme de alimentări cu apă și canalizări"
+        ]
+      },
+      {
+        "nume": "Facultatea de Căi Ferate, Drumuri și Poduri",
+        "specializari": ["Căi ferate, drumuri și poduri"]
+      },
+      {
+        "nume": "Facultatea de Ingineria Instalațiilor",
+        "specializari": [
+          "Instalații pentru construcții",
+          "Instalații pentru construcții (în limba franceză)",
+          "Instalații și echipamente pentru protecția atmosferei"
+        ]
+      },
+      {
+        "nume": "Facultatea de Inginerie Mecanică și Robotică în Construcții",
+        "specializari": ["Utilaje tehnologice pentru construcții", "Mecatronică"]
+      },
+      {
+        "nume": "Facultatea de Geodezie",
+        "specializari": ["Măsurători terestre și cadastru"]
+      },
+      {
+        "nume": "Facultatea de Inginerie în Limbi Străine",
+        "specializari": [
+          "Inginerie civilă (în limba engleză)",
+          "Inginerie civilă (în limba franceză)",
+          "Traducere și interpretare (engleză – franceză/ germană/ spaniolă)"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "Universitatea de Arhitectură și Urbanism \"Ion Mincu\" din București",
+    "oras": "București",
+    "facultati": [
+      {
+        "nume": "Facultatea de Arhitectură",
+        "specializari": [
+          "Arhitectură",
+          "Arhitectură (în limba engleză)",
+          "Conservare și restaurare de arhitectură (la Sibiu)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Arhitectură de Interior",
+        "specializari": ["Arhitectură de interior", "Design de produs", "Mobilier și amenajări interioare"]
+      },
+      {
+        "nume": "Facultatea de Urbanism",
+        "specializari": [
+          "Amenajarea și planificarea peisajului",
+          "Proiectare și planificare urbană",
+          "Urbanism și administrarea teritoriului (la Sibiu)"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "Universitatea de Științe Agronomice și Medicină Veterinară din București",
+    "oras": "București",
+    "facultati": [
+      {
+        "nume": "Facultatea de Agricultură",
+        "specializari": ["Agricultură", "Biologie", "Silvicultură"]
+      },
+      {
+        "nume": "Facultatea de Horticultură",
+        "specializari": ["Horticultură", "Peisagistică"]
+      },
+      {
+        "nume": "Facultatea de Ingineria și Gestiunea Producțiilor Animaliere",
+        "specializari": [
+          "Zootehnie",
+          "Tehnologia prelucrării produselor agricole",
+          "Protecția consumatorului și a mediului",
+          "Controlul și expertiza produselor alimentare",
+          "Științe gastronomice"
+        ]
+      },
+      {
+        "nume": "Facultatea de Medicină Veterinară",
+        "specializari": [
+          "Medicină veterinară",
+          "Medicină veterinară (în limba engleză)",
+          "Medicină veterinară (în limba franceză)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Îmbunătățiri Funciare și Ingineria Mediului",
+        "specializari": [
+          "Îmbunătățiri funciare și dezvoltare rurală",
+          "Ingineria și protecția mediului în agricultură",
+          "Inginerie și management în construcții",
+          "Măsurători terestre și cadastru"
+        ]
+      },
+      {
+        "nume": "Facultatea de Biotehnologii",
+        "specializari": [
+          "Biotehnologii agricole",
+          "Biotehnologii medical-veterinare",
+          "Biotehnologii pentru industria alimentară"
+        ]
+      },
+      {
+        "nume": "Facultatea de Management și Dezvoltare Rurală",
+        "specializari": [
+          "Ingineria și managementul afacerilor agricole",
+          "Inginerie și management în alimentația publică și agroturism",
+          "Ingineria și managementul afacerilor agricole (la Călărași)",
+          "Ingineria și managementul afacerilor agricole (la Slatina)"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "Universitatea din București",
+    "oras": "București",
+    "facultati": [
+      {
+        "nume": "Facultatea de Administrație și Afaceri",
+        "specializari": [
+          "Administrarea afacerilor",
+          "Administrarea afacerilor (la Focșani)",
+          "Administrarea afacerilor (în limba engleză)",
+          "Marketing",
+          "Administrație publică",
+          "Servicii și politici de sănătate publică (Public Health)",
+          "Cibernetică economică"
+        ]
+      },
+      {
+        "nume": "Facultatea de Biologie",
+        "specializari": ["Biochimie", "Biologie", "Ecologie și protecția mediului"]
+      },
+      {
+        "nume": "Facultatea de Chimie",
+        "specializari": ["Biochimie tehnologică", "Chimie", "Chimie medicală", "Chimie farmaceutică"]
+      },
+      {
+        "nume": "Facultatea de Drept",
+        "specializari": ["Drept", "Drept (în limba engleză)"]
+      },
+      {
+        "nume": "Facultatea de Filosofie",
+        "specializari": ["Filosofie"]
+      },
+      {
+        "nume": "Facultatea de Fizică",
+        "specializari": [
+          "Fizică",
+          "Fizică (în limba engleză)",
+          "Fizică informatică",
+          "Fizică medicală",
+          "Robotică",
+          "Fizică tehnologică"
+        ]
+      },
+      {
+        "nume": "Facultatea de Geografie",
+        "specializari": [
+          "Cartografie",
+          "Geografia turismului",
+          "Geografia turismului (la Focșani)",
+          "Geografia mediului",
+          "Planificare teritorială",
+          "Planificare teritorială (la Drobeta-Turnu Severin)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Geologie și Geofizică",
+        "specializari": ["Geologie", "Geofizică", "Inginerie geologică"]
+      },
+      {
+        "nume": "Facultatea de Istorie",
+        "specializari": ["Istoria artei", "Istorie", "Relații internaționale și studii europene"]
+      },
+      {
+        "nume": "Facultatea de Jurnalism și Științele Comunicării",
+        "specializari": [
+          "Comunicare și relații publice",
+          "Jurnalism",
+          "Publicitate",
+          "Științe ale informării și documentării"
+        ]
+      },
+      {
+        "nume": "Facultatea de Litere",
+        "specializari": [
+          "Limba și literatura română – Limba și literatura modernă (engleză/ franceză/ germană/ hindi/ italiană/ persană/ portugheză/ rusă/ spaniolă)/ Limba și literatura latină",
+          "Literatură universală și comparată – Limba și literatura modernă (engleză/ franceză/ germană/ italiană/ spaniolă/ portugheză/ rusă)/ Limba și literatura latină",
+          "Etnologie",
+          "Studii europene",
+          "Asistență managerială și administrativă",
+          "Comunicare și relații publice",
+          "Științe ale informării și documentării"
+        ]
+      },
+      {
+        "nume": "Facultatea de Limbi și Literaturi Străine",
+        "specializari": [
+          "Limba și literatura neogreacă – Limba și literatura modernă (catalană/ coreeană/ engleză/ franceză/ germană/ hindi/ italiană/ neerlandeză/ persană/ portugheză/ rusă/ spaniolă/ suedeză)/ Limba și literatura latină/ Limba și literatura română",
+          "Limba și literatura romani – Limba și literatura modernă (engleză/ franceză/ germană/ hindi/ italiană/ neerlandeză/ persană/ portugheză/ rusă/ spaniolă/ suedeză)/ Limba și literatura latină/ Limba și literatura română",
+          "Limba și literatura modernă (arabă/ bulgară/ cehă/ chineză/ croată/ engleză/ franceză/ germană/ italiană/ japoneză/ maghiară/ neerlandeză/ neogreacă/ polonă/ portugheză/ romani/ rusă/ sârbă/ slovacă/ spaniolă/ turcă/ ucraineană) – Limba și literatura coreeană",
+          "Limba și literatura modernă (arabă/ bulgară/ cehă/ chineză/ croată/ engleză/ franceză/ germană/ italiană/ japoneză/ maghiară/ neerlandeză/ polonă/ portugheză/ rusă/ sârbă/ slovacă/ spaniolă/ turcă/ ucraineană) – Limba și literatura catalană",
+          "Limba și literatura modernă (arabă/ bulgară/ cehă/ chineză/ croată/ engleză/ franceză/ germană/ italiană/ japoneză/ maghiară/ neerlandeză/ polonă/ portugheză/ rusă/ sârbă/ slovacă/ spaniolă/ turcă/ ucraineană) – Limba și literatura modernă (engleză/ franceză/ germană/ hindi/ italiană/ neerlandeză/ persană/ portugheză/ rusă/ spaniolă/ suedeză)/ Limba și literatura latină/ Limba și literatura română",
+          "Limba și literatura suedeză – Limba și literatura modernă (catalană/ coreeană/ engleză/ franceză/ germană/ hindi/ italiană/ neerlandeză/ persană/ portugheză/ rusă/ spaniolă)/ Limba și literatura latină/ Limba și literatura română",
+          "Filologie clasică (Limba și literatura latină – Limba și literatura greacă veche)",
+          "Limbi moderne aplicate (spaniolă/ italiană/ rusă/ cehă/ polonă/ slovacă/ croată)",
+          "Traducere și interpretare (engleză; franceză; germană; italiană; spaniolă; rusă)",
+          "Studii americane",
+          "Studii iudaice"
+        ]
+      },
+      {
+        "nume": "Facultatea de Matematică și Informatică",
+        "specializari": [
+          "Tehnologia informației",
+          "Informatică",
+          "Matematică",
+          "Matematică informatică",
+          "Matematică aplicate"
+        ]
+      },
+      {
+        "nume": "Facultatea de Sociologie și Asistență Socială",
+        "specializari": ["Asistență socială", "Antropologie", "Resurse umane", "Sociologie"]
+      },
+      {
+        "nume": "Facultatea de Psihologie și Științele Educației",
+        "specializari": [
+          "Psihologie",
+          "Psihologie - Științe cognitive (în limba engleză)",
+          "Pedagogia învățământului primar și preșcolar",
+          "Pedagogia învățământului primar și preșcolar (la Buzău)",
+          "Pedagogia învățământului primar și preșcolar (la Focșani)",
+          "Pedagogie",
+          "Psihopedagogie specială"
+        ]
+      },
+      {
+        "nume": "Facultatea de Științe Politice",
+        "specializari": [
+          "Studii de securitate",
+          "Științe politice",
+          "Științe politice (în limba engleză)",
+          "Științe politice (în limba franceză)",
+          "Relații internaționale și studii europene (în limba engleză)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Teologie Baptistă",
+        "specializari": ["Teologie baptistă asistență socială"]
+      },
+      {
+        "nume": "Facultatea de Teologie Ortodoxă",
+        "specializari": [
+          "Teologie ortodoxă asistență socială",
+          "Teologie ortodoxă didactică",
+          "Teologie ortodoxă pastorală",
+          "Teologie ortodoxă pastorală (la Roma, Italia)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Teologie Romano-Catolică",
+        "specializari": ["Teologie romano-catolică asistență socială", "Studii religioase"]
+      }
+    ]
+  },
+  {
+    "institutie": "Universitatea de Medicină și Farmacie \"Carol Davila\" din București",
+    "oras": "București",
+    "facultati": [
+      {
+        "nume": "Facultatea de Medicină",
+        "specializari": ["Medicină", "Medicină (în limba engleză)"]
+      },
+      {
+        "nume": "Facultatea de Stomatologie",
+        "specializari": ["Medicină dentară", "Medicină dentară (în limba engleză)"]
+      },
+      {
+        "nume": "Facultatea de Farmacie",
+        "specializari": ["Farmacie", "Farmacie (în limba franceză)"]
+      },
+      {
+        "nume": "Facultatea de Moașe și Asistență Medicală",
+        "specializari": [
+          "Asistență medicală generală",
+          "Asistență medicală generală (la Ploiești)",
+          "Moașe",
+          "Radiologie și imagistică",
+          "Balneofiziokinetoterapie și recuperare",
+          "Balneofiziokinetoterapie și recuperare (la Ploiești)",
+          "Tehnică Dentară"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "Academia de Studii Economice din București",
+    "oras": "București",
+    "facultati": [
+      {
+        "nume": "Facultatea de Economie Teoretică și Aplicată",
+        "specializari": ["Economie și comunicare economică în afaceri"]
+      },
+      {
+        "nume": "Facultatea de Economie Agroalimentară și a Mediului",
+        "specializari": ["Economie agroalimentară și a mediului", "Economie agroalimentară și a mediului (la Tulcea)"]
+      },
+      {
+        "nume": "Facultatea de Administrarea Afacerilor, cu predare în limbi străine",
+        "specializari": [
+          "Administrarea afacerilor (în limba engleză)",
+          "Administrarea afacerilor (în limba franceză)",
+          "Administrarea afacerilor (în limba germană)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Business și Turism",
+        "specializari": [
+          "Administrarea afacerilor în comerț, turism, servicii, merceologie și managementul calității",
+          "Administrarea afacerilor în comerț, turism, servicii, merceologie și managementul calității (în limba engleză)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Management",
+        "specializari": ["Management", "Management (în limba engleză)", "Management (în limba engleză, la Buzău)"]
+      },
+      {
+        "nume": "Facultatea de Marketing",
+        "specializari": ["Marketing", "Marketing (în limba engleză)", "Marketing (la Buzău)"]
+      },
+      {
+        "nume": "Facultatea de Cibernetică, Statistică și Informatică Economică",
+        "specializari": [
+          "Cibernetică economică",
+          "Informatică economică",
+          "Informatică economică (în limba engleză)",
+          "Statistică și previziune economică"
+        ]
+      },
+      {
+        "nume": "Facultatea de Finanțe, Asigurări, Bănci și Burse de Valori",
+        "specializari": ["Finanțe și bănci", "Finanțe și bănci (în limba engleză)", "Finanțe și bănci (la Buzău)"]
+      },
+      {
+        "nume": "Facultatea de Contabilitate și Informatică de Gestiune",
+        "specializari": [
+          "Contabilitate și informatică de gestiune",
+          "Contabilitate și informatică de gestiune (în limba engleză)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Relații Economice Internaționale",
+        "specializari": [
+          "Economie și afaceri internaționale",
+          "Economie și afaceri internaționale (în limba engleză)",
+          "Limbi moderne aplicate (engleză; franceză)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Administrație și Management Public",
+        "specializari": ["Administrație publică", "Resurse umane"]
+      },
+      {
+        "nume": "Facultatea de Drept",
+        "specializari": ["Drept"]
+      },
+      {
+        "nume": "Facultatea Bucharest Business School (Școala de Afaceri)",
+        "specializari": [
+          "MBA Româno-Canadian (în limba engleză)",
+          "MBA Româno-Francez INDE (în limba engleză)",
+          "MBA în energie (în limba engleză)"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "Universitatea Națională de Muzică din București",
+    "oras": "București",
+    "facultati": [
+      {
+        "nume": "Facultatea de Interpretare Muzicală",
+        "specializari": ["Interpretare muzicală - canto", "Interpretare muzicală - instrumente"]
+      },
+      {
+        "nume": "Facultatea de Compoziție, Muzicologie și Pedagogie Muzicală",
+        "specializari": ["Compoziție muzicală", "Dirijat", "Muzică religioasă", "Muzicologie", "Muzică"]
+      }
+    ]
+  },
+  {
+    "institutie": "Universitatea Națională de Arte din București",
+    "oras": "București",
+    "facultati": [
+      {
+        "nume": "Facultatea de Arte Plastice",
+        "specializari": [
+          "Arte plastice (fotografie - videoprocesarea computerizată a imaginii)",
+          "Arte plastice - Pictură",
+          "Arte plastice - Sculptură",
+          "Arte plastice - Grafică",
+          "Pedagogia artelor plastice și decorative"
+        ]
+      },
+      {
+        "nume": "Facultatea de Arte Decorative și Design",
+        "specializari": [
+          "Artă murală",
+          "Arte textile - design textil",
+          "Ceramică - sticlă - metal",
+          "Design",
+          "Modă - design vestimentar",
+          "Scenografie și eveniment artistic"
+        ]
+      },
+      {
+        "nume": "Facultatea de Istoria și Teoria Artei",
+        "specializari": ["Conservare și restaurare", "Istoria și teoria artei"]
+      }
+    ]
+  },
+  {
+    "institutie": "Universitatea Națională de Artă Teatrală și Cinematografică \"I. L. Caragiale\" din București",
+    "oras": "București",
+    "facultati": [
+      {
+        "nume": "Facultatea de Teatru",
+        "specializari": [
+          "Artele spectacolului (Actorie)",
+          "Artele spectacolului (Regie)",
+          "Artele spectacolului (Păpuși - Marionete)",
+          "Artele spectacolului (Coregrafie)",
+          "Scenografie",
+          "Teatrologie (Management cultural)",
+          "Teatrologie (Jurnalism teatral)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Film",
+        "specializari": [
+          "Cinematografie, fotografie, media (Regie de film și TV)",
+          "Cinematografie, fotografie, media (Imagine de film și TV)",
+          "Cinematografie, fotografie, media (Multimedia: sunet-montaj)",
+          "Cinematografie, fotografie, media (Comunicare audiovizuală: scenaristică, publicitate media, filmologie)",
+          "Cinematografie, fotografie, media (Animație)",
+          "Fotografie"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "Universitatea Națională de Educație Fizică și Sport din București",
+    "oras": "București",
+    "facultati": [
+      {
+        "nume": "Facultatea de Educație Fizică și Sport",
+        "specializari": [
+          "Educație fizică și sportivă",
+          "Educație fizică și sportivă (în limba franceză)",
+          "Educație fizică și sportivă",
+          "Sport și performanță motrică",
+          "Sport și performanță motrică"
+        ]
+      },
+      {
+        "nume": "Facultatea de Kinetoterapie",
+        "specializari": ["Kinetoterapie și motricitate specială"]
+      }
+    ]
+  },
+  {
+    "institutie": "Școala Națională de Studii Politice și Administrative din București",
+    "oras": "București",
+    "facultati": [
+      {
+        "nume": "Facultatea de Administrație Publică",
+        "specializari": ["Administrație europeană", "Administrație publică", "Administrație publică"]
+      },
+      {
+        "nume": "Facultatea de Științe Politice",
+        "specializari": ["Psihologie", "Relații internaționale și studii europene", "Sociologie", "Științe politice"]
+      },
+      {
+        "nume": "Facultatea de Comunicare și Relații Publice",
+        "specializari": [
+          "Comunicare și relații publice",
+          "Publicitate",
+          "Comunicare și media emergente (în limba engleză)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Management",
+        "specializari": ["Management", "Management (în limba engleză)"]
+      }
+    ]
+  },
+  {
+    "institutie": "Universitatea \"1 Decembrie 1918\" din Alba Iulia",
+    "oras": "Alba Iulia",
+    "facultati": [
+      {
+        "nume": "Facultatea de Istorie, Litere și Științe ale Educației",
+        "specializari": [
+          "Istorie",
+          "Arheologie",
+          "Limba și literatura română - Limba și literatura engleză",
+          "Traducere și interpretare (engleză; franceză)",
+          "Traducere și interpretare (germană-engleză)",
+          "Pedagogia învățământului primar și preșcolar",
+          "Pedagogia învățământului primar și preșcolar",
+          "Pedagogia învățământului primar și preșcolar (la Deva)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Științe Economice",
+        "specializari": [
+          "Administrarea afacerilor",
+          "Administrarea afacerilor (în limba engleză)",
+          "Administrarea afacerilor",
+          "Economia comerțului, turismului și serviciilor",
+          "Economia comerțului, turismului și serviciilor"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "Universitatea \"Aurel Vlaicu\" din Arad",
+    "oras": "Arad",
+    "facultati": [
+      {
+        "nume": "Facultatea de Inginerie",
+        "specializari": [
+          "Autovehicule rutiere",
+          "Automatică și informatică aplicată",
+          "Tehnologia construcțiilor de mașini",
+          "Tehnologia și designul produselor textile",
+          "Ingineria sudării"
+        ]
+      },
+      {
+        "nume": "Facultatea de Inginerie Alimentară, Turism și Protecția Mediului",
+        "specializari": [
+          "Inginerie economică industrială",
+          "Ingineria sistemelor biotehnice și ecologice",
+          "Controlul și expertiza produselor alimentare",
+          "Ingineria produselor alimentare",
+          "Protecția consumatorului și a mediului",
+          "Inginerie și management în alimentația publică și agroturism",
+          "Nutriție și dietetică"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "Universitatea „Vasile Alecsandri” din Bacău",
+    "oras": "Bacău",
+    "facultati": [
+      {
+        "nume": "Facultatea de Inginerie",
+        "specializari": [
+          "Tehnologia informației",
+          "Ingineria și protecția mediului în industrie",
+          "Ingineria dezvoltării rurale durabile",
+          "Ingineria produselor alimentare",
+          "Inginerie biochimică",
+          "Energetică industrială",
+          "Design industrial",
+          "Ingineria și managementul calității",
+          "Tehnologia construcțiilor de mașini",
+          "Echipamente pentru procese industriale",
+          "Inginerie economică în domeniul mecanic",
+          "Ingineria și managementul afacerilor",
+          "Inginerie și management în alimentația publică și agroturism",
+          "Mecatronică",
+          "Robotică"
+        ]
+      },
+      {
+        "nume": "Facultatea de Litere",
+        "specializari": [
+          "Limba și literatura engleză - Limba și literatura franceză",
+          "Limba și literatura română - Limba și literatura engleză",
+          "Limba și literatura modernă (engleză/franceză) - Limba și literatura română",
+          "Comunicare și relații publice",
+          "Pedagogia învățământului primar și preșcolar"
+        ]
+      },
+      {
+        "nume": "Facultatea de Științe ale Mișcării, Sportului și Sănătății",
+        "specializari": [
+          "Educație fizică și sportivă",
+          "Educație fizică și sportivă",
+          "Sport și performanță motrică",
+          "Kinetoterapie și motricitate specială",
+          "Kinetoterapie și motricitate specială",
+          "Terapie ocupațională"
+        ]
+      },
+      {
+        "nume": "Facultatea de Științe",
+        "specializari": ["Biologie", "Informatică", "Informatică", "Matematică", "Fizică informatică"]
+      },
+      {
+        "nume": "Facultatea de Științe Economice",
+        "specializari": [
+          "Administrarea afacerilor",
+          "Contabilitate și informatică de gestiune",
+          "Contabilitate și informatică de gestiune",
+          "Marketing",
+          "Marketing"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "Universitatea „Transilvania” din Brașov",
+    "oras": "Brașov",
+    "facultati": [
+      {
+        "nume": "Facultatea de Inginerie Mecanică",
+        "specializari": [
+          "Autovehicule rutiere",
+          "Autovehicule rutiere (în limba engleză)",
+          "Ingineria transporturilor și a traficului",
+          "Inginerie mecanică",
+          "Inginerie mecanică"
+        ]
+      },
+      {
+        "nume": "Facultatea de Inginerie Tehnologică și Management Industrial",
+        "specializari": [
+          "Construcții aerospațiale",
+          "Ingineria și managementul calității",
+          "Sisteme de producție digitale",
+          "Tehnologia construcțiilor de mașini",
+          "Ingineria și managementul afacerilor",
+          "Inginerie economică industrială",
+          "Inginerie economică industrială",
+          "Robotică"
+        ]
+      },
+      {
+        "nume": "Facultatea de Știința și Ingineria Materialelor",
+        "specializari": [
+          "Știința materialelor",
+          "Ingineria securității în industrie",
+          "Ingineria sudării",
+          "Inginerie economică în domeniul mecanic",
+          "Antreprenoriat în ingineria materialelor"
+        ]
+      },
+      {
+        "nume": "Facultatea de Inginerie Electrică și Știința Calculatoarelor",
+        "specializari": [
+          "Calculatoare",
+          "Tehnologia informației",
+          "Automatică și informatică aplicată",
+          "Electrotehnică",
+          "Inginerie electrică și calculatoare (în limba engleză)",
+          "Electronică aplicată",
+          "Tehnologii și sisteme de telecomunicații",
+          "Robotică"
+        ]
+      },
+      {
+        "nume": "Facultatea de Silvicultură și Exploatări Forestiere",
+        "specializari": [
+          "Măsurători terestre și cadastru",
+          "Cinegetică",
+          "Cinegetică",
+          "Exploatări forestiere",
+          "Silvicultură"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "Universitatea Tehnică din Cluj-Napoca",
+    "oras": "Cluj-Napoca",
+    "facultati": [
+      {
+        "nume": "Facultatea de Arhitectură și Urbanism",
+        "specializari": ["Arhitectură"]
+      },
+      {
+        "nume": "Facultatea de Automatică și Calculatoare",
+        "specializari": [
+          "Calculatoare",
+          "Calculatoare (în limba engleză)",
+          "Tehnologia informației",
+          "Automatică și informatică aplicată",
+          "Automatică și informatică aplicată (în limba engleză)",
+          "Automatică și informatică aplicată (la Satu Mare)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Construcții",
+        "specializari": [
+          "Amenajări și construcții hidrotehnice",
+          "Căi ferate, drumuri și poduri",
+          "Construcții civile, industriale și agricole",
+          "Construcții civile, industriale și agricole (în limba engleză)",
+          "Construcții civile, industriale și agricole (la Baia Mare)",
+          "Inginerie urbană și dezvoltare regională",
+          "Inginerie și management în construcții"
+        ]
+      },
+      {
+        "nume": "Facultatea de Inginerie Industrială, Robotică și Managementul Producției",
+        "specializari": [
+          "Design industrial",
+          "Sisteme de producție digitale (la Bistrița)",
+          "Tehnologia construcțiilor de mașini",
+          "Tehnologia construcțiilor de mașini (în limba germană)",
+          "Tehnologia construcțiilor de mașini (la Alba Iulia)",
+          "Tehnologia construcțiilor de mașini (la Satu Mare)",
+          "Tehnologia construcțiilor de mașini (la Zalău)",
+          "Tehnologia construcțiilor de mașini (în limba engleză)",
+          "Inginerie economică industrială",
+          "Inginerie economică industrială (la Bistrița)",
+          "Inginerie economică industrială (la Alba Iulia)",
+          "Inginerie economică industrială (la Satu Mare)",
+          "Robotică",
+          "Robotică (în limba engleză)",
+          "Robotică (la Bistrița)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Electronică, Telecomunicații și Tehnologia Informației",
+        "specializari": [
+          "Electronică aplicată",
+          "Electronică aplicată (în limba engleză)",
+          "Tehnologii și sisteme de telecomunicații",
+          "Tehnologii și sisteme de telecomunicații (în limba engleză)",
+          "Microelectronică, optoelectronică și nanotehnologii",
+          "Inginerie economică în domeniul electric, electronic și energetic"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "Universitatea de Științe Agricole și Medicină Veterinară din Cluj-Napoca",
+    "oras": "Cluj-Napoca",
+    "facultati": [
+      {
+        "nume": "Facultatea de Agricultură",
+        "specializari": [
+          "Agricultură",
+          "Agricultură",
+          "Exploatarea mașinilor și instalațiilor pentru agricultură și industria alimentară",
+          "Montanologie"
+        ]
+      },
+      {
+        "nume": "Facultatea de Horticultură și Afaceri în Dezvoltare Rurală",
+        "specializari": [
+          "Horticultură",
+          "Horticultură",
+          "Peisagistică",
+          "Ingineria și managementul afacerilor agricole",
+          "Inginerie și management în alimentația publică și agroturism",
+          "Inginerie și management în industria turismului"
+        ]
+      },
+      {
+        "nume": "Facultatea de Silvicultură și Cadastru",
+        "specializari": [
+          "Măsurători terestre și cadastru",
+          "Măsurători terestre și cadastru (în limba engleză)",
+          "Silvicultură"
+        ]
+      },
+      {
+        "nume": "Facultatea de Zootehnie și Biotehnologii",
+        "specializari": [
+          "Biotehnologii agricole",
+          "Biotehnologii medical-veterinare",
+          "Biotehnologii pentru industria alimentară",
+          "Biotehnologii",
+          "Piscicultură și acvacultură",
+          "Zootehnie",
+          "Zootehnie",
+          "Comportamentul și bunăstarea animalelor (în limba engleză)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Medicină Veterinară",
+        "specializari": [
+          "Medicină veterinară",
+          "Medicină veterinară (în limba engleză)",
+          "Medicină veterinară (în limba franceză)"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "Universitatea \"Babeș-Bolyai\" din Cluj-Napoca",
+    "oras": "Cluj-Napoca",
+    "facultati": [
+      {
+        "nume": "Facultatea de Matematică și Informatică",
+        "specializari": [
+          "Informatică",
+          "Informatică (în limba engleză)",
+          "Informatică (în limba maghiară)",
+          "Informatică (în limba germană)",
+          "Inteligență artificială (în limba engleză)",
+          "Matematică",
+          "Matematică (în limba maghiară)",
+          "Matematică informatică",
+          "Matematică informatică (în limba maghiară)",
+          "Matematică informatică (în limba engleză)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Fizică",
+        "specializari": [
+          "Fizică",
+          "Fizică (în limba maghiară)",
+          "Fizică informatică",
+          "Fizică informatică (în limba maghiară)",
+          "Fizică medicală",
+          "Fizică tehnologică",
+          "Fizică tehnologică (în limba maghiară)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Chimie și Inginerie Chimică",
+        "specializari": [
+          "Chimie",
+          "Chimie (în limba maghiară)",
+          "Chimie farmaceutică",
+          "Chimia și ingineria substanțelor organice, petrochimie și carbochimie",
+          "Chimia și ingineria substanțelor organice, petrochimie și carbochimie (în limba maghiară)",
+          "Chimie alimentară și tehnologii biochimice",
+          "Ingineria substanțelor anorganice și protecția mediului",
+          "Ingineria și informatica proceselor chimice și biochimice",
+          "Inginerie biochimică",
+          "Știința și ingineria materialelor oxidice și nanomateriale"
+        ]
+      },
+      {
+        "nume": "Facultatea de Biologie și Geologie",
+        "specializari": [
+          "Biologie",
+          "Biologie (în limba maghiară)",
+          "Biologie ambientală",
+          "Geologie",
+          "Geologie (în limba maghiară)",
+          "Inginerie geologică"
+        ]
+      },
+      {
+        "nume": "Facultatea de Geografie",
+        "specializari": [
+          "Cartografie",
+          "Geografia turismului",
+          "Geografia turismului (în limba maghiară)",
+          "Geografia turismului (în limba germană)",
+          "Geografie",
+          "Geografie (în limba maghiară)",
+          "Hidrologie și meteorologie",
+          "Planificare teritorială",
+          "Planificare teritorială (în limba maghiară)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Știința și Ingineria Mediului",
+        "specializari": [
+          "Ingineria mediului",
+          "Știința mediului",
+          "Știința mediului (în limba maghiară)",
+          "Management și audit de mediu"
+        ]
+      },
+      {
+        "nume": "Facultatea de Drept",
+        "specializari": ["Drept"]
+      },
+      {
+        "nume": "Facultatea de Litere",
+        "specializari": [
+          "Filologie clasică",
+          "Limba și literatura chineză",
+          "Limba și literatura coreeană",
+          "Limba și literatura finlandeză",
+          "Limba și literatura maghiară",
+          "Limba și literatura română",
+          "Limba și literatura ucraineană",
+          "Limbă și literatură japoneză",
+          "Limbă și literatură norvegiană",
+          "Literatură universală și comparată",
+          "Limbi moderne aplicate",
+          "Studii culturale",
+          "Etnologie"
+        ]
+      },
+      {
+        "nume": "Facultatea de Istorie și Filosofie",
+        "specializari": [
+          "Istorie",
+          "Relații internaționale și studii europene",
+          "Etnologie",
+          "Studii culturale",
+          "Turism cultural",
+          "Științe ale informării și documentării",
+          "Studii de securitate"
+        ]
+      },
+      {
+        "nume": "Facultatea de Sociologie și Asistență Socială",
+        "specializari": ["Asistență socială", "Antropologie", "Resurse umane", "Sociologie"]
+      },
+      {
+        "nume": "Facultatea de Psihologie și Științe ale Educației",
+        "specializari": ["Psihologie", "Pedagogia învățământului primar și preșcolar", "Psihopedagogie specială"]
+      },
+      {
+        "nume": "Facultatea de Științe Economice și Gestiunea Afacerilor",
+        "specializari": [
+          "Administrarea afacerilor",
+          "Contabilitate și informatică de gestiune",
+          "Economie și afaceri internaționale",
+          "Finanțe și bănci",
+          "Management",
+          "Marketing"
+        ]
+      },
+      {
+        "nume": "Facultatea de Business",
+        "specializari": ["Administrarea afacerilor în servicii de ospitalitate"]
+      },
+      {
+        "nume": "Facultatea de Studii Europene",
+        "specializari": ["Relații internaționale și studii europene", "Diplomație în afaceri"]
+      },
+      {
+        "nume": "Facultatea de Științe Politice, Administrative și ale Comunicării",
+        "specializari": [
+          "Administrație publică",
+          "Comunicare și relații publice",
+          "Jurnalism",
+          "Publicitate",
+          "Media digitală",
+          "Științe politice"
+        ]
+      },
+      {
+        "nume": "Facultatea de Educație Fizică și Sport",
+        "specializari": [
+          "Educație fizică și sportivă",
+          "Sport și performanță motrică",
+          "Kinetoterapie și motricitate specială"
+        ]
+      },
+      {
+        "nume": "Facultatea de Teologie Ortodoxă",
+        "specializari": [
+          "Teologie ortodoxă pastorală",
+          "Teologie ortodoxă didactică",
+          "Teologie ortodoxă asistență socială"
+        ]
+      },
+      {
+        "nume": "Facultatea de Teologie Greco-Catolică",
+        "specializari": [
+          "Teologie greco-catolică pastorală",
+          "Teologie greco-catolică didactică",
+          "Teologie greco-catolică asistență socială"
+        ]
+      },
+      {
+        "nume": "Facultatea de Teologie Reformată și Muzică",
+        "specializari": ["Teologie reformată didactică", "Muzică"]
+      },
+      {
+        "nume": "Facultatea de Teologie Romano-Catolică",
+        "specializari": ["Teologie romano-catolică pastorală"]
+      },
+      {
+        "nume": "Facultatea de Teatru și Film",
+        "specializari": [
+          "Cinematografie, fotografie, media",
+          "Filmologie",
+          "Artele spectacolului (actorie)",
+          "Artele spectacolului (regie)",
+          "Teatrologie"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "Universitatea de Medicină și Farmacie „Iuliu Hațieganu” din Cluj-Napoca",
+    "oras": "Cluj-Napoca",
+    "facultati": [
+      {
+        "nume": "Facultatea de Medicină",
+        "specializari": ["Medicină", "Medicină (în limba engleză)"]
+      },
+      {
+        "nume": "Facultatea de Medicină Dentară",
+        "specializari": ["Medicină dentară", "Medicină dentară (în limba engleză)"]
+      },
+      {
+        "nume": "Facultatea de Farmacie",
+        "specializari": ["Farmacie", "Farmacie (în limba franceză)"]
+      },
+      {
+        "nume": "Facultatea de Medicină Veterinară",
+        "specializari": ["Medicină veterinară", "Medicină veterinară (în limba engleză)"]
+      },
+      {
+        "nume": "Facultatea de Științe Bioinginerie Medicală",
+        "specializari": ["Bioinginerie medicală", "Bioinginerie medicală (în limba engleză)"]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA „BABEȘ-BOLYAI” DIN CLUJ-NAPOCA",
+    "oras": "Cluj-Napoca",
+    "facultati": [
+      {
+        "nume": "Facultatea de Matematică și Informatică",
+        "specializari": [
+          "Informatică",
+          "Informatică (în limba engleză)",
+          "Informatică (în limba maghiară)",
+          "Informatică (în limba germană)",
+          "Inteligență artificială (în limba engleză)",
+          "Matematică",
+          "Matematică (în limba maghiară)",
+          "Matematică informatică",
+          "Matematică informatică (în limba maghiară)",
+          "Matematică informatică (în limba engleză)",
+          "Ingineria informației (în limba engleză)",
+          "Ingineria informației (în limba maghiară)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Fizică",
+        "specializari": [
+          "Fizică",
+          "Fizică (în limba maghiară)",
+          "Fizică informatică",
+          "Fizică informatică (în limba maghiară)",
+          "Fizică medicală",
+          "Fizică tehnologică",
+          "Fizică tehnologică (în limba maghiară)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Chimie și Inginerie Chimică",
+        "specializari": [
+          "Chimie",
+          "Chimie (în limba maghiară)",
+          "Chimie farmaceutică",
+          "Chimia și ingineria substanțelor organice, petrochimie și carbochimie",
+          "Chimia și ingineria substanțelor organice, petrochimie și carbochimie (în limba maghiară)",
+          "Chimie alimentară și tehnologii biochimice",
+          "Ingineria substanțelor anorganice și protecția mediului",
+          "Ingineria și informatica proceselor chimice și biochimice",
+          "Ingineria și informatica proceselor chimice și biochimice (învățământ superior dual)",
+          "Inginerie biochimică",
+          "Știința și ingineria materialelor oxidice și nanomateriale"
+        ]
+      },
+      {
+        "nume": "Facultatea de Biologie și Geologie",
+        "specializari": [
+          "Biochimie",
+          "Biologie",
+          "Biologie (în limba maghiară)",
+          "Biologie ambientală",
+          "Geologie",
+          "Geologie (în limba maghiară)",
+          "Inginerie geologică",
+          "Ecologie și protecția mediului (în limba germană)",
+          "Ecologie și protecția mediului (în limba maghiară)",
+          "Biotehnologii industriale"
+        ]
+      },
+      {
+        "nume": "Facultatea de Geografie",
+        "specializari": [
+          "Cartografie",
+          "Geografia turismului",
+          "Geografia turismului (ID)",
+          "Geografia turismului (în limba maghiară)",
+          "Geografia turismului (în limba maghiară, la Gheorgheni)",
+          "Geografia turismului (la Bistrița)",
+          "Geografia turismului (la Gheorgheni)",
+          "Geografia turismului (la Sighetu Marmației)",
+          "Geografia turismului (la Zalău)",
+          "Geografia turismului (în limba germană)",
+          "Geografie",
+          "Geografie (în limba maghiară)",
+          "Hidrologie și meteorologie",
+          "Planificare teritorială",
+          "Planificare teritorială (în limba maghiară)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Știința și Ingineria Mediului",
+        "specializari": [
+          "Ingineria mediului",
+          "Știința mediului",
+          "Știința mediului (în limba maghiară)",
+          "Știința mediului (în limba maghiară, la Sfântu Gheorghe)",
+          "Management și audit de mediu"
+        ]
+      },
+      {
+        "nume": "Facultatea de Drept",
+        "specializari": ["Drept", "Drept (ID)"]
+      },
+      {
+        "nume": "Facultatea de Litere",
+        "specializari": [
+          "Filologie clasică (Limba și literatura latină - Limba și literatura greacă veche)",
+          "Limba și literatura chineză (în combinație cu română, maghiară, limbi moderne, latină/greacă veche etc.)",
+          "Limba și literatura coreeană (în combinație cu română, maghiară, limbi moderne, latină/greacă veche etc.)",
+          "Limba și literatura finlandeză (în combinație cu română, maghiară, limbi moderne, latină/greacă veche etc.)",
+          "Limba și literatura maghiară",
+          "Limba și literatura română (în diverse combinații cu limbi moderne, latină, greacă veche etc.)",
+          "Limba și literatura ucraineană (în combinație cu română, maghiară, limbi moderne, latină/greacă veche etc.)",
+          "Limba și literatura japoneză (în combinație cu română, maghiară, limbi moderne, latină/greacă veche etc.)",
+          "Limba și literatura norvegiană (în combinație cu română, maghiară, limbi moderne, latină/greacă veche etc.)",
+          "Literatură universală și comparată (în combinație cu română, maghiară, limbi moderne, latină/greacă veche etc.)",
+          "Limba și literatura portugheză (în combinație cu română, maghiară, limbi moderne etc.)",
+          "Limbi moderne aplicate (engleză, franceză, germană, italiană, rusă, spaniolă)",
+          "Etnologie (în limba maghiară)",
+          "Studii culturale (în limba maghiară)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Istorie și Filosofie",
+        "specializari": [
+          "Filosofie",
+          "Filosofie (ID)",
+          "Filosofie (în limba maghiară)",
+          "Arheologie",
+          "Arheologie (în limba maghiară)",
+          "Arhivistică",
+          "Arhivistică (în limba maghiară)",
+          "Istoria artei",
+          "Istoria artei (în limba maghiară)",
+          "Istorie",
+          "Istorie (ID)",
+          "Istorie (în limba maghiară)",
+          "Istorie (în limba maghiară, ID)",
+          "Relații internaționale și studii europene",
+          "Relații internaționale și studii europene (în limba maghiară)",
+          "Etnologie",
+          "Turism cultural",
+          "Turism cultural (în limba maghiară)",
+          "Științe ale informării și documentării",
+          "Științe ale informării și documentării (în limba maghiară)",
+          "Studii de securitate",
+          "Studii de securitate (ID)",
+          "Studii de securitate (în limba engleză)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Sociologie și Asistență Socială",
+        "specializari": [
+          "Asistență socială",
+          "Asistență socială (ID)",
+          "Asistență socială (în limba maghiară)",
+          "Asistență socială (în limba maghiară, ID)",
+          "Asistență socială (la Reșița)",
+          "Antropologie",
+          "Antropologie (în limba maghiară)",
+          "Resurse umane",
+          "Resurse umane (în limba maghiară)",
+          "Sociologie",
+          "Sociologie (în limba maghiară)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Psihologie și Științe ale Educației",
+        "specializari": [
+          "Psihologie",
+          "Psihologie (ID)",
+          "Psihologie (în limba maghiară)",
+          "Psihologie (în limba maghiară, ID)",
+          "Psihologie - Științe cognitive (în limba engleză)",
+          "Pedagogia învățământului primar și preșcolar",
+          "Pedagogia învățământului primar și preșcolar (ID)",
+          "Pedagogia învățământului primar și preșcolar (în limba maghiară)",
+          "Pedagogia învățământului primar și preșcolar (în limba maghiară, ID, la Odorheiu Secuiesc și alte locații)",
+          "Pedagogia învățământului primar și preșcolar (la Năsăud, Sighetu-Marmației, Târgu Mureș, Reșița etc.)",
+          "Pedagogia învățământului primar și preșcolar (în limba germană)",
+          "Pedagogie",
+          "Psihopedagogie specială",
+          "Psihopedagogie specială (ID)",
+          "Psihopedagogie specială (în limba maghiară)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Științe Economice și Gestiunea Afacerilor",
+        "specializari": [
+          "Economia comerțului, turismului și serviciilor",
+          "Economia comerțului, turismului și serviciilor (ID)",
+          "Economia comerțului, turismului și serviciilor (în limba maghiară, la Sfântu Gheorghe)",
+          "Economia comerțului, turismului și serviciilor (la Sfântu Gheorghe, Reșița)",
+          "Economia firmei (în limba maghiară, la Sfântu Gheorghe)",
+          "Administrarea afacerilor (în limba germană)",
+          "Informatică economică",
+          "Informatică economică (ID)",
+          "Informatică economică (în limba maghiară)",
+          "Informatică economică (la Arad, ID)",
+          "Statistică și previziune economică",
+          "Contabilitate și informatică de gestiune",
+          "Contabilitate și informatică de gestiune (ID)",
+          "Contabilitate și informatică de gestiune (în limba engleză)",
+          "Contabilitate și informatică de gestiune (în limba franceză)",
+          "Contabilitate și informatică de gestiune (la Sighetu Marmației)",
+          "Contabilitate și informatică de gestiune (la Reșița)",
+          "Economie agroalimentară și a mediului",
+          "Economie generală",
+          "Economie și afaceri internaționale",
+          "Economie și afaceri internaționale (ID)",
+          "Economie și afaceri internaționale (în limba engleză)",
+          "Finanțe și bănci",
+          "Finanțe și bănci (ID)",
+          "Finanțe și bănci (în limba engleză)",
+          "Finanțe și bănci (în limba maghiară)",
+          "Management",
+          "Management (ID)",
+          "Management (în limba engleză)",
+          "Management (în limba maghiară)",
+          "Management (în limba maghiară, ID)",
+          "Marketing",
+          "Marketing (ID)",
+          "Marketing (în limba maghiară)",
+          "Marketing (la Reșița, IF și ID)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Studii Europene",
+        "specializari": [
+          "Management",
+          "Relații internaționale și studii europene",
+          "Relații internaționale și studii europene (ID)",
+          "Relații internaționale și studii europene (în limba engleză)",
+          "Relații internaționale și studii europene (în limba germană)",
+          "Diplomație în afaceri",
+          "Administrație europeană"
+        ]
+      },
+      {
+        "nume": "Facultatea de Business",
+        "specializari": [
+          "Administrarea afacerilor",
+          "Administrarea afacerilor (ID)",
+          "Administrarea afacerilor (în limba engleză)",
+          "Administrarea afacerilor (la Bistrița)",
+          "Administrarea afacerilor în servicii de ospitalitate",
+          "Administrarea afacerilor în servicii de ospitalitate (ID)",
+          "Administrarea afacerilor în servicii de ospitalitate (în limba engleză)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Științe Politice, Administrative și ale Comunicării",
+        "specializari": [
+          "Administrație publică",
+          "Administrație publică (ID)",
+          "Administrație publică (în limba maghiară)",
+          "Administrație publică (în limba maghiară, la Sfântu Gheorghe)",
+          "Administrație publică (la Bistrița, Satu Mare, Sfântu Gheorghe, Reșița etc.)",
+          "Servicii și politici de sănătate publică (Public Health) (în limba engleză)",
+          "Servicii și politici de sănătate publică (Public Health)",
+          "Leadership în sectorul public (în limba engleză)",
+          "Studii de conflict",
+          "Știința datelor sociale",
+          "Comunicare și relații publice",
+          "Comunicare și relații publice (ID)",
+          "Comunicare și relații publice (în limba germană)",
+          "Comunicare și relații publice (în limba maghiară)",
+          "Jurnalism",
+          "Jurnalism (ID)",
+          "Jurnalism (în limba engleză)",
+          "Jurnalism (în limba germană)",
+          "Jurnalism (în limba maghiară)",
+          "Publicitate",
+          "Media digitală",
+          "Media digitală (în limba maghiară)",
+          "Științe politice",
+          "Științe politice (în limba maghiară)",
+          "Științe politice (în limba engleză)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Educație Fizică și Sport",
+        "specializari": [
+          "Educație fizică și sportivă",
+          "Educație fizică și sportivă (IFR)",
+          "Educație fizică și sportivă (în limba maghiară)",
+          "Educație fizică și sportivă (la Bistrița, Reșița)",
+          "Sport și performanță motrică",
+          "Sport și performanță motrică (în limba maghiară)",
+          "Kinetoterapie și motricitate specială",
+          "Kinetoterapie și motricitate specială (în limba maghiară)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Teologie Ortodoxă",
+        "specializari": [
+          "Artă sacră",
+          "Teologie ortodoxă asistență socială",
+          "Teologie ortodoxă didactică",
+          "Teologie ortodoxă pastorală"
+        ]
+      },
+      {
+        "nume": "Facultatea de Teologie Greco-Catolică",
+        "specializari": [
+          "Teologie greco-catolică asistență socială",
+          "Teologie greco-catolică didactică",
+          "Teologie greco-catolică pastorală",
+          "Teologie greco-catolică pastorală (la Blaj)",
+          "Teologie greco-catolică pastorală (la Oradea)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Teologie Reformată și Muzică",
+        "specializari": ["Muzică (în limba maghiară)", "Teologie reformată didactică (în limba maghiară)"]
+      },
+      {
+        "nume": "Facultatea de Teologie Romano-Catolică",
+        "specializari": [
+          "Teologie romano-catolică didactică (în limba maghiară)",
+          "Teologie romano-catolică pastorală (în limba maghiară, la Alba Iulia)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Teatru și Film",
+        "specializari": [
+          "Cinematografie, fotografie, media (Regie de film și TV)",
+          "Cinematografie, fotografie, media (Imagine de film și TV)",
+          "Cinematografie, fotografie, media (Multimedia: sunet-montaj)",
+          "Cinematografie, fotografie, media (Regie de film și TV, în limba maghiară)",
+          "Cinematografie, fotografie, media (Imagine de film și TV, în limba maghiară)",
+          "Cinematografie, fotografie, media (Multimedia: sunet-montaj, în limba maghiară)",
+          "Filmologie",
+          "Artele spectacolului (actorie)",
+          "Artele spectacolului (actorie, în limba maghiară)",
+          "Artele spectacolului (regie)",
+          "Teatrologie (Jurnalism teatral, Management cultural, în limba maghiară)",
+          "Teatrologie (Jurnalism teatral, Management cultural)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Inginerie (Centrul Universitar al UBB din Reșița)",
+        "specializari": [
+          "Inginerie mecanică",
+          "Inginerie mecanică (învățământ superior dual)",
+          "Electromecanică",
+          "Informatică aplicată în inginerie electrică",
+          "Informatică aplicată în inginerie electrică (învățământ superior dual)",
+          "Inginerie medicală",
+          "Informatică industrială"
+        ]
+      }
+    ]
+  },
+
+  {
+    "institutie": "UNIVERSITATEA DE MEDICINĂ ȘI FARMACIE „IULIU HAȚIEGANU” DIN CLUJ-NAPOCA",
+    "oras": "Cluj-Napoca",
+    "facultati": [
+      {
+        "nume": "Facultatea de Medicină",
+        "specializari": ["Medicină", "Medicină (în limba engleză)", "Medicină (în limba franceză)"]
+      },
+      {
+        "nume": "Facultatea de Medicină Dentară",
+        "specializari": [
+          "Medicină dentară",
+          "Medicină dentară (în limba engleză)",
+          "Medicină dentară (în limba franceză)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Farmacie",
+        "specializari": ["Farmacie", "Farmacie (în limba franceză)"]
+      },
+      {
+        "nume": "Facultatea de Asistență Medicală și Științe ale Sănătății",
+        "specializari": [
+          "Asistenţă medicală generală",
+          "Asistență medicală generală (la Baia Mare)",
+          "Balneofiziokinetoterapie şi recuperare",
+          "Radiologie şi imagistică",
+          "Tehnică dentară",
+          "Nutriţie şi dietetică",
+          "Cosmetică medicală și tehnologia produsului cosmetic"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "ACADEMIA NAȚIONALĂ DE MUZICĂ \"GHEORGHE DIMA\" DIN CLUJ-NAPOCA",
+    "oras": "Cluj-Napoca",
+    "facultati": [
+      {
+        "nume": "Facultatea de Interpretare Muzicală",
+        "specializari": [
+          "Artele spectacolului (Coregrafie)",
+          "Artele spectacolului muzical",
+          "Interpretare muzicală - canto",
+          "Interpretare muzicală - canto (în limba engleză)",
+          "Interpretare muzicală - canto (ID)",
+          "Interpretare muzicală - canto (la Piatra Neamț)",
+          "Interpretare muzicală - instrumente",
+          "Interpretare muzicală - instrumente (în limba engleză)",
+          "Interpretare muzicală - instrumente (ID)",
+          "Interpretare muzicală - instrumente (la Piatra Neamț)"
+        ]
+      },
+      {
+        "nume": "Facultatea Teoretică",
+        "specializari": [
+          "Compoziţie muzicală",
+          "Dirijat",
+          "Muzicologie",
+          "Muzică",
+          "Muzică (în limba engleză)",
+          "Muzică (ID)",
+          "Muzică (la Piatra Neamț)"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA DE ARTĂ ȘI DESIGN DIN CLUJ-NAPOCA",
+    "oras": "Cluj-Napoca",
+    "facultati": [
+      {
+        "nume": "Facultatea de Arte Plastice",
+        "specializari": [
+          "Arte plastice (fotografie - videoprocesarea computerizată a imaginii)",
+          "Arte plastice (grafică)",
+          "Arte plastice (pictură)",
+          "Arte plastice (sculptură)",
+          "Conservare şi restaurare",
+          "Pedagogia artelor plastice şi decorative"
+        ]
+      },
+      {
+        "nume": "Facultatea de Arte Decorative şi Design",
+        "specializari": [
+          "Arte textile - design textil",
+          "Ceramică - sticlă - metal",
+          "Design",
+          "Modă - design vestimentar",
+          "Istoria şi teoria artei"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA \"OVIDIUS\" DIN CONSTANȚA",
+    "oras": "Constanța",
+    "facultati": [
+      {
+        "nume": "Facultatea de Litere",
+        "specializari": [
+          "Limba și literatura franceză – Limba și literatura modernă (engleză/germană/italiană/turcă)",
+          "Limba și literatura engleză – Limba și literatura modernă (franceză/germană/italiană/turcă)",
+          "Limba și literatura română – Limba și literatura modernă (engleză/italiană)",
+          "Limba și literatura română – Limba și literatura modernă (engleză/germană/franceză/italiană/turcă)",
+          "Studii americane (în limba engleză)",
+          "Jurnalism"
+        ]
+      },
+      {
+        "nume": "Facultatea de Teologie",
+        "specializari": [
+          "Teologie ortodoxă asistență socială",
+          "Teologie ortodoxă didactică",
+          "Teologie ortodoxă pastorală",
+          "Muzică religioasă"
+        ]
+      },
+      {
+        "nume": "Facultatea de Istorie și Științe Politice",
+        "specializari": ["Istorie", "Relații internaționale și studii europene", "Științe politice"]
+      },
+      {
+        "nume": "Facultatea de Drept și Științe Administrative",
+        "specializari": [
+          "Drept",
+          "Drept (IFR)",
+          "Administrație publică",
+          "Administrație publică (IFR)",
+          "Asistență managerială și administrativă",
+          "Poliție locală"
+        ]
+      },
+      {
+        "nume": "Facultatea de Științe ale Naturii și Științe Agricole",
+        "specializari": [
+          "Agricultură",
+          "Agricultură (IFR)",
+          "Biologie",
+          "Geografia turismului",
+          "Geografie",
+          "Horticultură",
+          "Ecologie și protecția mediului"
+        ]
+      },
+      {
+        "nume": "Facultatea de Educație Fizică și Sport",
+        "specializari": [
+          "Educație fizică și sportivă",
+          "Educație fizică și sportivă (IFR)",
+          "Sport și performanță motrică",
+          "Kinetoterapie și motricitate specială"
+        ]
+      },
+      {
+        "nume": "Facultatea de Științe Aplicate și Inginerie",
+        "specializari": [
+          "Chimie medicală",
+          "Chimie alimentară și tehnologii biochimice",
+          "Prelucrarea petrolului și petrochimie",
+          "Fizică tehnologică",
+          "Ingineria și protecția mediului în industrie"
+        ]
+      },
+      {
+        "nume": "Facultatea de Matematică și Informatică",
+        "specializari": ["Informatică", "Informatică (în limba engleză)", "Matematică informatică"]
+      },
+      {
+        "nume": "Facultatea de Științe Economice",
+        "specializari": [
+          "Administrarea afacerilor (în limba engleză)",
+          "Economia comerțului, turismului și serviciilor",
+          "Economia comerțului, turismului și serviciilor (ID)",
+          "Economia firmei",
+          "Contabilitate și informatică de gestiune",
+          "Contabilitate și informatică de gestiune (ID)",
+          "Afaceri internaționale",
+          "Afaceri internaționale (ID)",
+          "Finanțe și bănci",
+          "Finanțe și bănci (ID)",
+          "Management",
+          "Marketing"
+        ]
+      },
+      {
+        "nume": "Facultatea de Medicină",
+        "specializari": [
+          "Asistență medicală generală",
+          "Balneofiziokinetoterapie și recuperare",
+          "Medicină",
+          "Medicină (în limba engleză)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Stomatologie",
+        "specializari": ["Medicină dentară", "Medicină dentară (în limba engleză)", "Tehnică dentară"]
+      },
+      {
+        "nume": "Facultatea de Farmacie",
+        "specializari": ["Asistență de farmacie", "Cosmetică medicală și tehnologia produsului cosmetic", "Farmacie"]
+      },
+      {
+        "nume": "Facultatea de Inginerie Mecanică, Industrială și Maritimă",
+        "specializari": [
+          "Sisteme și echipamente navale",
+          "Autovehicule rutiere",
+          "Autovehicule rutiere (IFR)",
+          "Energetică industrială",
+          "Ingineria sudării",
+          "Sisteme de producție digitale",
+          "Informatică aplicată în inginerie industrială",
+          "Instalații și echipamente portuare și marine",
+          "Inginerie mecanică (învățământ superior dual)",
+          "Inginerie economică în domeniul mecanic",
+          "Inginerie economică în domeniul mecanic (IFR)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Construcții",
+        "specializari": ["Amenajări și construcții hidrotehnice", "Construcții civile, industriale și agricole"]
+      },
+      {
+        "nume": "Facultatea de Arte",
+        "specializari": [
+          "Pedagogia artelor plastice și decorative",
+          "Interpretare muzicală – canto",
+          "Muzică",
+          "Artele spectacolului (Actorie)",
+          "Artele spectacolului (coregrafie)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Psihologie și Științele Educației",
+        "specializari": [
+          "Asistență socială",
+          "Psihologie",
+          "Pedagogia învățământului primar și preșcolar",
+          "Psihopedagogie specială"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA MARITIMĂ DIN CONSTANȚA",
+    "oras": "Constanța",
+    "facultati": [
+      {
+        "nume": "Facultatea de Navigație și Transport Naval",
+        "specializari": [
+          "Navigație și transport maritim și fluvial",
+          "Navigație și transport maritim și fluvial (IFR)",
+          "Navigație și transport maritim și fluvial (în limba engleză)",
+          "Inginerie și management în domeniul transporturilor"
+        ]
+      },
+      {
+        "nume": "Facultatea de Electromecanică Navală",
+        "specializari": [
+          "Ingineria și protecția mediului în industrie",
+          "Electrotehnică",
+          "Electrotehnică (în limba engleză)",
+          "Electrotehnică (IFR)",
+          "Ingineria sistemelor electroenergetice",
+          "Tehnologii și sisteme de telecomunicații",
+          "Securitate cibernetică",
+          "Electromecanică navală",
+          "Electromecanică navală (IFR)",
+          "Electromecanică navală (în limba engleză)"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA DIN CRAIOVA",
+    "oras": "Craiova",
+    "facultati": [
+      {
+        "nume": "Facultatea de Științe",
+        "specializari": [
+          "Biochimie tehnologică",
+          "Chimie",
+          "Chimie farmaceutică",
+          "Fizică informatică",
+          "Fizică medicală",
+          "Informatică",
+          "Matematică",
+          "Matematică informatică",
+          "Chimia mediului",
+          "Geografia turismului",
+          "Geografie"
+        ]
+      },
+      {
+        "nume": "Facultatea de Educație Fizică și Sport",
+        "specializari": [
+          "Educație fizică și sportivă",
+          "Educație fizică și sportivă (la Drobeta-Turnu Severin)",
+          "Kinetoterapie și motricitate specială",
+          "Kinetoterapie și motricitate specială (la Drobeta-Turnu Severin)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Litere",
+        "specializari": [
+          "Limba și literatura română – Limba și literatura latină",
+          "Limba și literatura română – Limba și literatura modernă (engleză/franceză/germană/italiană/spaniolă)",
+          "Limba și literatura română – Limba și literatura modernă (engleză/franceză/germană/italiană/spaniolă) (ID)",
+          "Limba și literatura română – Limba și literatura modernă (franceză/engleză) (la Drobeta-Turnu Severin)",
+          "Limba și literatura modernă (engleză/franceză/germană/italiană/spaniolă) – Limba și literatura modernă (engleză/franceză/germană/italiană/spaniolă)/ Limba și literatura latină",
+          "Traducere și interpretare (engleză-franceză)",
+          "Interpretare muzicală – canto",
+          "Interpretare muzicală – instrumente",
+          "Muzică",
+          "Comunicare și relații publice",
+          "Jurnalism",
+          "Pedagogia învățământului primar și preșcolar",
+          "Pedagogia învățământului primar și preșcolar (la Drobeta-Turnu Severin)",
+          "Artele spectacolului (actorie)",
+          "Cinematografie, fotografie, media (Comunicare audiovizuală: scenaristică, publicitate media, filmologie)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Teologie Ortodoxă",
+        "specializari": [
+          "Artă sacră",
+          "Arte plastice – Pictură",
+          "Arte plastice – Sculptură",
+          "Teologie ortodoxă pastorală"
+        ]
+      },
+      {
+        "nume": "Facultatea de Drept",
+        "specializari": [
+          "Drept",
+          "Drept (IFR)",
+          "Administrație publică",
+          "Administrație publică (la Drobeta-Turnu Severin)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Științe Sociale",
+        "specializari": [
+          "Istorie",
+          "Relații internaționale și studii europene",
+          "Asistență socială",
+          "Filosofie",
+          "Sociologie",
+          "Științe politice"
+        ]
+      },
+      {
+        "nume": "Facultatea de Economie și Administrarea Afacerilor",
+        "specializari": [
+          "Economia comerțului, turismului și serviciilor",
+          "Informatică economică",
+          "Contabilitate și informatică de gestiune",
+          "Contabilitate și informatică de gestiune (ID)",
+          "Contabilitate și informatică de gestiune (la Drobeta-Turnu Severin)",
+          "Economie și afaceri internaționale",
+          "Economie și afaceri internaționale (în limba engleză)",
+          "Finanțe și bănci",
+          "Finanțe și bănci (ID)",
+          "Finanțe și bănci (la Drobeta-Turnu Severin)",
+          "Management",
+          "Management (ID)",
+          "Management (la Drobeta-Turnu Severin)",
+          "Marketing"
+        ]
+      },
+      {
+        "nume": "Facultatea de Mecanică",
+        "specializari": [
+          "Autovehicule rutiere",
+          "Ingineria și protecția mediului în industrie (la Drobeta-Turnu Severin)",
+          "Ingineria transporturilor și a traficului",
+          "Construcții civile, industriale și agricole",
+          "Tehnologia construcțiilor de mașini",
+          "Navigație și transport maritim și fluvial (la Drobeta-Turnu Severin)",
+          "Inginerie economică industrială (la Drobeta-Turnu Severin)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Inginerie Electrică",
+        "specializari": [
+          "Echipamente și instalații de aviație",
+          "Electromecanică",
+          "Electromecanică (IFR)",
+          "Inginerie electrică și calculatoare",
+          "Informatică aplicată în inginerie electrică",
+          "Ingineria sistemelor electroenergetice"
+        ]
+      },
+      {
+        "nume": "Facultatea de Automatică, Calculatoare și Electronică",
+        "specializari": [
+          "Calculatoare",
+          "Calculatoare (în limba engleză)",
+          "Automatică și informatică aplicată",
+          "Ingineria sistemelor multimedia",
+          "Electronică aplicată",
+          "Mecatronică",
+          "Robotică"
+        ]
+      },
+      {
+        "nume": "Facultatea de Agronomie",
+        "specializari": [
+          "Agricultură",
+          "Agricultură (IFR)",
+          "Montanologie",
+          "Controlul și expertiza produselor alimentare",
+          "Măsurători terestre și cadastru",
+          "Silvicultură"
+        ]
+      },
+      {
+        "nume": "Facultatea de Horticultură",
+        "specializari": [
+          "Biologie",
+          "Horticultură",
+          "Peisagistică",
+          "Ingineria și protecția mediului în agricultură",
+          "Ingineria mediului",
+          "Ingineria produselor alimentare",
+          "Tehnologia prelucrării produselor agricole"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA DE MEDICINĂ ȘI FARMACIE DIN CRAIOVA",
+    "oras": "Craiova",
+    "facultati": [
+      {
+        "nume": "Facultatea de Medicină",
+        "specializari": ["Medicină", "Medicină (în limba engleză)"]
+      },
+      {
+        "nume": "Facultatea de Asistență Medicală",
+        "specializari": [
+          "Asistență medicală generală",
+          "Balneofiziokinetoterapie și recuperare",
+          "Moașe",
+          "Radiologie și imagistică",
+          "Nutriție și dietetică"
+        ]
+      },
+      {
+        "nume": "Facultatea de Stomatologie",
+        "specializari": ["Medicină dentară", "Medicină dentară (în limba engleză)", "Tehnică dentară"]
+      },
+      {
+        "nume": "Facultatea de Farmacie",
+        "specializari": [
+          "Farmacie",
+          "Farmacie (în limba engleză)",
+          "Cosmetică medicală și tehnologia produsului cosmetic"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA \"DUNĂREA DE JOS\" DIN GALAȚI",
+    "oras": "Galați",
+    "facultati": [
+      {
+        "nume": "Facultatea de Inginerie",
+        "specializari": [
+          "Autovehicule rutiere",
+          "Tehnologia construcțiilor de mașini",
+          "Sisteme de producție digitale",
+          "Inginerie mecanică",
+          "Inginerie mecanică (în limba engleză)",
+          "Inginerie medicală",
+          "Inginerie economică industrială",
+          "Știința materialelor",
+          "Informatică aplicată în ingineria materialelor",
+          "Ingineria și protecția mediului în industrie",
+          "Amenajări hidrotehnice și protecția mediului"
+        ]
+      },
+      {
+        "nume": "Facultatea de Arhitectură Navală",
+        "specializari": ["Arhitectură navală", "Sisteme și echipamente navale"]
+      },
+      {
+        "nume": "Facultatea de Automatică, Calculatoare, Inginerie Electrică și Electronică",
+        "specializari": [
+          "Calculatoare",
+          "Automatică și informatică aplicată",
+          "Electromecanică",
+          "Electronică de putere și acționări electrice",
+          "Inginerie electrică și calculatoare",
+          "Electronică aplicată",
+          "Rețele și software de telecomunicații"
+        ]
+      },
+      {
+        "nume": "Facultatea de Inginerie și Agronomie din Brăila",
+        "specializari": [
+          "Agricultură",
+          "Agricultură (la Buzău, IFR)",
+          "Ingineria sistemelor biotehnice și ecologice",
+          "Ingineria și managementul resurselor tehnologice în construcții",
+          "Mașini și instalații pentru agricultură și industrie alimentară",
+          "Utilaje tehnologice pentru construcții",
+          "Inginerie economică în domeniul mecanic"
+        ]
+      },
+      {
+        "nume": "Facultatea de Știința și Ingineria Alimentelor",
+        "specializari": [
+          "Controlul și expertiza produselor alimentare",
+          "Controlul și expertiza produselor alimentare (în limba engleză)",
+          "Ingineria produselor alimentare",
+          "Ingineria produselor alimentare (în limba engleză)",
+          "Tehnologie și control în alimentație publică",
+          "Antreprenoriat în producția alimentară",
+          "Piscicultură și acvacultură",
+          "Biotehnologii pentru industria alimentară"
+        ]
+      },
+      {
+        "nume": "Facultatea de Medicină și Farmacie",
+        "specializari": [
+          "Asistență medicală generală",
+          "Farmacie",
+          "Medicină",
+          "Medicină (în limba engleză)",
+          "Medicină (Enna - Italia)",
+          "Medicină dentară",
+          "Tehnică dentară",
+          "Moașe"
+        ]
+      },
+      {
+        "nume": "Facultatea de Științe și Mediu",
+        "specializari": [
+          "Fizică medicală",
+          "Chimie",
+          "Chimie farmaceutică",
+          "Matematică informatică",
+          "Știința mediului"
+        ]
+      },
+      {
+        "nume": "Facultatea de Litere",
+        "specializari": [
+          "Limba și literatura română – Limba și literatura engleză",
+          "Limba și literatura română – O limbă și literatură modernă (engleză) (ID)",
+          "Limba și literatura română – Limba și literatura franceză",
+          "Limba și literatura engleză – Limba și literatura franceză",
+          "Limba și literatura engleză – Limba și literatura română",
+          "Limba și literatura franceză – Limba și literatura română",
+          "Limbi moderne aplicate (engleză – franceză)",
+          "Jurnalism"
+        ]
+      },
+      {
+        "nume": "Facultatea de Istorie, Filosofie și Teologie",
+        "specializari": [
+          "Filosofie",
+          "Istorie",
+          "Sociologie",
+          "Resurse umane",
+          "Teologie ortodoxă asistență socială",
+          "Relații internaționale și studii europene",
+          "Artă sacră"
+        ]
+      },
+      {
+        "nume": "Facultatea de Arte",
+        "specializari": ["Arte plastice (pictură)", "Interpretare muzicală – canto", "Artele spectacolului (actorie)"]
+      },
+      {
+        "nume": "Facultatea de Economie și Administrarea Afacerilor",
+        "specializari": [
+          "Administrarea afacerilor (în limba engleză)",
+          "Economia comerțului, turismului și serviciilor",
+          "Administrarea afacerilor în alimentația publică",
+          "Informatică economică",
+          "Contabilitate și informatică de gestiune",
+          "Afaceri internaționale",
+          "Finanțe și bănci",
+          "Management",
+          "Marketing"
+        ]
+      },
+      {
+        "nume": "Facultatea de Drept și Științe Administrative",
+        "specializari": ["Drept", "Drept (IFR)", "Drept (la Buzău, IFR)", "Administrație publică"]
+      },
+      {
+        "nume": "Facultatea de Educație Fizică și Sport",
+        "specializari": [
+          "Educație fizică și sportivă",
+          "Educație fizică și sportivă (la Buzău)",
+          "Kinetoterapie și motricitate specială",
+          "Pedagogia învățământului primar și preșcolar"
+        ]
+      },
+      {
+        "nume": "Facultatea Transfrontalieră",
+        "specializari": [
+          "Educație fizică și sportivă (la Chișinău)",
+          "Kinetoterapie și motricitate specială (la Chișinău)",
+          "Traducere și interpretare (engleză-franceză) (la Chișinău)",
+          "Relații internaționale și studii europene (la Cahul)",
+          "Relații internaționale și studii europene (la Chișinău)",
+          "Afaceri internaționale (la Cahul)",
+          "Afaceri internaționale (la Chișinău)",
+          "Sisteme și echipamente termice (la Cahul)",
+          "Sisteme de producție digitale (la Cahul)",
+          "Ingineria produselor alimentare (la Cahul)",
+          "Ecologie și protecția mediului (la Cahul și la Chișinău)"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA TEHNICĂ \"GHEORGHE ASACHI\" DIN IAȘI",
+    "oras": "Iași",
+    "facultati": [
+      {
+        "nume": "Facultatea de Automatică și Calculatoare",
+        "specializari": ["Automatică și informatică aplicată", "Calculatoare", "Tehnologia informației"]
+      },
+      {
+        "nume": "Facultatea de Inginerie Chimică și Protecția Mediului \"Cristofor Simionescu\"",
+        "specializari": [
+          "Ingineria și protecția mediului în industrie",
+          "Chimia și ingineria substanțelor organice, petrochimie și carbochimie",
+          "Chimie alimentară și tehnologii biochimice",
+          "Ingineria fabricației hârtiei",
+          "Ingineria substanțelor anorganice și protecția mediului",
+          "Inginerie biochimică",
+          "Inginerie chimică",
+          "Știința și ingineria polimerilor",
+          "Inginerie economică în industria chimică și de materiale"
+        ]
+      },
+      {
+        "nume": "Facultatea de Construcții și Instalații",
+        "specializari": [
+          "Inginerie civilă (în limba engleză)",
+          "Construcții civile, industriale și agricole",
+          "Căi ferate, drumuri și poduri",
+          "Instalații pentru construcții",
+          "Inginerie și management în construcții"
+        ]
+      },
+      {
+        "nume": "Facultatea de Construcții de Mașini și Management Industrial",
+        "specializari": [
+          "Tehnologia construcțiilor de mașini",
+          "Sisteme de producție digitale",
+          "Ingineria sudării",
+          "Informatică aplicată în inginerie industrială",
+          "Mecanică fină și nanotehnologii",
+          "Mașini și sisteme hidraulice și pneumatice",
+          "Inginerie economică în domeniul mecanic"
+        ]
+      },
+      {
+        "nume": "Facultatea de Electronică, Telecomunicații și Tehnologia Informației",
+        "specializari": [
+          "Electronică aplicată",
+          "Microelectronică, optoelectronică și nanotehnologii",
+          "Tehnologii și sisteme de telecomunicații",
+          "Tehnologii și sisteme de telecomunicații (în limba engleză)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Inginerie Electrică, Energetică și Informatică Aplicată",
+        "specializari": [
+          "Electronică de putere și acționări electrice",
+          "Sisteme electrice",
+          "Instrumentație și achiziții de date",
+          "Informatică aplicată în inginerie electrică",
+          "Ingineria sistemelor electroenergetice",
+          "Energetică și tehnologii informatice",
+          "Inginerie economică în domeniul electric, electronic și energetic"
+        ]
+      },
+      {
+        "nume": "Facultatea de Hidrotehnică, Geodezie și Ingineria Mediului",
+        "specializari": [
+          "Amenajări și construcții hidrotehnice",
+          "Îmbunătățiri funciare și dezvoltare rurală",
+          "Măsurători terestre și cadastru",
+          "Ingineria și protecția mediului în agricultură"
+        ]
+      },
+      {
+        "nume": "Facultatea de Mecanică",
+        "specializari": [
+          "Autovehicule rutiere",
+          "Ingineria sistemelor de propulsie pentru autovehicule",
+          "Construcții de autovehicule",
+          "Inginerie mecanică",
+          "Sisteme și echipamente termice",
+          "Mașini și instalații pentru agricultură și industrie alimentară",
+          "Mecatronică",
+          "Robotică"
+        ]
+      },
+      {
+        "nume": "Facultatea de Știința și Ingineria Materialelor",
+        "specializari": [
+          "Ingineria procesării materialelor",
+          "Știința materialelor",
+          "Ingineria securității în industrie",
+          "Echipamente pentru procese industriale"
+        ]
+      },
+      {
+        "nume": "Facultatea de Design Industrial și Managementul Afacerilor",
+        "specializari": [
+          "Tehnologia și designul produselor textile",
+          "Tehnologia tricotajelor și confecțiilor",
+          "Tehnologia și designul confecțiilor din piele și înlocuitori",
+          "Design industrial",
+          "Design industrial (în limba engleză)",
+          "Tehnologie chimică textilă",
+          "Inginerie economică industrială",
+          "Ingineria și managementul afacerilor"
+        ]
+      },
+      {
+        "nume": "Facultatea de Arhitectură \"G. M. Cantacuzino\"",
+        "specializari": ["Arhitectură"]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA PENTRU ȘTIINȚELE VIEȚII \"ION IONESCU DE LA BRAD\" DIN IAȘI",
+    "oras": "Iași",
+    "facultati": [
+      {
+        "nume": "Facultatea de Agricultură",
+        "specializari": [
+          "Agricultură",
+          "Agricultură (ID)",
+          "Montanologie",
+          "Exploatarea mașinilor și instalațiilor pentru agricultură și industria alimentară",
+          "Biologie",
+          "Tehnologia prelucrării produselor agricole",
+          "Protecția consumatorului și a mediului",
+          "Ingineria și managementul afacerilor agricole",
+          "Ingineria și managementul afacerilor agricole (ID)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Horticultură",
+        "specializari": [
+          "Horticultură",
+          "Horticultură (ID)",
+          "Peisagistică",
+          "Biotehnologii agricole",
+          "Ingineria mediului"
+        ]
+      },
+      {
+        "nume": "Facultatea de Ingineria Resurselor Animale și Alimentare",
+        "specializari": [
+          "Controlul și expertiza produselor alimentare",
+          "Inginerie și management în alimentația publică și agroturism",
+          "Piscicultură și acvacultură",
+          "Zootehnie",
+          "Zootehnie (ID)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Medicină Veterinară",
+        "specializari": ["Medicină veterinară", "Medicină veterinară (în limba engleză)"]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA \"ALEXANDRU IOAN CUZA\" DIN IAȘI",
+    "oras": "Iași",
+    "facultati": [
+      {
+        "nume": "Facultatea de Biologie",
+        "specializari": ["Biochimie", "Biologie", "Ecologie și protecția mediului"]
+      },
+      {
+        "nume": "Facultatea de Chimie",
+        "specializari": [
+          "Biochimie tehnologică",
+          "Chimie",
+          "Chimie medicală",
+          "Chimie medicală (la Bălți)",
+          "Chimie alimentară"
+        ]
+      },
+      {
+        "nume": "Facultatea de Drept",
+        "specializari": ["Drept", "Drept (IFR)"]
+      },
+      {
+        "nume": "Facultatea de Economie și Administrarea Afacerilor",
+        "specializari": [
+          "Administrarea afacerilor (în limba engleză)",
+          "Economia comerțului, turismului și serviciilor",
+          "Economia comerțului, turismului și serviciilor (la Bălți)",
+          "Informatică economică",
+          "Statistică și previziune economică",
+          "Contabilitate și informatică de gestiune",
+          "Contabilitate și informatică de gestiune (ID)",
+          "Contabilitate și informatică de gestiune (la Piatra Neamț)",
+          "Economie și afaceri internaționale",
+          "Finanțe și bănci",
+          "Finanțe și bănci (ID)",
+          "Finanțe și bănci (la Botoșani)",
+          "Management",
+          "Management (ID)",
+          "Management (la Piatra Neamț)",
+          "Marketing",
+          "Administrație publică",
+          "Administrație publică (ID)",
+          "Administrație publică (la Botoșani)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Educație Fizică și Sport",
+        "specializari": [
+          "Educație fizică și sportivă",
+          "Sport și performanță motrică",
+          "Kinetoterapie și motricitate specială",
+          "Kinetoterapie și motricitate specială (la Chișinău)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Filosofie și Științe Social-Politice",
+        "specializari": [
+          "Asistență socială",
+          "Asistență socială (ID)",
+          "Filosofie",
+          "Relații internaționale și studii europene",
+          "Resurse umane",
+          "Sociologie",
+          "Comunicare și relații publice",
+          "Științe politice"
+        ]
+      },
+      {
+        "nume": "Facultatea de Fizică",
+        "specializari": [
+          "Fizică",
+          "Fizică (în limba engleză)",
+          "Fizică informatică",
+          "Fizică medicală",
+          "Fizică tehnologică (la Bălți)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Geografie și Geologie",
+        "specializari": [
+          "Geografia turismului",
+          "Geografia turismului (în limba franceză)",
+          "Geografia turismului (în limba engleză)",
+          "Planificare teritorială",
+          "Planificare teritorială (Focșani)",
+          "Geochimie",
+          "Inginerie geologică",
+          "Inginerie geologică (la Bălți)",
+          "Geografia mediului"
+        ]
+      },
+      {
+        "nume": "Facultatea de Informatică",
+        "specializari": ["Informatică", "Informatică (în limba engleză)", "Inteligență artificială"]
+      },
+      {
+        "nume": "Facultatea de Istorie",
+        "specializari": ["Istorie", "Istorie (ID)", "Istorie (la Focșani)"]
+      },
+      {
+        "nume": "Facultatea de Litere",
+        "specializari": [
+          "Filologie clasică (Limba și literatura latină – Limba și literatura greacă veche)",
+          "Limba și literatura română – Literatură universală și comparată",
+          "Limba și literatura română – Limba și literatura latină",
+          "Limba și literatura română – Limba și literatura modernă (engleză/franceză/germană/rusă/italiană/spaniolă)",
+          "Literatură universală și comparată – Limba și literatura modernă (engleză/franceză/germană/italiană/rusă/spaniolă)",
+          "Limba și literatura modernă (engleză/franceză/germană/rusă/italiană/spaniolă) – Limba și literatura modernă (engleză/franceză/germană/rusă/italiană/spaniolă)",
+          "Limba și literatura modernă (engleză/franceză/germană/italiană/rusă/spaniolă) – Limba și literatura română (la Focșani)",
+          "Limbi moderne aplicate (Traducere și interpretare: engleză/franceză/germană)",
+          "Studii americane (în limba engleză)",
+          "Jurnalism"
+        ]
+      },
+      {
+        "nume": "Facultatea de Matematică",
+        "specializari": ["Matematică", "Matematică informatică"]
+      },
+      {
+        "nume": "Facultatea de Psihologie și Științe ale Educației",
+        "specializari": [
+          "Psihologie",
+          "Psihologie (ID)",
+          "Pedagogia învățământului primar și preșcolar",
+          "Pedagogia învățământului primar și preșcolar (ID)",
+          "Pedagogie",
+          "Psihopedagogie specială"
+        ]
+      },
+      {
+        "nume": "Facultatea de Teologie Ortodoxă",
+        "specializari": [
+          "Artă sacră",
+          "Teologie ortodoxă asistență socială",
+          "Teologie ortodoxă pastorală",
+          "Teologie ortodoxă pastorală (la Chișinău)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Teologie Romano-Catolică",
+        "specializari": ["Teologie romano-catolică asistență socială", "Teologie romano-catolică pastorală"]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA DE MEDICINĂ ȘI FARMACIE \"GRIGORE T. POPA\" DIN IAȘI",
+    "oras": "Iași",
+    "facultati": [
+      {
+        "nume": "Facultatea de Medicină",
+        "specializari": [
+          "Asistență medicală generală",
+          "Medicină",
+          "Medicină (în limba engleză)",
+          "Medicină (în limba franceză)",
+          "Nutriție și dietetică"
+        ]
+      },
+      {
+        "nume": "Facultatea de Medicină Dentară",
+        "specializari": [
+          "Medicină dentară",
+          "Medicină dentară (în limba engleză)",
+          "Medicină dentară (în limba franceză)",
+          "Tehnică dentară",
+          "Asistență de profilaxie stomatologică"
+        ]
+      },
+      {
+        "nume": "Facultatea de Farmacie",
+        "specializari": [
+          "Farmacie",
+          "Farmacie (în limba engleză)",
+          "Cosmetică medicală și tehnologia produsului cosmetic"
+        ]
+      },
+      {
+        "nume": "Facultatea de Bioinginerie Medicală",
+        "specializari": [
+          "Balneofiziokinetoterapie și recuperare",
+          "Balneofiziokinetoterapie și recuperare (în limba engleză)",
+          "Audiologie și protezare auditivă",
+          "Bioinginerie"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA NAȚIONALĂ DE ARTE \"GEORGE ENESCU\" DIN IAȘI",
+    "oras": "Iași",
+    "facultati": [
+      {
+        "nume": "Facultatea de Interpretare, Compoziție și Studii Muzicale Teoretice",
+        "specializari": [
+          "Compoziție muzicală",
+          "Dirijat",
+          "Interpretare muzicală - canto",
+          "Interpretare muzicală - instrumente",
+          "Muzică religioasă",
+          "Muzicologie",
+          "Muzică"
+        ]
+      },
+      {
+        "nume": "Facultatea de Teatru",
+        "specializari": [
+          "Artele spectacolului (actorie, păpuși-marionete)",
+          "Artele spectacolului (regie)",
+          "Teatrologie (Management cultural)",
+          "Teatrologie (Management cultural, în limba engleză)",
+          "Artele spectacolului (coregrafie)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Arte Vizuale și Design",
+        "specializari": [
+          "Artă murală",
+          "Arte plastice (fotografie - videoprocesarea computerizată a imaginii)",
+          "Arte plastice (pictură)",
+          "Arte plastice (sculptură)",
+          "Arte plastice (grafică)",
+          "Arte plastice (pictură, în limba engleză)",
+          "Conservare și restaurare",
+          "Design",
+          "Istoria și teoria artei",
+          "Modă - design vestimentar",
+          "Arte textile - design textil",
+          "Pedagogia artelor plastice și decorative"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA DIN ORADEA",
+    "oras": "Oradea",
+    "facultati": [
+      {
+        "nume": "Facultatea de Arte",
+        "specializari": [
+          "Arte decorative",
+          "Arte plastice (pictură)",
+          "Design",
+          "Modă - design vestimentar",
+          "Arte plastice (grafică)",
+          "Interpretare muzicală - canto",
+          "Interpretare muzicală - instrumente",
+          "Muzică"
+        ]
+      },
+      {
+        "nume": "Facultatea de Construcții, Cadastru și Arhitectură",
+        "specializari": [
+          "Construcții civile, industriale și agricole",
+          "Construcții pentru sisteme de alimentări cu apă și canalizări",
+          "Măsurători terestre și cadastru",
+          "Arhitectură"
+        ]
+      },
+      {
+        "nume": "Facultatea de Drept",
+        "specializari": ["Drept", "Administrație publică"]
+      },
+      {
+        "nume": "Facultatea de Geografie, Turism și Sport",
+        "specializari": [
+          "Geografia turismului",
+          "Geografia turismului (în limba engleză)",
+          "Planificare teritorială",
+          "Kinetoterapie și motricitate specială",
+          "Kinetoterapie și motricitate specială (în limba engleză)",
+          "Educație fizică și sportivă"
+        ]
+      },
+      {
+        "nume": "Facultatea de Inginerie Electrică și Tehnologia Informației",
+        "specializari": [
+          "Calculatoare",
+          "Tehnologia informației",
+          "Automatică și informatică aplicată",
+          "Electromecanică",
+          "Electromecanică (la Beiuș)",
+          "Sisteme electrice",
+          "Inginerie electrică și calculatoare",
+          "Electronică aplicată",
+          "Rețele și software de telecomunicații",
+          "Inginerie economică în domeniul electric, electronic și energetic"
+        ]
+      },
+      {
+        "nume": "Facultatea de Inginerie Energetică și Management Industrial",
+        "specializari": [
+          "Energetică industrială",
+          "Energetică și tehnologii informatice",
+          "Ingineria sistemelor electroenergetice",
+          "Ingineria sistemelor de energii regenerabile",
+          "Tehnologia tricotajelor și confecțiilor",
+          "Inginerie economică industrială"
+        ]
+      },
+      {
+        "nume": "Facultatea de Inginerie Managerială și Tehnologică",
+        "specializari": [
+          "Autovehicule rutiere",
+          "Tehnologia construcțiilor de mașini",
+          "Inginerie economică în domeniul mecanic",
+          "Inginerie economică în domeniul mecanic (ID)",
+          "Mecatronică",
+          "Robotică",
+          "Robotică (în limba engleză)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Istorie, Relații Internaționale, Științe Politice și Științele Comunicării",
+        "specializari": [
+          "Istorie",
+          "Relații internaționale și studii europene",
+          "Relații internaționale și studii europene (în limba engleză)",
+          "Studii de securitate",
+          "Științe politice",
+          "Jurnalism"
+        ]
+      },
+      {
+        "nume": "Facultatea de Litere",
+        "specializari": [
+          "Limba și literatura engleză – Limba și literatura modernă (franceză/germană)/Limba și literatura română",
+          "Limba și literatura franceză – Limba și literatura modernă (engleză/germană)/Limba și literatura română",
+          "Limba și literatura germană – Limba și literatura modernă (engleză/franceză)/Limba și literatura română",
+          "Limba și literatura română – Limba și literatura modernă (engleză/franceză/germană)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Medicină și Farmacie",
+        "specializari": [
+          "Asistență medicală generală",
+          "Balneofiziokinetoterapie și recuperare",
+          "Nutriție și dietetică",
+          "Farmacie",
+          "Medicină",
+          "Medicină dentară",
+          "Medicină (în limba engleză)",
+          "Radiologie și imagistică",
+          "Tehnică dentară"
+        ]
+      },
+      {
+        "nume": "Facultatea de Protecția Mediului",
+        "specializari": [
+          "Agricultură",
+          "Horticultură",
+          "Peisagistică",
+          "Ingineria sistemelor biotehnice și ecologice",
+          "Controlul și expertiza produselor alimentare",
+          "Ingineria produselor alimentare",
+          "Inginerie și management în agricultură și dezvoltare rurală",
+          "Silvicultură",
+          "Inginerie geodezică",
+          "Montanologie"
+        ]
+      },
+      {
+        "nume": "Facultatea de Informatică și Științe",
+        "specializari": ["Biologie", "Chimie", "Fizică medicală", "Informatică", "Matematică"]
+      },
+      {
+        "nume": "Facultatea de Științe Economice",
+        "specializari": [
+          "Administrarea afacerilor (în limba engleză)",
+          "Economia comerțului, turismului și serviciilor",
+          "Economia comerțului, turismului și serviciilor (ID)",
+          "Contabilitate și informatică de gestiune",
+          "Contabilitate și informatică de gestiune (ID)",
+          "Afaceri internaționale",
+          "Afaceri internaționale (în limba engleză)",
+          "Finanțe și bănci",
+          "Finanțe și bănci (ID)",
+          "Management",
+          "Management (ID)",
+          "Marketing",
+          "Marketing (ID)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Științe Socio-Umane",
+        "specializari": [
+          "Asistență socială",
+          "Psihologie",
+          "Sociologie",
+          "Resurse umane",
+          "Pedagogia învățământului primar și preșcolar",
+          "Pedagogia învățământului primar și preșcolar (IFR)",
+          "Pedagogia învățământului primar și preșcolar (în limba maghiară)",
+          "Pedagogia învățământului primar și preșcolar (la Beiuș)",
+          "Psihopedagogie specială"
+        ]
+      },
+      {
+        "nume": "Facultatea de Teologie Ortodoxă \"Episcop Dr. Vasile Coman\"",
+        "specializari": ["Teologie ortodoxă pastorală"]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA DIN PETROȘANI",
+    "oras": "Petroșani",
+    "facultati": [
+      {
+        "nume": "Facultatea de Mine",
+        "specializari": [
+          "Ingineria și protecția mediului în industrie",
+          "Construcții miniere",
+          "Ingineria securității în industrie",
+          "Ingineria și managementul afacerilor (la Deva)",
+          "Inginerie minieră",
+          "Topografie minieră"
+        ]
+      },
+      {
+        "nume": "Facultatea de Inginerie Mecanică și Electrică",
+        "specializari": [
+          "Calculatoare",
+          "Automatică și informatică aplicată",
+          "Ingineria transporturilor și a traficului",
+          "Electromecanică",
+          "Electromecanică (la Horezu)",
+          "Energetică industrială",
+          "Tehnologia construcțiilor de mașini",
+          "Echipamente pentru procese industriale",
+          "Mașini și echipamente miniere"
+        ]
+      },
+      {
+        "nume": "Facultatea de Științe Economice, Administrative și Sociale",
+        "specializari": [
+          "Economia comerțului, turismului și serviciilor",
+          "Asistență socială",
+          "Contabilitate și informatică de gestiune",
+          "Finanțe și bănci",
+          "Management",
+          "Sociologie",
+          "Administrație publică",
+          "Administrație publică (la Deva)"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA PETROL-GAZE DIN PLOIEȘTI",
+    "oras": "Ploiești",
+    "facultati": [
+      {
+        "nume": "Facultatea de Inginerie Mecanică și Electrică",
+        "specializari": [
+          "Calculatoare",
+          "Automatică și informatică aplicată",
+          "Automatică și informatică aplicată (IFR)",
+          "Electromecanică",
+          "Utilaje petroliere și petrochimice",
+          "Ingineria designului de produs",
+          "Inginerie economică în domeniul mecanic",
+          "Inginerie economică în domeniul mecanic (ID)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Ingineria Petrolului și Gazelor",
+        "specializari": [
+          "Geologia resurselor petroliere",
+          "Inginerie de petrol și gaze",
+          "Inginerie de petrol și gaze (IFR)",
+          "Transportul, depozitarea și distribuția hidrocarburilor"
+        ]
+      },
+      {
+        "nume": "Facultatea de Tehnologia Petrolului și Petrochimie",
+        "specializari": [
+          "Ingineria și protecția mediului în industrie",
+          "Controlul și securitatea produselor alimentare",
+          "Prelucrarea petrolului și petrochimie",
+          "Prelucrarea petrolului și petrochimie (în limba engleză)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Științe Economice",
+        "specializari": [
+          "Economia comerțului, turismului și serviciilor",
+          "Merceologie și managementul calității",
+          "Informatică economică",
+          "Contabilitate și informatică de gestiune",
+          "Contabilitate și informatică de gestiune (ID)",
+          "Finanțe și bănci",
+          "Management",
+          "Management (ID)",
+          "Economie și comunicare economică în afaceri"
+        ]
+      },
+      {
+        "nume": "Facultatea de Litere și Științe",
+        "specializari": [
+          "Informatică",
+          "Limba și literatura engleză – Limba și literatura franceză",
+          "Limba și literatura română – Limba și literatura engleză",
+          "Administrație publică",
+          "Asistență managerială și administrativă",
+          "Pedagogia învățământului primar și preșcolar",
+          "Pedagogie"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA \"LUCIAN BLAGA\" DIN SIBIU",
+    "oras": "Sibiu",
+    "facultati": [
+      {
+        "nume": "Facultatea de Teologie",
+        "specializari": ["Teologie ortodoxă pastorală", "Muzică religioasă"]
+      },
+      {
+        "nume": "Facultatea de Drept",
+        "specializari": ["Drept", "Drept (ID)", "Administrație publică", "Administrație publică (ID)"]
+      },
+      {
+        "nume": "Facultatea de Litere și Arte",
+        "specializari": [
+          "Limba și literatura chineză – Limba și literatura engleză",
+          "Limba și literatura chineză – Limba și literatura modernă (germană/franceză)/ Limba și literatura română",
+          "Limba și literatura engleză – Limba și literatura modernă (germană/franceză)/Limba și literatura română",
+          "Limba și literatura franceză – Limba și literatura modernă (engleză/germană)/Limba și literatura română",
+          "Limba și literatura germană – Limba și literatura modernă (engleză/franceză)/Limba și literatura română",
+          "Limba și literatura română – Limba și literatura modernă (engleză/germană/franceză)",
+          "Limbi moderne aplicate (engleză, franceză, germană)",
+          "Științe ale informării și documentării",
+          "Artele spectacolului (Actorie)",
+          "Artele spectacolului (Coregrafie)",
+          "Teatrologie (management cultural)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Științe Socio-Umane",
+        "specializari": [
+          "Conservare și restaurare",
+          "Asistență socială",
+          "Istorie",
+          "Psihologie",
+          "Relații internaționale și studii europene",
+          "Resurse umane",
+          "Sociologie",
+          "Comunicare și relații publice",
+          "Jurnalism",
+          "Studii de securitate",
+          "Științe politice",
+          "Teologie protestantă pastorală (în limba germană)",
+          "Pedagogia învățământului primar și preșcolar",
+          "Pedagogia învățământului primar și preșcolar (ID)",
+          "Pedagogia învățământului primar și preșcolar (în limba germană)",
+          "Studiul patrimoniului și managementul bunurilor culturale"
+        ]
+      },
+      {
+        "nume": "Facultatea de Inginerie",
+        "specializari": [
+          "Calculatoare",
+          "Tehnologia informației",
+          "Ingineria și protecția mediului în industrie",
+          "Ingineria sistemelor multimedia",
+          "Ingineria transporturilor și a traficului",
+          "Electromecanică",
+          "Electronică aplicată",
+          "Sisteme de producție digitale",
+          "Tehnologia construcțiilor de mașini",
+          "Tehnologia tricotajelor și confecțiilor",
+          "Inginerie economică industrială",
+          "Inginerie economică în domeniul mecanic",
+          "Inginerie economică în domeniul mecanic (ID)",
+          "Mecatronică",
+          "Mecatronică (în limba engleză)",
+          "Robotică",
+          "Transportul, depozitarea și distribuția hidrocarburilor (IF, IFR)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Științe",
+        "specializari": [
+          "Biologie",
+          "Biologie (în limba engleză)",
+          "Educație fizică și sportivă",
+          "Sport și performanță motrică",
+          "Informatică",
+          "Matematică informatică",
+          "Ecologie și protecția mediului"
+        ]
+      },
+      {
+        "nume": "Facultatea de Medicină",
+        "specializari": [
+          "Asistență medicală generală",
+          "Farmacie",
+          "Medicină",
+          "Medicină (în limba engleză)",
+          "Medicină dentară",
+          "Medicină dentară (în limba engleză)",
+          "Tehnică dentară",
+          "Balneofiziokinetoterapie și recuperare"
+        ]
+      },
+      {
+        "nume": "Facultatea de Științe Agricole, Industrie Alimentară și Protecția Mediului",
+        "specializari": [
+          "Montanologie (IF, ID)",
+          "Ingineria și protecția mediului în agricultură",
+          "Controlul și expertiza produselor alimentare",
+          "Ingineria produselor alimentare (IF, ID)",
+          "Inginerie și management în alimentația publică și agroturism"
+        ]
+      },
+      {
+        "nume": "Facultatea de Științe Economice",
+        "specializari": [
+          "Economia comerțului, turismului și serviciilor (IF, ID)",
+          "Administrarea afacerilor (în limba engleză)",
+          "Informatică economică (în limba engleză)",
+          "Contabilitate și informatică de gestiune (IF, ID)",
+          "Finanțe și bănci (IF, ID)",
+          "Management (IF, ID)",
+          "Marketing (IF, ID)"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA \"ȘTEFAN CEL MARE\" DIN SUCEAVA",
+    "oras": "Suceava",
+    "facultati": [
+      {
+        "nume": "Facultatea de Educație Fizică și Sport",
+        "specializari": ["Educație fizică și sportivă", "Kinetoterapie și motricitate specială"]
+      },
+      {
+        "nume": "Facultatea de Inginerie Alimentară",
+        "specializari": [
+          "Controlul și expertiza produselor alimentare",
+          "Ingineria produselor alimentare",
+          "Protecția consumatorului și a mediului",
+          "Științe gastronomice"
+        ]
+      },
+      {
+        "nume": "Facultatea de Inginerie Electrică și Știința Calculatoarelor",
+        "specializari": [
+          "Calculatoare",
+          "Calculatoare (învățământ superior dual)",
+          "Automatică și informatică aplicată",
+          "Automatică și informatică aplicată (învățământ superior dual)",
+          "Sisteme electrice",
+          "Sisteme electrice (învățământ superior dual)",
+          "Electronică aplicată",
+          "Rețele și software de telecomunicații",
+          "Managementul energiei",
+          "Energetică și tehnologii informatice",
+          "Echipamente și sisteme de comandă și control pentru autovehicule",
+          "Echipamente și sisteme medicale (învățământ superior dual)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Inginerie Mecanică, Autovehicule și Robotică",
+        "specializari": [
+          "Tehnologia construcțiilor de mașini",
+          "Tehnologia construcțiilor de mașini (învățământ superior dual)",
+          "Inginerie mecanică",
+          "Inginerie mecanică (învățământ superior dual)",
+          "Mecatronică",
+          "Robotică (învățământ superior dual)",
+          "Autovehicule rutiere (învățământ superior dual)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Istorie, Geografie și Științe Sociale",
+        "specializari": [
+          "Asistență socială",
+          "Filosofie",
+          "Geografia turismului",
+          "Geografia turismului (ID)",
+          "Geografie",
+          "Geografie (ID)",
+          "Istorie",
+          "Relații internaționale și studii europene",
+          "Resurse umane (autorizare provizorie)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Litere și Științe ale Comunicării",
+        "specializari": [
+          "Limba și literatura engleză – Limba și literatura germană/ Limba și literatura română",
+          "Limba și literatura engleză – Limba și literatura modernă (spaniolă/italiană)",
+          "Limba și literatura franceză – Limba și literatura modernă (engleză/germană)",
+          "Limba și literatura română – Limba și literatura modernă (franceză/germană/spaniolă/ italiană)",
+          "Limba și literatura ucraineană – Limba și literatura modernă (franceză/engleză)/ Limba și literatura română",
+          "Limba și literatura franceză – Limba și literatura modernă (spaniolă/italiană)",
+          "Comunicare și relații publice",
+          "Media digitală"
+        ]
+      },
+      {
+        "nume": "Facultatea de Silvicultură",
+        "specializari": ["Silvicultură (IF, ID)", "Ecologie și protecția mediului"]
+      },
+      {
+        "nume": "Facultatea de Drept și Științe Administrative",
+        "specializari": [
+          "Drept",
+          "Drept european și internațional (AP)",
+          "Administrație publică (IF, ID)",
+          "Poliție locală"
+        ]
+      },
+      {
+        "nume": "Facultatea de Economie, Administrație și Afaceri",
+        "specializari": [
+          "Matematică informatică (AP)",
+          "Administrarea afacerilor (IF, ID)",
+          "Economia comerțului, turismului și serviciilor (IF, ID)",
+          "Informatică economică",
+          "Contabilitate și informatică de gestiune (IF, ID)",
+          "Economie generală și comunicare economică",
+          "Afaceri internaționale",
+          "Finanțe și bănci",
+          "Management",
+          "Asistență managerială și administrativă (IF, ID)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Științe ale Educației",
+        "specializari": ["Pedagogia învățământului primar și preșcolar", "Psihologie (AP)"]
+      },
+      {
+        "nume": "Facultatea de Medicină și Științe Biologice",
+        "specializari": [
+          "Medicină (AP)",
+          "Asistență medicală generală (AP)",
+          "Balneofiziokinetoterapie și recuperare",
+          "Nutriție și dietetică",
+          "Tehnică dentară (AP)",
+          "Biologie (AP)",
+          "Biochimie (AP)"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA \"VALAHIA\" DIN TÂRGOVIȘTE",
+    "oras": "Târgoviște",
+    "facultati": [
+      {
+        "nume": "Facultatea de Științe Economice",
+        "specializari": [
+          "Administrarea afacerilor (în limba engleză)",
+          "Economia comerțului, turismului și serviciilor",
+          "Contabilitate și informatică de gestiune",
+          "Finanțe și bănci",
+          "Management",
+          "Management (ID)",
+          "Marketing"
+        ]
+      },
+      {
+        "nume": "Facultatea de Drept și Științe Administrative",
+        "specializari": ["Drept", "Drept (ID)", "Administrație publică"]
+      },
+      {
+        "nume": "Facultatea de Științe Politice, Litere și Comunicare",
+        "specializari": ["Jurnalism", "Limba și literatura română – Limba și literatura modernă (engleză/franceză)"]
+      },
+      {
+        "nume": "Facultatea de Științe Umaniste",
+        "specializari": [
+          "Educație fizică și sportivă",
+          "Istorie",
+          "Geografie",
+          "Geografia turismului",
+          "Kinetoterapie și motricitate specială"
+        ]
+      },
+      {
+        "nume": "Facultatea de Teologie Ortodoxă și Științele Educației",
+        "specializari": ["Teologie ortodoxă pastorală", "Pedagogia învățământului primar și preșcolar"]
+      },
+      {
+        "nume": "Facultatea de Științe și Arte",
+        "specializari": ["Chimie", "Fizică", "Matematică informatică", "Muzică"]
+      },
+      {
+        "nume": "Facultatea de Inginerie Electrică, Electronică și Tehnologia Informației",
+        "specializari": [
+          "Automatică și informatică aplicată",
+          "Electronică aplicată",
+          "Tehnologii și sisteme de telecomunicații",
+          "Electrotehnică",
+          "Energetică industrială"
+        ]
+      },
+      {
+        "nume": "Facultatea de Ingineria Materialelor și Mecanică",
+        "specializari": [
+          "Știința materialelor",
+          "Ingineria biomaterialelor",
+          "Echipamente pentru procese industriale",
+          "Inginerie economică în domeniul mecanic"
+        ]
+      },
+      {
+        "nume": "Facultatea de Ingineria Mediului și Știința Alimentelor",
+        "specializari": [
+          "Ingineria și protecția mediului în agricultură",
+          "Tehnologia prelucrării produselor agricole",
+          "Controlul și securitatea produselor alimentare",
+          "Montanologie"
+        ]
+      },
+      {
+        "nume": "Facultatea de Științe și Inginerie (Alexandria)",
+        "specializari": [
+          "Economia comerțului, turismului și serviciilor",
+          "Administrație publică",
+          "Agricultură",
+          "Ingineria sistemelor multimedia"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA \"CONSTANTIN BRÂNCUȘI\" DIN TÂRGU JIU",
+    "oras": "Târgu Jiu",
+    "facultati": [
+      {
+        "nume": "Facultatea de Științe ale Educației, Drept și Administrație Publică",
+        "specializari": [
+          "Drept",
+          "Drept (ID)",
+          "Administrație publică",
+          "Relații internaționale și studii europene",
+          "Pedagogia învățământului primar și preșcolar",
+          "Limba și literatura engleză – Limba și literatura română"
+        ]
+      },
+      {
+        "nume": "Facultatea de Științe Economice",
+        "specializari": [
+          "Economia comerțului, turismului și serviciilor",
+          "Informatică economică",
+          "Economie și comunicare economică în afaceri",
+          "Contabilitate și informatică de gestiune",
+          "Finanțe și bănci",
+          "Management",
+          "Sociologie"
+        ]
+      },
+      {
+        "nume": "Facultatea de Inginerie",
+        "specializari": [
+          "Tehnologia construcțiilor de mașini",
+          "Managementul energiei",
+          "Automatică și informatică aplicată",
+          "Inginerie medicală",
+          "Inginerie și management în alimentația publică și agroturism"
+        ]
+      },
+      {
+        "nume": "Facultatea de Științe Medicale și Comportamentale",
+        "specializari": [
+          "Educație fizică și sportivă",
+          "Kinetoterapie și motricitate specială",
+          "Asistență medicală generală",
+          "Asistență de farmacie"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA DE MEDICINĂ, FARMACIE, ȘTIINȚE ȘI TEHNOLOGIE „GEORGE EMIL PALADE” DIN TÂRGU MUREȘ",
+    "oras": "Târgu Mureș",
+    "facultati": [
+      {
+        "nume": "Facultatea de Medicină",
+        "specializari": [
+          "Medicină",
+          "Medicină (în limba maghiară)",
+          "Asistență medicală generală (linia română și linia maghiară)",
+          "Asistență medicală generală (la Bistrița)",
+          "Balneofiziokinetoterapie și recuperare"
+        ]
+      },
+      {
+        "nume": "Facultatea de Medicină Dentară",
+        "specializari": [
+          "Medicină dentară (linia română și linia maghiară)",
+          "Medicină dentară (în limba engleză)",
+          "Tehnică dentară",
+          "Tehnică dentară (la Bistrița)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Farmacie",
+        "specializari": [
+          "Chimie medicală",
+          "Chimie tehnologică",
+          "Farmacie (linia română și linia maghiară)",
+          "Cosmetică medicală și tehnologia produsului cosmetic",
+          "Nutriție și dietetică",
+          "Asistență de farmacie (la Bistrița)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Medicină în Limba Engleză",
+        "specializari": ["Medicină (în limba engleză)"]
+      },
+      {
+        "nume": "Filiala UMFST-UMCH din Hamburg-Germania",
+        "specializari": ["Medicină (în limba engleză, Hamburg-Germania)"]
+      },
+      {
+        "nume": "Facultatea de Inginerie și Tehnologia Informației",
+        "specializari": [
+          "Automatică și informatică aplicată",
+          "Energetică și tehnologii informatice",
+          "Tehnologia construcțiilor de mașini",
+          "Sisteme de producție digitale",
+          "Inginerie economică industrială",
+          "Inginerie medicală",
+          "Informatică",
+          "Informatică (în limba maghiară)",
+          "Arhitectură (în limba engleză)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Științe și Litere „Petru Maior”",
+        "specializari": [
+          "Istorie",
+          "Limba și literatura română – Limba și literatura engleză",
+          "Limbi moderne aplicate (engleză, franceză, germană, italiană)",
+          "Comunicare și relații publice",
+          "Comunicare și media emergente",
+          "Studii de securitate",
+          "Psihologie",
+          "Pedagogia învățământului primar și preșcolar",
+          "Educație fizică și sportivă"
+        ]
+      },
+      {
+        "nume": "Facultatea de Economie și Drept",
+        "specializari": [
+          "Economia comerțului, turismului și serviciilor",
+          "Economia comerțului, turismului și serviciilor (în limba engleză)",
+          "Contabilitate și informatică de gestiune",
+          "Contabilitate și informatică de gestiune (ID)",
+          "Drept",
+          "Drept (ID)",
+          "Finanțe și bănci",
+          "Management",
+          "Management (ID)",
+          "Administrație publică"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA DE ARTE DIN TÂRGU MUREȘ",
+    "oras": "Târgu Mureș",
+    "facultati": [
+      {
+        "nume": "Facultatea de Arte în Limba Română",
+        "specializari": [
+          "Muzică",
+          "Artele spectacolului (Coregrafie)",
+          "Artele spectacolului (Păpuși-Marionete)",
+          "Teatrologie (Jurnalism teatral)",
+          "Artele spectacolului (Actorie)",
+          "Artele spectacolului (Regie)",
+          "Scenografie și eveniment artistic",
+          "Cinematografie, fotografie, media (Comunicare audiovizuală: scenaristică, publicitate media)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Arte în Limba Maghiară",
+        "specializari": [
+          "Muzică (în limba maghiară)",
+          "Cinematografie, fotografie, media (Comunicare audiovizuală: scenaristică, publicitate media) (în limba maghiară)",
+          "Artele spectacolului (Coregrafie) (în limba maghiară)",
+          "Artele spectacolului (Păpuși-Marionete) (în limba maghiară)",
+          "Teatrologie (Jurnalism teatral) (în limba maghiară)",
+          "Artele spectacolului (Actorie) (în limba maghiară)",
+          "Artele spectacolului (Regie) (în limba maghiară)",
+          "Scenografie și eveniment artistic (în limba maghiară)"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA POLITEHNICA TIMIȘOARA",
+    "oras": "Timișoara",
+    "facultati": [
+      {
+        "nume": "Facultatea de Automatică și Calculatoare",
+        "specializari": [
+          "Calculatoare",
+          "Calculatoare (în limba engleză)",
+          "Tehnologia informației",
+          "Informatică",
+          "Informatică (ID)",
+          "Automatică și informatică aplicată"
+        ]
+      },
+      {
+        "nume": "Facultatea de Inginerie Chimică, Biotehnologii și Protecția Mediului",
+        "specializari": [
+          "Ingineria și protecția mediului în industrie",
+          "Informatică aplicată în ingineria mediului",
+          "Chimia și ingineria substanțelor organice, petrochimie și carbochimie",
+          "Ingineria substanțelor anorganice și protecția mediului",
+          "Ingineria și informatica proceselor chimice și biochimice",
+          "Controlul și expertiza produselor alimentare"
+        ]
+      },
+      {
+        "nume": "Facultatea de Construcții",
+        "specializari": [
+          "Instalații pentru construcții",
+          "Amenajări și construcții hidrotehnice",
+          "Căi ferate, drumuri și poduri",
+          "Construcții civile, industriale și agricole",
+          "Inginerie civilă (în limba engleză)",
+          "Inginerie civilă (în limba germană)",
+          "Construcții pentru sisteme de alimentări cu apă și canalizări",
+          "Măsurători terestre și cadastru"
+        ]
+      },
+      {
+        "nume": "Facultatea de Arhitectură și Urbanism",
+        "specializari": ["Arhitectură", "Mobilier și amenajări interioare"]
+      },
+      {
+        "nume": "Facultatea de Electronică, Telecomunicații și Tehnologii informaționale",
+        "specializari": [
+          "Electronică aplicată",
+          "Tehnologii și sisteme de telecomunicații",
+          "Tehnologii și sisteme de telecomunicații (ID)",
+          "Tehnologii și sisteme de telecomunicații (în limba engleză)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Inginerie Electrică și Energetică",
+        "specializari": [
+          "Electrotehnică",
+          "Inginerie electrică și calculatoare",
+          "Ingineria sistemelor electroenergetice",
+          "Energetică și tehnologii informatice"
+        ]
+      },
+      {
+        "nume": "Facultatea de Management în Producție și Transporturi",
+        "specializari": [
+          "Inginerie economică industrială",
+          "Inginerie și management în construcții",
+          "Inginerie economică în domeniul electric, electronic și energetic",
+          "Inginerie economică în industria chimică și de materiale",
+          "Administrație publică"
+        ]
+      },
+      {
+        "nume": "Facultatea de Mecanică",
+        "specializari": [
+          "Autovehicule rutiere",
+          "Știința materialelor",
+          "Ingineria transporturilor și a traficului",
+          "Ingineria sudării",
+          "Tehnologia construcțiilor de mașini (IF și IFR)",
+          "Inginerie mecanică (IF, cu o variantă în limba engleză)",
+          "Mașini și instalații pentru agricultură și industrie alimentară",
+          "Mașini și sisteme hidraulice și pneumatice",
+          "Sisteme și echipamente termice",
+          "Mecatronică",
+          "Robotică (cu variantă de învățământ superior dual)",
+          "Inginerie medicală"
+        ]
+      },
+      {
+        "nume": "Facultatea de Științe ale Comunicării",
+        "specializari": [
+          "Traducere și interpretare (engleză; franceză/germană)",
+          "Comunicare și relații publice (IF și ID)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Inginerie din Hunedoara",
+        "specializari": [
+          "Autovehicule rutiere",
+          "Inginerie electrică și calculatoare",
+          "Inginerie economică în domeniul mecanic",
+          "Inginerie economică în industria chimică și de materiale",
+          "Informatică industrială",
+          "Ingineria valorificării deșeurilor"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA DE ȘTIINȚELE VIEȚII „REGELE MIHAI I” DIN TIMIȘOARA",
+    "oras": "Timișoara",
+    "facultati": [
+      {
+        "nume": "Facultatea de Agricultură",
+        "specializari": [
+          "Agricultură (IF, IFR, în limba engleză)",
+          "Protecția plantelor",
+          "Biologie",
+          "Ingineria și protecția mediului în agricultură (IF, IFR, cu variantă în limba franceză)",
+          "Măsurători terestre și cadastru",
+          "Mașini și instalații pentru agricultură și industrie alimentară"
+        ]
+      },
+      {
+        "nume": "Facultatea de Inginerie și Tehnologii Aplicate",
+        "specializari": [
+          "Inginerie genetică",
+          "Horticultură (IF, IFR)",
+          "Peisagistică (IF și în limba engleză)",
+          "Silvicultură",
+          "Științe de laborator aplicate"
+        ]
+      },
+      {
+        "nume": "Facultatea de Management și Turism Rural",
+        "specializari": [
+          "Ingineria și managementul afacerilor agricole (IF, cu variantă în limba engleză)",
+          "Inginerie și management în alimentația publică și agroturism (IF, IFR)",
+          "Inginerie și management în industria turismului"
+        ]
+      },
+      {
+        "nume": "Facultatea de Medicină Veterinară",
+        "specializari": ["Medicină veterinară (IF, în limba engleză și în limba franceză)"]
+      },
+      {
+        "nume": "Facultatea de Inginerie Alimentară",
+        "specializari": [
+          "Controlul și expertiza produselor alimentare (IF, variantă și în limba engleză)",
+          "Ingineria produselor alimentare (IF, variantă și în limba engleză)",
+          "Protecția consumatorului și a mediului"
+        ]
+      },
+      {
+        "nume": "Facultatea de Bioingineria Resurselor Animaliere",
+        "specializari": [
+          "Biotehnologii (variantă și în limba engleză)",
+          "Zootehnie",
+          "Antreprenoriat în producția alimentară"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA DE VEST DIN TIMIȘOARA",
+    "oras": "Timișoara",
+    "facultati": [
+      {
+        "nume": "Facultatea de Arte și Design",
+        "specializari": [
+          "Arte plastice (fotografie - videoprocesarea computerizată a imaginii)",
+          "Arte plastice (Pictură)",
+          "Arte plastice (Grafică)",
+          "Arte plastice (Sculptură)",
+          "Conservare și restaurare",
+          "Design",
+          "Modă - design vestimentar",
+          "Arte decorative"
+        ]
+      },
+      {
+        "nume": "Facultatea de Chimie, Biologie, Geografie",
+        "specializari": [
+          "Biochimie",
+          "Biologie",
+          "Chimie",
+          "Chimie medicală",
+          "Geografie",
+          "Geografia turismului",
+          "Planificare teritorială",
+          "Științe aplicate în criminalistică",
+          "Geoinformatică"
+        ]
+      },
+      {
+        "nume": "Facultatea de Drept",
+        "specializari": ["Drept", "Drept (IFR)", "Drept european și internațional (bilingv română - engleză)"]
+      },
+      {
+        "nume": "Facultatea de Economie și de Administrare a Afacerilor",
+        "specializari": [
+          "Economia comerțului, turismului și serviciilor",
+          "Informatică economică",
+          "Contabilitate și informatică de gestiune",
+          "Contabilitate și informatică de gestiune (ID)",
+          "Contabilitate și informatică de gestiune (în limba germană)",
+          "Economie generală și comunicare economică",
+          "Economie și afaceri internaționale",
+          "Finanțe și bănci",
+          "Finanțe și bănci (ID)",
+          "Finanțe și bănci (în limba engleză)",
+          "Management",
+          "Management (ID)",
+          "Management (în limba franceză)",
+          "Marketing"
+        ]
+      },
+      {
+        "nume": "Facultatea de Educație Fizică și Sport",
+        "specializari": [
+          "Educație fizică și sportivă",
+          "Educație fizică și sportivă (IFR)",
+          "Sport și performanță motrică",
+          "Kinetoterapie și motricitate specială"
+        ]
+      },
+      {
+        "nume": "Facultatea de Fizică",
+        "specializari": ["Fizică", "Fizică informatică", "Fizică medicală"]
+      },
+      {
+        "nume": "Facultatea de Litere, Istorie, Filosofie și Teologie",
+        "specializari": [
+          "Istorie",
+          "Filosofie",
+          "Filologie clasică (Limba și literatura latină - Limba și literatura greacă veche)",
+          "Limba și literatura română - Limba și literatura modernă (rusă/sârbă/japoneză)",
+          "Limba și literatura engleză - Limba și literatura modernă (rusă/sârbă/japoneză)",
+          "Limba și literatura engleză - Limba și literatura modernă (franceză/germană/italiană/spaniolă)/Limba și literatura latină/Limba și literatura română",
+          "Limba și literatura franceză - Limba și literatura modernă (engleză/germană/italiană/spaniolă)/Limba și literatura latină/Limba și literatura română",
+          "Limba și literatura germană - Limba și literatura modernă (engleză/franceză/italiană/spaniolă)/Limba și literatura latină/Limba și literatura română",
+          "Limba și literatura română - Limba și literatura modernă (engleză/franceză/germană/italiană/spaniolă)/Limba și literatura latină",
+          "Limba și literatura rusă - Limba și literatura modernă (engleză/franceză/germană/italiană/spaniolă)/Limba și literatura latină/Limba și literatura română",
+          "Limba și literatura sârbă - Limba și literatura modernă (engleză/franceză/germană/italiană/spaniolă)/Limba și literatura latină/Limba și literatura română",
+          "Limbi moderne aplicate (engleză; franceză; germană; spaniolă; rusă)",
+          "Teologie ortodoxă pastorală"
+        ]
+      },
+      {
+        "nume": "Facultatea de Matematică și Informatică",
+        "specializari": [
+          "Informatică",
+          "Informatică (ID)",
+          "Informatică (în limba engleză)",
+          "Inteligență artificială (în limba engleză)",
+          "Matematică",
+          "Matematică informatică"
+        ]
+      },
+      {
+        "nume": "Facultatea de Muzică și Teatru",
+        "specializari": [
+          "Interpretare muzicală - canto",
+          "Interpretare muzicală - instrumente",
+          "Muzică",
+          "Artele spectacolului (actorie)",
+          "Artele spectacolului (actorie, în limba germană)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Sociologie și Psihologie",
+        "specializari": [
+          "Asistență socială",
+          "Asistență socială (ID)",
+          "Psihologie",
+          "Psihologie - Științe cognitive (în limba engleză)",
+          "Resurse umane",
+          "Sociologie",
+          "Pedagogia învățământului primar și preșcolar",
+          "Pedagogie",
+          "Psihopedagogie specială"
+        ]
+      },
+      {
+        "nume": "Facultatea de Științe ale Guvernării și Comunicării",
+        "specializari": [
+          "Administrație publică",
+          "Relații internaționale și studii europene",
+          "Relații internaționale și studii europene (în limba germană)",
+          "Comunicare și relații publice",
+          "Jurnalism",
+          "Publicitate",
+          "Științe ale informării și documentării",
+          "Media digitală",
+          "Științe politice",
+          "Studii de securitate"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA DE MEDICINĂ ȘI FARMACIE \"VICTOR BABEȘ\" DIN TIMIȘOARA",
+    "oras": "Timișoara",
+    "facultati": [
+      {
+        "nume": "Facultatea de Medicină",
+        "specializari": ["Medicină", "Medicină (în limba engleză)", "Medicină (în limba franceză)"]
+      },
+      {
+        "nume": "Facultatea de Medicină Dentară",
+        "specializari": [
+          "Medicină dentară",
+          "Medicină dentară (în limba engleză)",
+          "Tehnică dentară",
+          "Asistență de profilaxie stomatologică"
+        ]
+      },
+      {
+        "nume": "Facultatea de Farmacie",
+        "specializari": [
+          "Farmacie",
+          "Farmacie (în limba engleză)",
+          "Farmacie (în limba franceză)",
+          "Asistență de farmacie (la Deva)",
+          "Cosmetică medicală și tehnologia produsului cosmetic"
+        ]
+      },
+      {
+        "nume": "Facultatea de Asistență Medicală",
+        "specializari": [
+          "Asistență medicală generală",
+          "Asistență medicală generală (la Lugoj)",
+          "Asistență medicală generală (la Deva)",
+          "Balneofiziokinetoterapie și recuperare",
+          "Nutriție și dietetică"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "ACADEMIA TEHNICĂ MILITARĂ \"FERDINAND I\" DIN BUCUREȘTI",
+    "oras": "București",
+    "facultati": [
+      {
+        "nume": "Facultatea de Comunicații și Sisteme Electronice pentru Apărare și Securitate",
+        "specializari": [
+          "Echipamente și sisteme electronice militare",
+          "Comunicații pentru apărare și securitate",
+          "Echipamente și sisteme electronice militare, electronică - radioelectronică de aviație"
+        ]
+      },
+      {
+        "nume": "Facultatea de Sisteme Informatice și Securitate Cibernetică",
+        "specializari": ["Calculatoare și sisteme informatice pentru apărare și securitate națională"]
+      },
+      {
+        "nume": "Facultatea de Sisteme Integrate de Armament, Geniu și Mecatronică",
+        "specializari": [
+          "Construcții și fortificații",
+          "Drumuri, poduri și infrastructuri militare",
+          "Topogeodezie și automatizarea asigurării topogeodezice",
+          "Sisteme pentru baraje de mine, distrugeri și mascare",
+          "Armament, aparatură artileristică și sisteme de conducere a focului",
+          "Armament, rachete, muniții de aviație și sisteme de salvare",
+          "Muniții, rachete, explozivi și pulberi",
+          "Materiale energetice și apărare CBRN"
+        ]
+      },
+      {
+        "nume": "Facultatea de Aeronave și Autovehicule Militare",
+        "specializari": [
+          "Aeronave și motoare de aviație",
+          "Echipamente și instalații de aviație",
+          "Blindate, automobile și tractoare",
+          "Echipamente și sisteme de comandă și control pentru autovehicule"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA NAȚIONALĂ DE APĂRARE \"CAROL I\" DIN BUCUREȘTI",
+    "oras": "București",
+    "facultati": [
+      {
+        "nume": "Facultatea de Comandă și Stat Major",
+        "specializari": [
+          "Conducere interarme - forțe aeriene",
+          "Conducere interarme - forțe terestre",
+          "Logistică",
+          "Intendență"
+        ]
+      },
+      {
+        "nume": "Facultatea de Securitate și Apărare",
+        "specializari": [
+          "Securitate și apărare",
+          "Comunicare publică și interculturală în domeniul securității și apărării",
+          "Sisteme informaționale"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "ACADEMIA NAȚIONALĂ DE INFORMAȚII \"MIHAI VITEAZUL\" DIN BUCUREȘTI",
+    "oras": "București",
+    "facultati": [
+      {
+        "nume": "Facultatea de Informații",
+        "specializari": ["Operațiuni de intelligence"]
+      },
+      {
+        "nume": "Facultatea de Studii de Intelligence",
+        "specializari": ["Studii de securitate și informații"]
+      }
+    ]
+  },
+  {
+    "institutie": "ACADEMIA DE POLIȚIE \"ALEXANDRU IOAN CUZA\" DIN BUCUREȘTI",
+    "oras": "București",
+    "facultati": [
+      {
+        "nume": "Facultatea de Poliție",
+        "specializari": ["Drept", "Drept (ID)", "Ordine și siguranță publică", "Ordine și siguranță publică (IFR)"]
+      },
+      {
+        "nume": "Facultatea de Pompieri",
+        "specializari": ["Instalații pentru construcții - pompieri"]
+      }
+    ]
+  },
+  {
+    "institutie": "ACADEMIA FORȚELOR AERIENE \"HENRI COANDĂ\" DIN BRAȘOV",
+    "oras": "Brașov",
+    "facultati": [
+      {
+        "nume": "Facultatea de Management Aeronautic",
+        "specializari": ["Management în aviație", "Managementul traficului aerian", "Management aeronautic"]
+      },
+      {
+        "nume": "Facultatea de Sisteme de Securitate Aeriană",
+        "specializari": [
+          "Managementul sistemelor de rachete și artilerie antiaeriene",
+          "Managementul sistemelor de supraveghere aeriană"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "ACADEMIA NAVALĂ \"MIRCEA CEL BĂTRÂN\" DIN CONSTANȚA",
+    "oras": "Constanța",
+    "facultati": [
+      {
+        "nume": "Facultatea de Inginerie Marină",
+        "specializari": [
+          "Electromecanică",
+          "Electromecanică navală",
+          "Navigație, hidrografie și echipamente navale",
+          "Navigație, hidrografie și echipamente navale (în limba engleză)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Navigație și Management Naval",
+        "specializari": ["Inginerie și management naval și portuar", "Navigație și transport maritim și fluvial"]
+      }
+    ]
+  },
+  {
+    "institutie": "ACADEMIA FORȚELOR TERESTRE \"NICOLAE BĂLCESCU\" DIN SIBIU",
+    "oras": "Sibiu",
+    "facultati": [
+      {
+        "nume": "Facultatea de Management Militar",
+        "specializari": [
+          "Managementul organizației",
+          "Managementul sistemelor tehnice de artilerie",
+          "Managementul sistemelor tehnice de tancuri și auto",
+          "Managementul sistemelor tehnice de geniu",
+          "Managementul sistemelor tehnice de apărare C.B.R.N.",
+          "Inginerie și management în domeniul comunicațiilor militare"
+        ]
+      },
+      {
+        "nume": "Facultatea de Științe Militare",
+        "specializari": ["Leadership militar"]
+      },
+      {
+        "nume": "Facultatea de Științe Economice și Administrative",
+        "specializari": [
+          "Administrație publică",
+          "Contabilitate și informatică de gestiune",
+          "Management economico - financiar",
+          "Managementul sistemelor speciale de protecție și pază"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA CREȘTINĂ \"DIMITRIE CANTEMIR\" DIN BUCUREȘTI",
+    "oras": "București",
+    "facultati": [
+      {
+        "nume": "Facultatea de Științe Juridice și Administrative „Momcilo Luburici”",
+        "specializari": ["Drept", "Drept (ID)", "Administrație publică"]
+      },
+      {
+        "nume": "Facultatea de Business",
+        "specializari": [
+          "Economia comerțului, turismului și serviciilor",
+          "Economia comerțului, turismului și serviciilor (ID)",
+          "Marketing"
+        ]
+      },
+      {
+        "nume": "Facultatea de Limbi și Literaturi Străine",
+        "specializari": [
+          "Limba și literatura engleză – Limba și literatura modernă (germană, arabă, italiană, japoneză, spaniolă)",
+          "Limba și literatura română – Limba și literatura modernă (engleză, franceză, spaniolă, italiană, arabă, japoneză, rusă, chineză, turcă)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Științe ale Educației",
+        "specializari": ["Pedagogia învățământului primar și preșcolar"]
+      },
+      {
+        "nume": "Facultatea de Drept din Cluj-Napoca",
+        "specializari": ["Drept", "Drept (ID)"]
+      },
+      {
+        "nume": "Facultatea de Științe Economice din Cluj-Napoca",
+        "specializari": ["Contabilitate și informatică de gestiune", "Contabilitate și informatică de gestiune (ID)"]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA \"TITU MAIORESCU\" DIN BUCUREȘTI",
+    "oras": "București",
+    "facultati": [
+      {
+        "nume": "Facultatea de Drept",
+        "specializari": ["Drept", "Drept (ID)"]
+      },
+      {
+        "nume": "Facultatea de Științe Economice",
+        "specializari": [
+          "Administrarea afacerilor",
+          "Contabilitate și informatică de gestiune",
+          "Contabilitate și informatică de gestiune (ID)",
+          "Finanțe și bănci",
+          "Finanțe și bănci (ID)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Psihologie",
+        "specializari": ["Psihologie", "Psihologie (ID)"]
+      },
+      {
+        "nume": "Facultatea de Informatică",
+        "specializari": ["Informatică", "Informatică (ID)"]
+      },
+      {
+        "nume": "Facultatea de Medicină",
+        "specializari": ["Medicină", "Medicină (în limba engleză)", "Asistență medicală generală"]
+      },
+      {
+        "nume": "Facultatea de Medicină Dentară",
+        "specializari": ["Medicină dentară", "Medicină dentară (în limba engleză)", "Tehnică dentară"]
+      },
+      {
+        "nume": "Facultatea de Științele Educației, Comunicare și Relații Internaționale",
+        "specializari": [
+          "Relații internaționale și studii europene",
+          "Comunicare și relații publice",
+          "Pedagogia învățământului primar și preșcolar"
+        ]
+      },
+      {
+        "nume": "Facultatea de Farmacie",
+        "specializari": ["Farmacie"]
+      },
+      {
+        "nume": "Facultatea de Drept și Științe Economice - Târgu Jiu",
+        "specializari": ["Drept", "Contabilitate și informatică de gestiune"]
+      },
+      {
+        "nume": "Facultatea de Asistență Medicală – Târgu Jiu",
+        "specializari": ["Asistență medicală generală"]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA \"NICOLAE TITULESCU\" DIN BUCUREȘTI",
+    "oras": "București",
+    "facultati": [
+      {
+        "nume": "Facultatea de Drept",
+        "specializari": ["Drept", "Drept (IFR)", "Drept european și internațional"]
+      },
+      {
+        "nume": "Facultatea de Economie și Administrarea Afacerilor",
+        "specializari": [
+          "Administrarea afacerilor",
+          "Administrarea afacerilor (ID)",
+          "Contabilitate și informatică de gestiune",
+          "Contabilitate și informatică de gestiune (ID)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Relații Internaționale și Administrație",
+        "specializari": ["Administrație publică", "Administrație publică (ID)"]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA ROMÂNO-AMERICANĂ DIN BUCUREȘTI",
+    "oras": "București",
+    "facultati": [
+      {
+        "nume": "Facultatea de Drept",
+        "specializari": ["Drept", "Drept (IFR)"]
+      },
+      {
+        "nume": "Facultatea de Turism și Managementul Ospitalității",
+        "specializari": [
+          "Economia comerțului, turismului și serviciilor",
+          "Economia comerțului, turismului și serviciilor (IFR)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Informatică Managerială",
+        "specializari": ["Informatică economică", "Informatică economică (în limba engleză)"]
+      },
+      {
+        "nume": "Facultatea de Management-Marketing",
+        "specializari": [
+          "Management",
+          "Management (IFR)",
+          "Marketing",
+          "Marketing (în limba engleză)",
+          "Marketing (IFR)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Afaceri Internaționale",
+        "specializari": [
+          "Afaceri internaționale",
+          "Afaceri internaționale (IFR)",
+          "Afaceri internaționale (în limba engleză)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Finanțe și Contabilitate",
+        "specializari": ["Finanțe și bănci", "Contabilitate și informatică de gestiune"]
+      },
+      {
+        "nume": "Facultatea de Educație Fizică, Sport și Kinetoterapie",
+        "specializari": ["Kinetoterapie și motricitate specială", "Educație fizică și sportivă"]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA \"HYPERION\" DIN BUCUREȘTI",
+    "oras": "București",
+    "facultati": [
+      {
+        "nume": "Facultatea de Științe Exacte și Inginerești",
+        "specializari": ["Fizică", "Informatică", "Automatică și informatică aplicată"]
+      },
+      {
+        "nume": "Facultatea de Științe Sociale, Umaniste și ale Naturii",
+        "specializari": [
+          "Geografie",
+          "Limba și literatura română – Limba și literatura modernă (engleză/japoneză)",
+          "Științe politice"
+        ]
+      },
+      {
+        "nume": "Facultatea de Științe Juridice",
+        "specializari": ["Drept", "Drept (ID)"]
+      },
+      {
+        "nume": "Facultatea de Jurnalism",
+        "specializari": ["Jurnalism"]
+      },
+      {
+        "nume": "Facultatea de Psihologie și Științe ale Educației",
+        "specializari": ["Psihologie"]
+      },
+      {
+        "nume": "Facultatea de Științe Economice",
+        "specializari": [
+          "Economia comerțului, turismului și serviciilor (IF, ID)",
+          "Contabilitate și informatică de gestiune (IF, ID, la Satu Mare)",
+          "Afaceri internaționale (IF, ID)",
+          "Finanțe și bănci (IF, ID)",
+          "Management (IF, ID)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Arte",
+        "specializari": [
+          "Cinematografie, fotografie, media (Regie de film și TV)",
+          "Cinematografie, fotografie, media (Imagine de film și TV)",
+          "Artele spectacolului (actorie)"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA \"SPIRU HARET\" DIN BUCUREȘTI",
+    "oras": "București",
+    "facultati": [
+      {
+        "nume": "Facultatea de Educație Fizică și Sport",
+        "specializari": ["Educație fizică și sportivă", "Kinetoterapie și motricitate specială"]
+      },
+      {
+        "nume": "Facultatea de Inginerie și Informatică",
+        "specializari": ["Informatică"]
+      },
+      {
+        "nume": "Facultatea de Medicină Veterinară",
+        "specializari": ["Medicină veterinară"]
+      },
+      {
+        "nume": "Facultatea de Psihologie și Științele Educației",
+        "specializari": ["Psihologie (IF, IFR, ID)", "Pedagogia învățământului primar și preșcolar"]
+      },
+      {
+        "nume": "Facultatea de Psihologie și Științele Educației, Brașov",
+        "specializari": ["Psihologie", "Pedagogia învățământului primar și preșcolar"]
+      },
+      {
+        "nume": "Facultatea de Științe Economice",
+        "specializari": [
+          "Marketing (în limba engleză)",
+          "Contabilitate și informatică de gestiune",
+          "Management (IF, IFR, ID)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Științe Economice, Câmpulung",
+        "specializari": ["Contabilitate și informatică de gestiune"]
+      },
+      {
+        "nume": "Facultatea de Științe Juridice și Științe Economice, Brașov",
+        "specializari": ["Management", "Drept"]
+      },
+      {
+        "nume": "Facultatea de Științe Juridice, Economice și Administrative, Craiova",
+        "specializari": [
+          "Contabilitate și informatică de gestiune (IF)",
+          "Management (IF)",
+          "Drept (IF, IFR, ID)",
+          "Administrație publică (IF, IFR, ID)",
+          "Poliție locală"
+        ]
+      },
+      {
+        "nume": "Facultatea de Științe Juridice și Științe Economice, Constanța",
+        "specializari": ["Management (IF)", "Management (în limba engleză, IF)", "Drept (IF)"]
+      },
+      {
+        "nume": "Facultatea de Științe Juridice și Științe Administrative",
+        "specializari": ["Drept (IF, IFR)", "Administrație publică (IF)"]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA \"BIOTERRA\" DIN BUCUREȘTI",
+    "oras": "București",
+    "facultati": [
+      {
+        "nume": "Facultatea de Management Agroturistic",
+        "specializari": [
+          "Inginerie și management în alimentația publică și agroturism (IF)",
+          "Inginerie și management în alimentația publică și agroturism (IFR)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Drept",
+        "specializari": [
+          "Drept (IF)",
+          "Drept (IFR)",
+          "Drept (la Buzău)",
+          "Drept european și internațional",
+          "Drept european și internațional (în limba engleză)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Controlul și Expertiza Produselor Alimentare",
+        "specializari": [
+          "Controlul și expertiza produselor alimentare (IF)",
+          "Controlul și expertiza produselor alimentare (IFR)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Management Agroturistic din Buzău",
+        "specializari": ["Inginerie și management în alimentația publică și agroturism (IF)"]
+      },
+      {
+        "nume": "Facultatea de Asistență Medicală Generală",
+        "specializari": [
+          "Asistență medicală generală (IF)",
+          "Asistență medicală generală (în limba engleză, IF)",
+          "Asistență medicală generală (la Buzău, IF)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Informatică",
+        "specializari": [
+          "Informatică aplicată (IF)",
+          "Informatică aplicată (în limba engleză, IF)",
+          "Informatică aplicată (la Buzău, IF)"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA ECOLOGICĂ DIN BUCUREȘTI",
+    "oras": "București",
+    "facultati": [
+      {
+        "nume": "Facultatea de Drept",
+        "specializari": ["Drept (IF)", "Drept (IFR)", "Drept (ID)"]
+      },
+      {
+        "nume": "Facultatea de Educație Fizică și Sport",
+        "specializari": ["Educație fizică și sportivă", "Kinetoterapie și motricitate specială"]
+      },
+      {
+        "nume": "Facultatea de Management Financiar",
+        "specializari": ["Finanțe și bănci (IF)", "Finanțe și bănci (IFR)"]
+      },
+      {
+        "nume": "Facultatea de Ecologie și Protecția Mediului",
+        "specializari": ["Ecologie și protecția mediului (IF)", "Ecologie și protecția mediului (IFR)"]
+      },
+      {
+        "nume": "Facultatea de Psihologie",
+        "specializari": ["Psihologie (IF)", "Psihologie (IFR)"]
+      },
+      {
+        "nume": "Facultatea de Științele Comunicării",
+        "specializari": ["Comunicare și relații publice (IF)", "Comunicare și relații publice (IFR)"]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA \"ATHENAEUM\" DIN BUCUREȘTI",
+    "oras": "București",
+    "facultati": [
+      {
+        "nume": "Facultatea de Științe Economice",
+        "specializari": [
+          "Informatică economică (IF, autorizare provizorie)",
+          "Contabilitate și informatică de gestiune (IF)",
+          "Management (IF, autorizare provizorie)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Administrație Publică",
+        "specializari": ["Administrație publică (IF)"]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA \"ARTIFEX\" DIN BUCUREȘTI",
+    "oras": "București",
+    "facultati": [
+      {
+        "nume": "Facultatea de Finanțe și Contabilitate",
+        "specializari": ["Contabilitate și informatică de gestiune", "Finanțe și bănci"]
+      },
+      {
+        "nume": "Facultatea de Management-Marketing",
+        "specializari": ["Economia comerțului, turismului și serviciilor", "Management", "Marketing"]
+      }
+    ]
+  },
+  {
+    "institutie": "INSTITUTUL TEOLOGIC BAPTIST DIN BUCUREȘTI",
+    "oras": "București",
+    "facultati": [
+      {
+        "nume": "Facultatea de Teologie",
+        "specializari": ["Teologie baptistă pastorală (IF)", "Teologie baptistă pastorală (ID)"]
+      }
+    ]
+  },
+  {
+    "institutie": "INSTITUTUL TEOLOGIC PENTICOSTAL DIN BUCUREȘTI",
+    "oras": "București",
+    "facultati": [
+      {
+        "nume": "Facultatea de Teologie Penticostală",
+        "specializari": ["Teologie penticostală pastorală"]
+      }
+    ]
+  },
+  {
+    "institutie": "INSTITUTUL DE ADMINISTRARE A AFACERILOR DIN MUNICIPIUL BUCUREȘTI",
+    "oras": "București",
+    "facultati": [
+      {
+        "nume": "Învățământ universitar - ciclul II (Master)",
+        "specializari": [
+          "Administrarea afacerilor – Executive MBA",
+          "Administrarea afacerilor – Master of Business Administration"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA DE VEST \"VASILE GOLDIȘ\" DIN ARAD",
+    "oras": "Arad",
+    "facultati": [
+      {
+        "nume": "Facultatea de Științe Juridice",
+        "specializari": ["Drept (IF)", "Drept (la Baia Mare)", "Poliție locală (autorizare provizorie)"]
+      },
+      {
+        "nume": "Facultatea de Științe Economice, Informatică și Inginerie",
+        "specializari": [
+          "Administrarea afacerilor (IF, inclusiv varianta în limba engleză)",
+          "Economia comerțului, turismului și serviciilor (la Sebiș)",
+          "Contabilitate și informatică de gestiune (IF, la Baia Mare, la Satu Mare)",
+          "Marketing (IF, la Baia Mare, Marghita, Satu Mare, Zalău)",
+          "Informatică (IF)",
+          "Silvicultură (IF)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Medicină",
+        "specializari": [
+          "Medicină (IF, inclusiv în limba engleză și franceză)",
+          "Asistență medicală generală (autorizare provizorie)",
+          "Balneofiziokinetoterapie și recuperare",
+          "Biologie"
+        ]
+      },
+      {
+        "nume": "Facultatea de Stomatologie",
+        "specializari": ["Medicină dentară", "Tehnică dentară"]
+      },
+      {
+        "nume": "Facultatea de Farmacie",
+        "specializari": ["Farmacie", "Nutriție și dietetică"]
+      },
+      {
+        "nume": "Facultatea de Științe Socio-Umane și Educație Fizică și Sport",
+        "specializari": [
+          "Limba și literatura chineză – Limba și literatura engleză (autorizare provizorie)",
+          "Limbi moderne aplicate (engleză, franceză, germană)",
+          "Educație fizică și sportivă",
+          "Psihologie",
+          "Pedagogia învățământului primar și preșcolar (IF, inclusiv la Satu Mare, Baia Mare; la Zalău – autorizare provizorie)",
+          "Studii de securitate (autorizare provizorie)"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA \"GEORGE BACOVIA\" DIN BACĂU",
+    "oras": "Bacău",
+    "facultati": [
+      {
+        "nume": "Facultatea de Științe Economice, Juridice și Administrative",
+        "specializari": [
+          "Economia comerțului, turismului și serviciilor",
+          "Management",
+          "Drept",
+          "Administrație publică"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA \"BOGDAN VODĂ\" DIN CLUJ-NAPOCA",
+    "oras": "Cluj-Napoca",
+    "facultati": [
+      {
+        "nume": "Facultatea de Științe Economice",
+        "specializari": ["Management (IF, IFR)"]
+      },
+      {
+        "nume": "Facultatea de Drept",
+        "specializari": ["Drept (IF, IFR)"]
+      },
+      {
+        "nume": "Facultatea de Educație Fizică și Sport",
+        "specializari": ["Educație fizică și sportivă"]
+      }
+    ]
+  },
+  {
+    "institutie": "INSTITUTUL TEOLOGIC PROTESTANT DIN CLUJ-NAPOCA",
+    "oras": "Cluj-Napoca",
+    "facultati": [
+      {
+        "nume": "Facultatea de Teologie",
+        "specializari": ["Teologie protestantă pastorală (în limba maghiară)"]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA \"SAPIENTIA\" DIN CLUJ-NAPOCA",
+    "oras": "Cluj-Napoca",
+    "facultati": [
+      {
+        "nume": "Facultatea de Științe și Arte",
+        "specializari": [
+          "Cinematografie, fotografie, media (Regie de film și TV)",
+          "Cinematografie, fotografie, media (Imagine de film și TV)",
+          "Cinematografie, fotografie, media (Comunicare audiovizuală: scenaristică, publicitate media)",
+          "Artele spectacolului (Coregrafie) (AP)",
+          "Drept",
+          "Relații internaționale și studii europene",
+          "Știința mediului"
+        ]
+      },
+      {
+        "nume": "Facultatea de Științe Economice, Socio-Umane și Inginerești din Miercurea Ciuc",
+        "specializari": [
+          "Ingineria produselor alimentare",
+          "Inginerie și management în alimentația publică și agroturism",
+          "Informatică aplicată în ingineria mediului (AP)",
+          "Sociologie",
+          "Resurse umane",
+          "Comunicare și relații publice",
+          "Inginerie genetică",
+          "Informatică economică",
+          "Contabilitate și informatică de gestiune",
+          "Economie agroalimentară",
+          "Economie generală",
+          "Limba și literatura română – Limba și literatura engleză",
+          "Literatură universală și comparată – Limba și literatura engleză",
+          "Marketing",
+          "Educație fizică și sportivă (AP)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Științe Tehnice și Umaniste din Târgu Mureș",
+        "specializari": [
+          "Calculatoare",
+          "Horticultură",
+          "Peisagistică",
+          "Informatică",
+          "Automatică și informatică aplicată",
+          "Tehnologii și sisteme de telecomunicații",
+          "Tehnologia construcțiilor de mașini",
+          "Traducere și interpretare (engleză; germană)",
+          "Mecatronică",
+          "Servicii și politici de sănătate publică (Public Health) (AP)",
+          "Comunicare și relații publice"
+        ]
+      },
+      {
+        "nume": "Facultatea de Științe ale Vieții și Sport din Sfântu Gheorghe",
+        "specializari": ["Agricultură", "Silvicultură (AP)", "Sport și performanță motrică (AP)"]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA \"ANDREI ȘAGUNA\" DIN CONSTANȚA",
+    "oras": "Constanța",
+    "facultati": [
+      {
+        "nume": "Facultatea de Științe Economice și Administrative",
+        "specializari": [
+          "Contabilitate și informatică de gestiune",
+          "Finanțe și bănci",
+          "Management",
+          "Administrație publică"
+        ]
+      },
+      {
+        "nume": "Facultatea de Psihologie, Științe comportamentale și juridice",
+        "specializari": ["Drept", "Psihologie"]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA INTERNAȚIONALĂ DANUBIUS",
+    "oras": "Galați",
+    "facultati": [
+      {
+        "nume": "Facultatea de Drept",
+        "specializari": ["Drept (IF)", "Drept (IFR)", "Drept (ID)"]
+      },
+      {
+        "nume": "Facultatea de Științe Economice și Administrarea Afacerilor",
+        "specializari": [
+          "Economia comerțului, turismului și serviciilor (IF)",
+          "Economia comerțului, turismului și serviciilor (ID)",
+          "Contabilitate și informatică de gestiune (IF)",
+          "Contabilitate și informatică de gestiune (IFR)",
+          "Finanțe și bănci (IF)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Științe Comportamentale și Aplicate",
+        "specializari": ["Psihologie (IF)", "Informatică (AP IF)", "Asistență socială (AP IF)"]
+      },
+      {
+        "nume": "Facultatea de Comunicare și Relații Internaționale",
+        "specializari": [
+          "Relații internaționale și studii europene (IF)",
+          "Relații internaționale și studii europene (ID)",
+          "Comunicare și relații publice (IF)",
+          "Comunicare și relații publice (ID)",
+          "Media digitală (AP IF)"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA \"PETRE ANDREI\" DIN IAȘI",
+    "oras": "Iași",
+    "facultati": [
+      {
+        "nume": "Facultatea de Drept, Economie, Științe Politice și Administrative",
+        "specializari": [
+          "Drept (IF)",
+          "Contabilitate și informatică de gestiune (IF)",
+          "Finanțe și bănci (IF)",
+          "Informatică (AP IF)",
+          "Marketing (IF)",
+          "Științe politice (IF)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Psihologie, Științele Educației și Asistență Socială",
+        "specializari": ["Psihologie (IF)", "Asistență socială (IF)"]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA \"APOLLONIA\" DIN IAȘI",
+    "oras": "Iași",
+    "facultati": [
+      {
+        "nume": "Facultatea de Medicină",
+        "specializari": [
+          "Asistență medicală generală",
+          "Balneofiziokinetoterapie și recuperare",
+          "Medicină dentară (AP)",
+          "Tehnică dentară"
+        ]
+      },
+      {
+        "nume": "Facultatea de Științe ale comunicării",
+        "specializari": ["Comunicare și relații publice", "Jurnalism"]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA EUROPEANĂ \"DRĂGAN\" DIN LUGOJ",
+    "oras": "Lugoj",
+    "facultati": [
+      {
+        "nume": "Facultatea de Drept",
+        "specializari": ["Drept"]
+      },
+      {
+        "nume": "Facultatea de Științe Economice",
+        "specializari": ["Finanțe și bănci"]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA AGORA DIN MUNICIPIUL ORADEA",
+    "oras": "Oradea",
+    "facultati": [
+      {
+        "nume": "Facultatea de Științe Economice",
+        "specializari": ["Contabilitate și informatică de gestiune", "Management"]
+      },
+      {
+        "nume": "Facultatea de Științe Juridice și Administrative",
+        "specializari": ["Drept", "Poliție locală", "Administrație publică (AP IF)"]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA \"EMANUEL\" DIN ORADEA",
+    "oras": "Oradea",
+    "facultati": [
+      {
+        "nume": "Facultatea de Teologie",
+        "specializari": [
+          "Asistență socială",
+          "Limba și literatura română – Limba și literatura engleză",
+          "Muzică",
+          "Teologie baptistă pastorală"
+        ]
+      },
+      {
+        "nume": "Facultatea de Management",
+        "specializari": ["Management", "Informatică economică"]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA CREȘTINĂ \"PARTIUM\" DIN ORADEA",
+    "oras": "Oradea",
+    "facultati": [
+      {
+        "nume": "Facultatea de Litere și Arte",
+        "specializari": [
+          "Limba și literatura engleză",
+          "Limba și literatura engleză – Limba și literatura germană",
+          "Limba și literatura maghiară – Limba și literatura engleză",
+          "Limba și literatura germană",
+          "Limba și literatura maghiară",
+          "Arte plastice (grafică)",
+          "Muzică",
+          "Interpretare muzicală – canto (AP)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Științe Economice și Sociale",
+        "specializari": [
+          "Asistență socială",
+          "Sociologie",
+          "Pedagogia învățământului primar și preșcolar",
+          "Economia comerțului, turismului și serviciilor",
+          "Informatică economică (AP)",
+          "Finanțe și bănci",
+          "Management"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA \"CONSTANTIN BRÂNCOVEANU\" DIN PITEȘTI",
+    "oras": "Pitești",
+    "facultati": [
+      {
+        "nume": "Facultatea de Științe Economice și Juridice",
+        "specializari": [
+          "Management (IF)",
+          "Management (IFR)",
+          "Contabilitate și informatică de gestiune (IF)",
+          "Drept (IF)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Management, Marketing în Afaceri Economice din Brăila",
+        "specializari": [
+          "Contabilitate și informatică de gestiune (IF)",
+          "Management (IF)",
+          "Administrație publică (IF)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Management, Marketing în Afaceri Economice din Râmnicu Vâlcea",
+        "specializari": [
+          "Economia comerțului, turismului și serviciilor (IF)",
+          "Contabilitate și informatică de gestiune (IF)",
+          "Management (IF)",
+          "Administrație publică (IF)",
+          "Drept (AP, IF)"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA \"DIMITRIE CANTEMIR\" DIN TÂRGU MUREŞ",
+    "oras": "Târgu Mureș",
+    "facultati": [
+      {
+        "nume": "Facultatea de Drept",
+        "specializari": ["Drept (IF)"]
+      },
+      {
+        "nume": "Facultatea de Științe Economice",
+        "specializari": [
+          "Economia comerțului, turismului și serviciilor (IF)",
+          "Economia comerțului, turismului și serviciilor (în limba engleză) (AP)",
+          "Contabilitate și informatică de gestiune (AP)",
+          "Finanțe și bănci (IF)",
+          "Psihologie (IF)",
+          "Geografia turismului (IF)"
+        ]
+      },
+      {
+        "nume": "Facultatea de Medicină",
+        "specializari": [
+          "Medicină dentară (AP)",
+          "Asistență de profilaxie stomatologică (AP)",
+          "Balneofiziokinetoterapie și recuperare (AP)"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA \"TIBISCUS\" DIN TIMIȘOARA",
+    "oras": "Timișoara",
+    "facultati": [
+      {
+        "nume": "Facultatea de Științe Economice",
+        "specializari": ["Contabilitate și informatică de gestiune (IF, IFR)"]
+      },
+      {
+        "nume": "Facultatea de Calculatoare și Informatică Aplicată",
+        "specializari": ["Informatică (IF)"]
+      },
+      {
+        "nume": "Facultatea de Drept și Administrație Publică",
+        "specializari": ["Drept (IF)", "Administrație publică"]
+      },
+      {
+        "nume": "Facultatea de Psihologie",
+        "specializari": ["Psihologie (IF)"]
+      }
+    ]
+  },
+  {
+    "institutie": "UNIVERSITATEA ADVENTUS DIN CERNICA",
+    "oras": "Cernica (jud. Ilfov)",
+    "facultati": [
+      {
+        "nume": "Facultatea de Teologie și Științe Sociale",
+        "specializari": [
+          "Pedagogia învățământului primar și preșcolar",
+          "Asistență socială",
+          "Teologie adventistă pastorală"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "INSTITUTUL TEOLOGIC CREȘTIN DUPĂ EVANGHELIE \"TIMOTHEUS\" DIN BUCUREȘTI",
+    "oras": "București",
+    "facultati": [
+      {
+        "nume": "Facultatea de Teologie Pastorală",
+        "specializari": ["Teologie creștină după evanghelie pastorală"]
+      }
+    ]
+  },
+  {
+    "institutie": "FUNDAȚIA \"GAUDEAMUS\" – UNIVERSITATEA \"TOMIS\" DIN CONSTANȚA",
+    "oras": "Constanța",
+    "facultati": [
+      {
+        "nume": "Facultatea (programe de licență autorizate/acreditate)",
+        "specializari": [
+          "Administrarea afacerilor (IF)",
+          "Economia comerțului, turismului și serviciilor (IF)",
+          "Finanțe și bănci (IF)"
+        ]
+      }
+    ]
+  },
+  {
+    "institutie": "FUNDAȚIA PENTRU CULTURĂ ȘI ÎNVĂȚĂMÂNT \"IOAN SLAVICI\" – UNIVERSITATEA \"IOAN SLAVICI\" DIN TIMIȘOARA",
+    "oras": "Timișoara",
+    "facultati": [
+      {
+        "nume": "Facultatea (programe de licență autorizate/acreditate)",
+        "specializari": [
+          "Finanțe și bănci (IF)",
+          "Contabilitate și informatică de gestiune (IF)",
+          "Tehnologia informației (IF)"
+        ]
+      }
+    ]
+  }
+]
+

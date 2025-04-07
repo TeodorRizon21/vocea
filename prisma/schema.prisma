@@ -1,0 +1,161 @@
+model User {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  clerkId     String    @unique
+  email       String?   // Made optional since Clerk handles email
+  firstName   String?   // Added firstName
+  lastName    String?   // Added lastName
+  university  String?
+  faculty     String?
+  city        String?
+  year        String?
+  avatar      String?   // Added avatar field
+  isOnboarded Boolean   @default(false)
+  isAdmin     Boolean   @default(false)  // Added isAdmin field
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  projects    Project[] @relation("UserProjects")
+  reviews     Review[]  @relation("UserReviews")
+  topics      ForumTopic[] // Added relation to forum topics
+  comments    ForumComment[] // Added relation to forum comments
+  reports     Report[]  @relation("UserReports") // Added relation to reports
+}
+
+model Project {
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  type         String    // Will be one of: "proiect", "cerere", "diverse"
+  title        String
+  description  String
+  subject      String
+  category     String
+  university   String
+  faculty      String
+  phoneNumber  String
+  images       String[]
+  userId       String    // References clerkId from User
+  authorName   String?   // Will be formatted as "firstName lastName"
+  authorAvatar String?   // Will reference user's avatar URL
+  user         User      @relation("UserProjects", fields: [userId], references: [clerkId])
+  reviews      Review[]  @relation("ProjectReviews")
+  reports      Report[]  @relation("ProjectReports") // Added relation to reports
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Review {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  score     Int @default(0) // The reviews' score
+  comment   String?
+  projectId String   @db.ObjectId
+  project   Project  @relation("ProjectReviews", fields: [projectId], references: [id])
+  userId    String   // References clerkId from User
+  user      User     @relation("UserReviews", fields: [userId], references: [clerkId])
+  reports   Report[] @relation("ReviewReports") // Added relation to reports
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Find the News model and update the id field definition
+model News {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String   // Removed @db.Text since it's not supported in MongoDB
+  image       String?
+  city        String   @default("")
+  university  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Subscription model for handling user subscription plans
+model Subscription {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String    @unique  // References clerkId from User
+  plan      String    // "Basic", "Premium", or "Gold"
+  startDate DateTime  @default(now())
+  endDate   DateTime?
+  status    String    // "active", "cancelled", "expired"
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+// Updated Forum models
+model ForumTopic {
+  id          String         @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  content     String
+  userId      String        // References clerkId from User
+  university  String
+  faculty     String
+  category    String
+  isClosed    Boolean       @default(false)
+  comments    ForumComment[] @relation("TopicComments")
+  reports     Report[]      @relation("TopicReports") // Added relation to reports
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  user        User          @relation(fields: [userId], references: [clerkId])
+  favorites   String[]      // Array of userIds who favorited this topic
+}
+
+model ForumComment {
+  id        String         @id @default(auto()) @map("_id") @db.ObjectId
+  content   String
+  userId    String        // References clerkId from User
+  topicId   String        @db.ObjectId
+  parentId  String?       @db.ObjectId  // For replies to comments
+  topic     ForumTopic    @relation("TopicComments", fields: [topicId], references: [id])
+  user      User          @relation(fields: [userId], references: [clerkId])
+  replies   ForumComment[] @relation("CommentReplies")
+  parent    ForumComment? @relation("CommentReplies", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  reports   Report[]      @relation("CommentReports") // Added relation to reports
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
+// Notification model for system notifications
+model Notification {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   // References clerkId from User
+  type      String   // "project_comment", "forum_reply", "system", etc.
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ProjectApplication model for handling project applications
+model ProjectApplication {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  projectId String   @db.ObjectId
+  userId    String   // References clerkId from User
+  status    String   // "pending", "accepted", "rejected"
+  message   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// New Report model for handling reported content
+model Report {
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  type          String        // "project", "forum_topic", "forum_comment", "review"
+  reason        String
+  status        String        // "pending", "resolved", "dismissed"
+  reporterId    String        // References clerkId from User who reported
+  reporter      User          @relation("UserReports", fields: [reporterId], references: [clerkId])
+  
+  // Optional relations based on what was reported
+  projectId     String?       @db.ObjectId
+  project       Project?      @relation("ProjectReports", fields: [projectId], references: [id])
+  
+  topicId       String?       @db.ObjectId
+  topic         ForumTopic?   @relation("TopicReports", fields: [topicId], references: [id])
+  
+  commentId     String?       @db.ObjectId
+  comment       ForumComment? @relation("CommentReports", fields: [commentId], references: [id])
+
+  reviewId     String?       @db.ObjectId
+  review       Review?        @relation("ReviewReports", fields: [reviewId], references: [id])
+  
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
