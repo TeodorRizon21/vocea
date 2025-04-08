@@ -1,13 +1,16 @@
 import { getAuth } from "@clerk/nextjs/server"
 import { prisma } from "@/lib/prisma"
-import { NextResponse, type NextRequest } from "next/server"
+import { NextResponse } from "next/server"
+import type { NextRequest } from "next/server"
+
+export const runtime = "edge"
 
 export async function POST(req: NextRequest) {
   try {
     const { userId } = getAuth(req)
     if (!userId) {
       console.error("Unauthorized: No userId found")
-      return new NextResponse("Unauthorized", { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     const { firstName, lastName, university, faculty, city, year } = await req.json()
@@ -15,18 +18,18 @@ export async function POST(req: NextRequest) {
     // Validate required fields
     if (!firstName || !lastName || !university || !faculty || !city || !year) {
       console.error("Missing required fields:", { firstName, lastName, university, faculty, city, year })
-      return new NextResponse(JSON.stringify({ error: "All fields are required" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      })
+      return NextResponse.json(
+        { error: "All fields are required" },
+        { status: 400 }
+      )
     }
 
     // Validate name fields are not empty strings after trimming
     if (!firstName.trim() || !lastName.trim()) {
-      return new NextResponse(JSON.stringify({ error: "First name and last name cannot be empty" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      })
+      return NextResponse.json(
+        { error: "First name and last name cannot be empty" },
+        { status: 400 }
+      )
     }
 
     console.log("Attempting to update user with data:", {
@@ -83,7 +86,13 @@ export async function POST(req: NextRequest) {
     }
   } catch (error) {
     console.error("Error in onboarding:", error)
-    return new NextResponse(error instanceof Error ? error.message : "Internal Server Error", { status: 500 })
+    return NextResponse.json(
+      {
+        error: "Internal Server Error",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 }
+    )
   }
 }
 
