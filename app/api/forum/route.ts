@@ -4,6 +4,8 @@ import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 import universitiesData from "@/data/universities.json"
 
+export const runtime = "edge"
+
 // Helper function to get university name from ID
 function getUniversityName(id: string): string {
   // If the ID is already a name (not an ID), return it
@@ -59,9 +61,19 @@ function getFacultyName(universityId: string, facultyId: string): string {
   return university.facultati[facIndex].nume
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    const { searchParams } = new URL(req.url)
+    const university = searchParams.get('university')
+    const faculty = searchParams.get('faculty')
+    const category = searchParams.get('category')
+
     const topics = await prisma.forumTopic.findMany({
+      where: {
+        ...(university && { university }),
+        ...(faculty && { faculty }),
+        ...(category && { category }),
+      },
       include: {
         comments: true,
         user: {
@@ -82,43 +94,47 @@ export async function GET() {
     // Transform the topics to include university and faculty names
     const transformedTopics = topics.map(topic => ({
       ...topic,
-      universityName: getUniversityName(topic.university),
-      facultyName: getFacultyName(topic.university, topic.faculty),
+      user: {
+        ...topic.user,
+        university: getUniversityName(topic.user.university || ''),
+        faculty: getFacultyName(topic.user.university || '', topic.user.faculty || ''),
+      },
     }))
 
     return NextResponse.json(transformedTopics)
   } catch (error) {
     console.error("Error fetching forum topics:", error)
-    return new NextResponse("Internal Server Error", { status: 500 })
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    )
   }
 }
 
 export async function POST(req: NextRequest) {
   try {
     const { userId } = getAuth(req)
+    
     if (!userId) {
-      return new NextResponse("Unauthorized", { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     const data = await req.json()
 
-    // Validate required fields
-    if (!data.title || !data.content || !data.university || !data.faculty) {
-      return new NextResponse("Missing required fields", { status: 400 })
-    }
-
-    // Validate content length
-    if (data.content.length < 200) {
-      return new NextResponse("Content must be at least 200 characters long", { status: 400 })
+    if (!data.title || !data.content || !data.university || !data.faculty || !data.category) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      )
     }
 
     const topic = await prisma.forumTopic.create({
       data: {
         title: data.title,
         content: data.content,
-        category: data.category || "General",
         university: data.university,
         faculty: data.faculty,
+        category: data.category,
         userId: userId,
       },
       include: {
@@ -128,15 +144,26 @@ export async function POST(req: NextRequest) {
             lastName: true,
             university: true,
             faculty: true,
+            avatar: true,
           },
         },
       },
     })
 
-    return NextResponse.json(topic)
+    return NextResponse.json({
+      ...topic,
+      user: {
+        ...topic.user,
+        university: getUniversityName(topic.user.university || ''),
+        faculty: getFacultyName(topic.user.university || '', topic.user.faculty || ''),
+      },
+    })
   } catch (error) {
     console.error("Error creating forum topic:", error)
-    return new NextResponse("Internal Server Error", { status: 500 })
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    )
   }
 }
 
