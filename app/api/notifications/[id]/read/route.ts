@@ -3,11 +3,23 @@ import { prisma } from "@/lib/prisma"
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export const runtime = "edge"
+
+export async function POST(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
+    if (!params.id) {
+      return NextResponse.json(
+        { error: "Notification ID is required" },
+        { status: 400 }
+      )
+    }
+
     const { userId } = getAuth(req)
     if (!userId) {
-      return new NextResponse("Unauthorized", { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     // Find the notification
@@ -18,16 +30,19 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     })
 
     if (!notification) {
-      return new NextResponse("Notification not found", { status: 404 })
+      return NextResponse.json(
+        { error: "Notification not found" },
+        { status: 404 }
+      )
     }
 
     // Check if the notification belongs to the user
     if (notification.userId !== userId) {
-      return new NextResponse("Unauthorized", { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     // Mark as read
-    await prisma.notification.update({
+    const updatedNotification = await prisma.notification.update({
       where: {
         id: params.id,
       },
@@ -36,10 +51,16 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       },
     })
 
-    return new NextResponse("Notification marked as read", { status: 200 })
+    return NextResponse.json(updatedNotification)
   } catch (error) {
     console.error("Error marking notification as read:", error)
-    return new NextResponse("Internal Server Error", { status: 500 })
+    return NextResponse.json(
+      {
+        error: "Internal Server Error",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 }
+    )
   }
 }
 
