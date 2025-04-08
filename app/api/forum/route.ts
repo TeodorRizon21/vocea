@@ -4,8 +4,6 @@ import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 import universitiesData from "@/data/universities.json"
 
-export const runtime = "edge"
-
 // Helper function to get university name from ID
 function getUniversityName(id: string): string {
   // If the ID is already a name (not an ID), return it

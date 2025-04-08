@@ -19,8 +19,14 @@ interface Project {
   description: string
   type: string
   createdAt: string
+  authorName: string
+  authorAvatar: string | null
   user: {
-    name: string
+    firstName: string
+    lastName: string
+    university: string | null
+    faculty: string | null
+    avatar: string | null
   }
 }
 
@@ -76,7 +82,7 @@ export default function BrowsePageClient({
                     <CardHeader>
                       <CardTitle>{project.title}</CardTitle>
                       <CardDescription>
-                        By {project.user.name} • {new Date(project.createdAt).toLocaleDateString()}
+                        By {project.authorName} • {new Date(project.createdAt).toLocaleDateString()}
                       </CardDescription>
                     </CardHeader>
                     <CardContent>

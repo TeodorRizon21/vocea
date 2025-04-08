@@ -1,5 +1,5 @@
 import UserProfile from "@/components/UserProfile"
-import BrowsePageWrapper from "@/components/BrowsePageWrapper"
+import BrowsePageClient from "@/components/BrowsePageClient"
 
 const tabsData = [
   {
@@ -21,11 +21,12 @@ const tabsData = [
 
 async function getProjects(type?: string) {
   try {
-    console.log("Fetching projects with type:", type)
-    const response = await fetch(`/api/projects?type=${type || ""}`, {
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+    const response = await fetch(`${baseUrl}/api/projects?type=${type || ""}`, {
       headers: {
         "Content-Type": "application/json",
       },
+      cache: "no-store",
     })
 
     if (!response.ok) {
@@ -33,7 +34,6 @@ async function getProjects(type?: string) {
     }
 
     const data = await response.json()
-    console.log(`Found ${data.projects.length} projects`)
     return data.projects
   } catch (error) {
     console.error("Error fetching projects:", error)
@@ -41,12 +41,13 @@ async function getProjects(type?: string) {
   }
 }
 
-export default function BrowsePage({
+export default async function BrowsePage({
   searchParams,
 }: {
   searchParams: { [key: string]: string | string[] | undefined }
 }) {
   const activeTab = (searchParams.tab as string) || "proiect"
+  const projects = await getProjects(activeTab)
 
   return (
     <div className="space-y-6">
@@ -55,7 +56,11 @@ export default function BrowsePage({
         <UserProfile membershipPlan="Basic" />
       </div>
 
-      <BrowsePageWrapper initialTab={activeTab} />
+      <BrowsePageClient
+        tabsData={tabsData}
+        initialTab={activeTab}
+        projects={projects}
+      />
     </div>
   )
 }
