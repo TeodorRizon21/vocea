@@ -102,6 +102,30 @@ export default function OnboardingDialog({ isOpen, onClose, onSubmit }: Onboardi
     }
   }, [formData.universityId, universities])
 
+  // Reset faculty when university changes
+  useEffect(() => {
+    if (formData.universityId) {
+      setFormData((prev) => ({ ...prev, facultyId: "", faculty: "" }))
+    }
+  }, [formData.universityId])
+
+  // Reset form when dialog opens
+  useEffect(() => {
+    if (isOpen) {
+      setFormData({
+        firstName: "",
+        lastName: "",
+        universityId: "",
+        facultyId: "",
+        university: "",
+        faculty: "",
+        city: "",
+        year: "",
+      })
+      setError("")
+    }
+  }, [isOpen])
+
   if (loading) {
     return (
       <Dialog open={isOpen}>
@@ -115,211 +139,158 @@ export default function OnboardingDialog({ isOpen, onClose, onSubmit }: Onboardi
   }
 
   return (
-    <Dialog
-      open={isOpen}
-      onOpenChange={(open) => {
-        if (!isSubmitting) {
-          onClose()
-        }
-      }}
-    >
-      <DialogContent
-        className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto"
-        onPointerDownOutside={(e) => {
-          if (
-            !formData.firstName ||
-            !formData.lastName ||
-            !formData.universityId ||
-            !formData.facultyId ||
-            !formData.city ||
-            !formData.year
-          ) {
-            e.preventDefault()
-          }
-        }}
-      >
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>Complete Your Profile</DialogTitle>
-          <DialogDescription>Please provide your information to continue using the platform.</DialogDescription>
+          <DialogDescription>
+            Please provide your information to get started with Vocea Campusului.
+          </DialogDescription>
         </DialogHeader>
+
+        {error && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
         <div className="grid gap-4 py-4">
-          {error && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
           <div className="grid grid-cols-2 gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="firstName">
-                First Name
-                <span className="text-red-500 ml-1">*</span>
-              </Label>
+            <div className="space-y-2">
+              <Label htmlFor="firstName">First Name *</Label>
               <Input
                 id="firstName"
                 value={formData.firstName}
-                onChange={(e) => setFormData((prev) => ({ ...prev, firstName: e.target.value }))}
-                placeholder="Enter your first name"
+                onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                placeholder="John"
                 required
               />
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="lastName">
-                Last Name
-                <span className="text-red-500 ml-1">*</span>
-              </Label>
+            <div className="space-y-2">
+              <Label htmlFor="lastName">Last Name *</Label>
               <Input
                 id="lastName"
                 value={formData.lastName}
-                onChange={(e) => setFormData((prev) => ({ ...prev, lastName: e.target.value }))}
-                placeholder="Enter your last name"
+                onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                placeholder="Doe"
                 required
               />
             </div>
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="university">
-              University
-              <span className="text-red-500 ml-1">*</span>
-            </Label>
-            <Select
-              value={formData.universityId}
-              onValueChange={(value) => {
-                setFormData((prev) => ({
-                  ...prev,
-                  universityId: value,
-                  facultyId: "",
-                }))
-              }}
-              required
-            >
-              <SelectTrigger className="min-h-[2.5rem] h-auto whitespace-normal text-left">
-                <SelectValue placeholder="Select your university" />
-              </SelectTrigger>
-              <SelectContent className="p-0 w-[700px]">
-                <div className="flex items-center px-3 pb-2 pt-3 border-b">
-                  <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
-                  <Input
-                    placeholder="Search university..."
-                    className="h-8 border-none focus-visible:ring-0 focus-visible:ring-offset-0"
-                    value={universitySearch}
-                    onChange={(e) => setUniversitySearch(e.target.value)}
-                  />
+
+          <div className="space-y-2">
+            <Label htmlFor="university">University *</Label>
+            <div className="relative">
+              <Input
+                id="university"
+                value={universitySearch}
+                onChange={(e) => setUniversitySearch(e.target.value)}
+                placeholder="Search for your university"
+                className="pr-10"
+              />
+              <Search className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
+            </div>
+            <ScrollArea className="h-[200px] rounded-md border p-2">
+              {loading ? (
+                <div className="flex justify-center p-4">Loading universities...</div>
+              ) : filteredUniversities.length > 0 ? (
+                <div className="space-y-1">
+                  {filteredUniversities.map((university) => (
+                    <Button
+                      key={university.id}
+                      variant={formData.universityId === university.id ? "default" : "ghost"}
+                      className="w-full justify-start"
+                      onClick={() => {
+                        setFormData({
+                          ...formData,
+                          universityId: university.id,
+                          university: university.name,
+                        })
+                        setUniversitySearch(university.name)
+                      }}
+                    >
+                      {university.name} ({university.city})
+                    </Button>
+                  ))}
                 </div>
-                <ScrollArea className="h-72">
-                  {filteredUniversities.length === 0 ? (
-                    <div className="py-6 text-center text-sm">No university found.</div>
-                  ) : (
-                    filteredUniversities.map((university) => (
-                      <SelectItem key={university.id} value={university.id} className="cursor-pointer py-3">
-                        <div className="flex flex-col gap-1">
-                          <span className="whitespace-normal break-words leading-snug">{university.name}</span>
-                          <span className="text-xs text-muted-foreground">{university.city}</span>
-                        </div>
-                      </SelectItem>
-                    ))
-                  )}
-                </ScrollArea>
-              </SelectContent>
-            </Select>
+              ) : (
+                <div className="p-4 text-center text-gray-500">No universities found</div>
+              )}
+            </ScrollArea>
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="faculty">
-              Faculty
-              <span className="text-red-500 ml-1">*</span>
-            </Label>
-            <Select
-              value={formData.facultyId}
-              onValueChange={(value) => setFormData((prev) => ({ ...prev, facultyId: value }))}
-              disabled={!formData.universityId}
-              required
-            >
-              <SelectTrigger className="min-h-[2.5rem] h-auto whitespace-normal text-left">
-                <SelectValue
-                  placeholder={formData.universityId ? "Select your faculty" : "Select a university first"}
-                />
-              </SelectTrigger>
-              <SelectContent className="p-0 w-[700px]">
-                <div className="flex items-center px-3 pb-2 pt-3 border-b">
-                  <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
-                  <Input
-                    placeholder="Search faculty..."
-                    className="h-8 border-none focus-visible:ring-0 focus-visible:ring-offset-0"
-                    value={facultySearch}
-                    onChange={(e) => setFacultySearch(e.target.value)}
-                  />
+
+          <div className="space-y-2">
+            <Label htmlFor="faculty">Faculty *</Label>
+            <div className="relative">
+              <Input
+                id="faculty"
+                value={facultySearch}
+                onChange={(e) => setFacultySearch(e.target.value)}
+                placeholder="Search for your faculty"
+                className="pr-10"
+                disabled={!formData.universityId}
+              />
+              <Search className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
+            </div>
+            <ScrollArea className="h-[200px] rounded-md border p-2">
+              {!formData.universityId ? (
+                <div className="p-4 text-center text-gray-500">Select a university first</div>
+              ) : filteredFaculties.length > 0 ? (
+                <div className="space-y-1">
+                  {filteredFaculties.map((faculty) => (
+                    <Button
+                      key={faculty.id}
+                      variant={formData.facultyId === faculty.id ? "default" : "ghost"}
+                      className="w-full justify-start"
+                      onClick={() => {
+                        setFormData({
+                          ...formData,
+                          facultyId: faculty.id,
+                          faculty: faculty.name,
+                        })
+                        setFacultySearch(faculty.name)
+                      }}
+                    >
+                      {faculty.name}
+                    </Button>
+                  ))}
                 </div>
-                <ScrollArea className="h-72">
-                  {filteredFaculties.length === 0 ? (
-                    <div className="py-6 text-center text-sm">No faculty found.</div>
-                  ) : (
-                    filteredFaculties.map((faculty) => (
-                      <SelectItem key={faculty.id} value={faculty.id} className="cursor-pointer py-3">
-                        <span className="whitespace-normal break-words leading-snug">{faculty.name}</span>
-                      </SelectItem>
-                    ))
-                  )}
-                </ScrollArea>
-              </SelectContent>
-            </Select>
+              ) : (
+                <div className="p-4 text-center text-gray-500">No faculties found</div>
+              )}
+            </ScrollArea>
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="city">
-              City
-              <span className="text-red-500 ml-1">*</span>
-            </Label>
-            <Input
-              id="city"
-              value={formData.city}
-              onChange={(e) => setFormData((prev) => ({ ...prev, city: e.target.value }))}
-              placeholder="Enter your city"
-              required
-              readOnly={!!formData.universityId}
-              className={formData.universityId ? "bg-gray-100" : ""}
-            />
-            {formData.universityId && (
-              <p className="text-xs text-muted-foreground">City is automatically set based on your university.</p>
-            )}
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="year">
-              Study Year
-              <span className="text-red-500 ml-1">*</span>
-            </Label>
+
+          <div className="space-y-2">
+            <Label htmlFor="year">Year *</Label>
             <Select
               value={formData.year}
-              onValueChange={(value) => setFormData((prev) => ({ ...prev, year: value }))}
-              required
+              onValueChange={(value) => setFormData({ ...formData, year: value })}
             >
-              <SelectTrigger>
-                <SelectValue placeholder="Select your year of study" />
+              <SelectTrigger id="year">
+                <SelectValue placeholder="Select your year" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="1">1st Year</SelectItem>
-                <SelectItem value="2">2nd Year</SelectItem>
-                <SelectItem value="3">3rd Year</SelectItem>
-                <SelectItem value="4">4th Year</SelectItem>
-                <SelectItem value="masters">Masters</SelectItem>
+                <SelectItem value="1">Year 1</SelectItem>
+                <SelectItem value="2">Year 2</SelectItem>
+                <SelectItem value="3">Year 3</SelectItem>
+                <SelectItem value="4">Year 4</SelectItem>
+                <SelectItem value="5">Year 5</SelectItem>
+                <SelectItem value="6">Year 6</SelectItem>
+                <SelectItem value="master">Master</SelectItem>
                 <SelectItem value="phd">PhD</SelectItem>
               </SelectContent>
             </Select>
           </div>
         </div>
-        <div className="flex justify-end">
-          <Button
-            onClick={handleSubmit}
-            disabled={
-              isSubmitting ||
-              !formData.firstName ||
-              !formData.lastName ||
-              !formData.universityId ||
-              !formData.facultyId ||
-              !formData.city ||
-              !formData.year
-            }
-            className="bg-purple-600 hover:bg-purple-700"
-          >
-            {isSubmitting ? "Saving..." : "Continue"}
+
+        <div className="flex justify-end space-x-2">
+          <Button variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button onClick={handleSubmit} disabled={isSubmitting}>
+            {isSubmitting ? "Saving..." : "Save"}
           </Button>
         </div>
       </DialogContent>
