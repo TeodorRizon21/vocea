@@ -4,6 +4,8 @@ import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 import universitiesData from "@/data/universities.json"
 
+export const runtime = "edge"
+
 // Helper function to get university name from ID
 function getUniversityName(id: string): string {
   // If the ID is already a name (not an ID), return it
@@ -59,8 +61,15 @@ function getFacultyName(universityId: string, facultyId: string): string {
   return university.facultati[facIndex].nume
 }
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
+    if (!params.id) {
+      return NextResponse.json({ error: "Topic ID is required" }, { status: 400 })
+    }
+
     const { userId } = getAuth(req)
     const topic = await prisma.forumTopic.findUnique({
       where: { id: params.id },
@@ -98,62 +107,70 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
                 },
               },
               orderBy: {
-                createdAt: "asc",
+                createdAt: 'asc',
               },
             },
           },
           orderBy: {
-            createdAt: "asc",
+            createdAt: 'asc',
           },
         },
       },
     })
 
     if (!topic) {
-      return new NextResponse("Topic not found", { status: 404 })
+      return NextResponse.json({ error: "Topic not found" }, { status: 404 })
     }
 
-    // Transform the topic to include university and faculty names
-    const transformedTopic = {
+    // Format the response
+    const formattedTopic = {
       ...topic,
-      universityName: getUniversityName(topic.university),
-      facultyName: getFacultyName(topic.university, topic.faculty),
-      isOwner: userId === topic.userId,
-      isFavorited: topic.favorites.includes(userId || ""),
+      user: {
+        ...topic.user,
+        university: getUniversityName(topic.user.university || ''),
+        faculty: getFacultyName(topic.user.university || '', topic.user.faculty || ''),
+      },
+      comments: topic.comments.map(comment => ({
+        ...comment,
+        user: {
+          ...comment.user,
+          university: getUniversityName(comment.user.university || ''),
+          faculty: getFacultyName(comment.user.university || '', comment.user.faculty || ''),
+        },
+        replies: comment.replies.map(reply => ({
+          ...reply,
+          user: {
+            ...reply.user,
+            university: getUniversityName(reply.user.university || ''),
+            faculty: getFacultyName(reply.user.university || '', reply.user.faculty || ''),
+          },
+        })),
+      })),
     }
 
-    // Transform comments to include university and faculty names
-    transformedTopic.comments = topic.comments.map(comment => ({
-      ...comment,
-      user: {
-        ...comment.user,
-        universityName: comment.user.university ? getUniversityName(comment.user.university) : null,
-        facultyName: comment.user.university && comment.user.faculty ? 
-          getFacultyName(comment.user.university, comment.user.faculty) : null,
-      },
-      replies: comment.replies.map(reply => ({
-        ...reply,
-        user: {
-          ...reply.user,
-          universityName: reply.user.university ? getUniversityName(reply.user.university) : null,
-          facultyName: reply.user.university && reply.user.faculty ? 
-            getFacultyName(reply.user.university, reply.user.faculty) : null,
-        },
-      })),
-    }))
-
-    return NextResponse.json(transformedTopic)
+    return NextResponse.json(formattedTopic)
   } catch (error) {
-    console.error("Error fetching forum topic:", error)
-    return new NextResponse("Internal Server Error", { status: 500 })
+    console.error("Error fetching topic:", error)
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    )
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     const { userId } = getAuth(req)
+    
     if (!userId) {
-      return new NextResponse("Unauthorized", { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    if (!params.id) {
+      return NextResponse.json({ error: "Topic ID is required" }, { status: 400 })
     }
 
     const topic = await prisma.forumTopic.findUnique({
@@ -162,14 +179,14 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     })
 
     if (!topic) {
-      return new NextResponse("Topic not found", { status: 404 })
+      return NextResponse.json({ error: "Topic not found" }, { status: 404 })
     }
 
     if (topic.userId !== userId) {
-      return new NextResponse("Unauthorized", { status: 403 })
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
-    // Delete all comments and replies first
+    // Delete all comments first
     await prisma.forumComment.deleteMany({
       where: { topicId: params.id },
     })
@@ -179,10 +196,13 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
       where: { id: params.id },
     })
 
-    return new NextResponse(null, { status: 204 })
+    return NextResponse.json(null, { status: 204 })
   } catch (error) {
     console.error("Error deleting topic:", error)
-    return new NextResponse("Internal Server Error", { status: 500 })
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    )
   }
 }
 
