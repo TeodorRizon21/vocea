@@ -3,11 +3,13 @@ import { prisma } from "@/lib/prisma"
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
+export const runtime = "edge"
+
 export async function GET(req: NextRequest) {
   try {
     const { userId: clerkId } = getAuth(req)
     if (!clerkId) {
-      return new NextResponse("Unauthorized", { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     // Find the user by their Clerk ID
@@ -18,7 +20,7 @@ export async function GET(req: NextRequest) {
     })
 
     if (!user) {
-      return new NextResponse("User not found", { status: 404 })
+      return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
     // Get all projects created by the user
@@ -76,8 +78,12 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ ratings: formattedRatings })
   } catch (error) {
     console.error("Error fetching user ratings:", error)
-    return new NextResponse(`Internal Server Error: ${error instanceof Error ? error.message : "Unknown error"}`, {
-      status: 500,
-    })
+    return NextResponse.json(
+      {
+        error: "Internal Server Error",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 }
+    )
   }
 } 
