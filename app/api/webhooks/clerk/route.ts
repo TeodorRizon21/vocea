@@ -3,15 +3,21 @@ import type { WebhookEvent } from "@clerk/nextjs/server"
 import { prisma } from "@/lib/prisma"
 import { Webhook } from "svix"
 import { NextResponse } from "next/server"
+import type { NextRequest } from "next/server"
 
-export async function POST(req: Request) {
+export const runtime = "edge"
+
+export async function POST(req: NextRequest) {
   const headerPayload = headers()
   const svix_id = headerPayload.get("svix-id")
   const svix_timestamp = headerPayload.get("svix-timestamp")
   const svix_signature = headerPayload.get("svix-signature")
 
   if (!svix_id || !svix_timestamp || !svix_signature) {
-    return new NextResponse("Error occurred -- no svix headers", { status: 400 })
+    return NextResponse.json(
+      { error: "Missing required Svix headers" },
+      { status: 400 }
+    )
   }
 
   const payload = await req.json()
@@ -29,7 +35,10 @@ export async function POST(req: Request) {
     }) as WebhookEvent
   } catch (err) {
     console.error("Error verifying webhook:", err)
-    return new NextResponse("Error occurred", { status: 400 })
+    return NextResponse.json(
+      { error: "Invalid webhook signature" },
+      { status: 400 }
+    )
   }
 
   const eventType = evt.type
@@ -95,10 +104,16 @@ export async function POST(req: Request) {
       })
     }
 
-    return new NextResponse("", { status: 200 })
+    return NextResponse.json({ success: true })
   } catch (error) {
     console.error("Error processing webhook:", error)
-    return new NextResponse("Internal Server Error", { status: 500 })
+    return NextResponse.json(
+      {
+        error: "Internal Server Error",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 }
+    )
   }
 }
 
