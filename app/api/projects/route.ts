@@ -5,6 +5,47 @@ import type { NextRequest } from "next/server"
 
 export const runtime = "edge"
 
+export async function GET(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url)
+    const type = searchParams.get("type")
+
+    const projects = await prisma.project.findMany({
+      where: type
+        ? {
+            type: type,
+          }
+        : undefined,
+      include: {
+        user: {
+          select: {
+            firstName: true,
+            lastName: true,
+            university: true,
+            faculty: true,
+            avatar: true,
+          },
+        },
+        reviews: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    })
+
+    return NextResponse.json({ projects })
+  } catch (error) {
+    console.error("Error fetching projects:", error)
+    return NextResponse.json(
+      {
+        error: "Internal Server Error",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 }
+    )
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { userId } = getAuth(req)

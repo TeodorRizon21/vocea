@@ -1,4 +1,3 @@
-import { prisma } from "@/lib/prisma"
 import UserProfile from "@/components/UserProfile"
 import BrowsePageClient from "@/components/BrowsePageClient"
 
@@ -23,32 +22,20 @@ const tabsData = [
 async function getProjects(type?: string) {
   try {
     console.log("Fetching projects with type:", type)
-
-    const projects = await prisma.project.findMany({
-      where: type
-        ? {
-            type: type,
-          }
-        : undefined,
-      include: {
-        user: {
-          select: {
-            firstName: true,
-            lastName: true,
-            university: true,
-            faculty: true,
-            avatar: true,
-          },
-        },
-        reviews: true,
-      },
-      orderBy: {
-        createdAt: "desc",
+    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/projects?type=${type || ""}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
       },
     })
 
-    console.log(`Found ${projects.length} projects`)
-    return projects
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+
+    const data = await response.json()
+    console.log(`Found ${data.projects.length} projects`)
+    return data.projects
   } catch (error) {
     console.error("Error fetching projects:", error)
     return []
