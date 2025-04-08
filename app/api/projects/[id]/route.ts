@@ -1,9 +1,19 @@
 import { getAuth } from "@clerk/nextjs/server"
 import { prisma } from "@/lib/prisma"
-import { type NextRequest, NextResponse } from "next/server"
+import { NextResponse } from "next/server"
+import type { NextRequest } from "next/server"
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export const runtime = "edge"
+
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
+    if (!params.id) {
+      return NextResponse.json({ error: "Project ID is required" }, { status: 400 })
+    }
+
     const project = await prisma.project.findUnique({
       where: { id: params.id },
       include: {
@@ -21,21 +31,32 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     })
 
     if (!project) {
-      return new NextResponse("Project not found", { status: 404 })
+      return NextResponse.json({ error: "Project not found" }, { status: 404 })
     }
 
     return NextResponse.json(project)
   } catch (error) {
     console.error("Error fetching project:", error)
-    return new NextResponse("Internal Server Error", { status: 500 })
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    )
   }
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     const { userId } = getAuth(req)
+    
     if (!userId) {
-      return new NextResponse("Unauthorized", { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    if (!params.id) {
+      return NextResponse.json({ error: "Project ID is required" }, { status: 400 })
     }
 
     const data = await req.json()
@@ -47,11 +68,11 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     })
 
     if (!project) {
-      return new NextResponse("Project not found", { status: 404 })
+      return NextResponse.json({ error: "Project not found" }, { status: 404 })
     }
 
     if (project.userId !== userId) {
-      return new NextResponse("Unauthorized", { status: 401 })
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
     const updatedProject = await prisma.project.update({
@@ -73,15 +94,26 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     return NextResponse.json(updatedProject)
   } catch (error) {
     console.error("Error updating project:", error)
-    return new NextResponse("Internal Server Error", { status: 500 })
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    )
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     const { userId } = getAuth(req)
+    
     if (!userId) {
-      return new NextResponse("Unauthorized", { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    if (!params.id) {
+      return NextResponse.json({ error: "Project ID is required" }, { status: 400 })
     }
 
     // Check if the user is the owner of the project
@@ -91,21 +123,24 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     })
 
     if (!project) {
-      return new NextResponse("Project not found", { status: 404 })
+      return NextResponse.json({ error: "Project not found" }, { status: 404 })
     }
 
     if (project.userId !== userId) {
-      return new NextResponse("Unauthorized", { status: 401 })
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
     await prisma.project.delete({
       where: { id: params.id },
     })
 
-    return new NextResponse(null, { status: 204 })
+    return NextResponse.json(null, { status: 204 })
   } catch (error) {
     console.error("Error deleting project:", error)
-    return new NextResponse("Internal Server Error", { status: 500 })
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    )
   }
 }
 

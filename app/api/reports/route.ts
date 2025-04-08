@@ -1,19 +1,24 @@
 import { getAuth } from "@clerk/nextjs/server"
 import { prisma } from "@/lib/prisma"
 import { NextResponse } from "next/server"
-import { NextRequest } from "next/server"
+import type { NextRequest } from "next/server"
+
+export const runtime = "edge"
 
 export async function POST(req: NextRequest) {
   try {
     const { userId } = getAuth(req)
     if (!userId) {
-      return new NextResponse("Unauthorized", { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     const { type, contentId, reason } = await req.json()
 
     if (!type || !contentId || !reason) {
-      return new NextResponse("Missing required fields", { status: 400 })
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      )
     }
 
     // Create the report
@@ -40,9 +45,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(report)
   } catch (error) {
     console.error("Error creating report:", error)
-    return new NextResponse(`Internal Server Error: ${error instanceof Error ? error.message : "Unknown error"}`, {
-      status: 500,
-    })
+    return NextResponse.json(
+      {
+        error: "Internal Server Error",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 }
+    )
   }
 }
 
@@ -100,9 +109,13 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(reports)
   } catch (error) {
     console.error("Error fetching reports:", error)
-    return new NextResponse(`Internal Server Error: ${error instanceof Error ? error.message : "Unknown error"}`, {
-      status: 500,
-    })
+    return NextResponse.json(
+      {
+        error: "Internal Server Error",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 }
+    )
   }
 }
 
