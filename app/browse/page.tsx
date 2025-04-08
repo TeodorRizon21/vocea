@@ -1,5 +1,5 @@
 import UserProfile from "@/components/UserProfile"
-import BrowsePageClient from "@/components/BrowsePageClient"
+import BrowsePageWrapper from "@/components/BrowsePageWrapper"
 
 const tabsData = [
   {
@@ -22,8 +22,7 @@ const tabsData = [
 async function getProjects(type?: string) {
   try {
     console.log("Fetching projects with type:", type)
-    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/projects?type=${type || ""}`, {
-      method: "GET",
+    const response = await fetch(`/api/projects?type=${type || ""}`, {
       headers: {
         "Content-Type": "application/json",
       },
@@ -42,13 +41,12 @@ async function getProjects(type?: string) {
   }
 }
 
-export default async function BrowsePage({
+export default function BrowsePage({
   searchParams,
 }: {
   searchParams: { [key: string]: string | string[] | undefined }
 }) {
   const activeTab = (searchParams.tab as string) || "proiect"
-  const projects = await getProjects(activeTab)
 
   return (
     <div className="space-y-6">
@@ -57,7 +55,7 @@ export default async function BrowsePage({
         <UserProfile membershipPlan="Basic" />
       </div>
 
-      <BrowsePageClient tabsData={tabsData} initialTab={activeTab} projects={projects} />
+      <BrowsePageWrapper initialTab={activeTab} />
     </div>
   )
 }

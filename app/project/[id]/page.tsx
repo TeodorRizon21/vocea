@@ -1,40 +1,9 @@
 import { Suspense } from "react"
 import { notFound } from "next/navigation"
-import { prisma } from "@/lib/prisma"
-import ProjectDetails from "@/components/ProjectDetails"
 import { Loader2 } from "lucide-react"
+import ProjectDetailsWrapper from "@/components/ProjectDetailsWrapper"
 
-async function getProject(id: string) {
-  try {
-    const project = await prisma.project.findUnique({
-      where: { id },
-      include: {
-        user: {
-          select: {
-            firstName: true,
-            lastName: true,
-            university: true,
-            faculty: true,
-            avatar: true,
-          },
-        },
-        reviews: true,
-      },
-    })
-    return project
-  } catch (error) {
-    console.error("Error fetching project:", error)
-    return null
-  }
-}
-
-export default async function ProjectPage({ params }: { params: { id: string } }) {
-  const project = await getProject(params.id)
-
-  if (!project) {
-    notFound()
-  }
-
+export default function ProjectPage({ params }: { params: { id: string } }) {
   return (
     <Suspense
       fallback={
@@ -43,7 +12,7 @@ export default async function ProjectPage({ params }: { params: { id: string } }
         </div>
       }
     >
-      <ProjectDetails project={project} />
+      <ProjectDetailsWrapper projectId={params.id} />
     </Suspense>
   )
 }
