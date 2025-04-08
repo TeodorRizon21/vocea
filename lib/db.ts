@@ -2,11 +2,22 @@ import { prisma } from "./prisma"
 import type { User } from "@prisma/client"
 
 export async function createUser(clerkId: string, email: string, name?: string): Promise<User> {
+  // Split the name into firstName and lastName if provided
+  let firstName: string | undefined = undefined
+  let lastName: string | undefined = undefined
+  
+  if (name) {
+    const nameParts = name.split(' ')
+    firstName = nameParts[0]
+    lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : undefined
+  }
+  
   return await prisma.user.create({
     data: {
       clerkId,
       email,
-      name,
+      firstName,
+      lastName,
     },
   })
 }

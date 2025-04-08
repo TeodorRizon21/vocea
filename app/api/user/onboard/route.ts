@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
 
       console.log("Successfully updated user:", updatedUser)
       return NextResponse.json(updatedUser)
-    } catch (updateError) {
+    } catch (updateError: any) {
       // If update fails because user doesn't exist, create new user
       if (updateError.code === "P2025") {
         const newUser = await prisma.user.create({

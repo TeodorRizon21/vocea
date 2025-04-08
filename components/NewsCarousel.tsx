@@ -12,10 +12,11 @@ interface News {
   id: string
   title: string
   description: string
-  image: string
-  university?: string
+  image: string | null
+  university?: string | null
   city?: string
   createdAt: Date
+  updatedAt: Date
 }
 
 interface NewsCarouselProps {

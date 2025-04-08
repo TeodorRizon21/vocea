@@ -1,9 +1,12 @@
 import { createUploadthing, type FileRouter } from "uploadthing/next"
 import { getAuth } from "@clerk/nextjs/server"
+import { prisma } from "@/lib/prisma"
+import { NextResponse } from "next/server"
+import { NextRequest } from "next/server"
 
 const f = createUploadthing()
 
-const handleAuth = async (req: Request) => {
+const handleAuth = async (req: NextRequest) => {
   const { userId } = getAuth(req)
   if (!userId) throw new Error("Unauthorized")
   return { userId }
@@ -51,4 +54,18 @@ export const ourFileRouter = {
 } satisfies FileRouter
 
 export type OurFileRouter = typeof ourFileRouter
+
+export async function POST(req: NextRequest) {
+  try {
+    const { userId } = getAuth(req)
+    if (!userId) {
+      return new NextResponse("Unauthorized", { status: 401 })
+    }
+
+    // ... existing code ...
+  } catch (error) {
+    console.error("Error in POST handler:", error)
+    return new NextResponse("Internal Server Error", { status: 500 })
+  }
+}
 

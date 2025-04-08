@@ -1,8 +1,9 @@
 import { getAuth } from "@clerk/nextjs/server"
 import { prisma } from "@/lib/prisma"
 import { NextResponse } from "next/server"
+import { NextRequest } from "next/server"
 
-export async function DELETE(req: Request, { params }: { params: { id: string; commentId: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string; commentId: string } }) {
   try {
     const { userId } = getAuth(req)
     if (!userId) {

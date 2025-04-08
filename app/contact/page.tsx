@@ -14,6 +14,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { ControllerRenderProps } from "react-hook-form"
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters" }),
@@ -201,7 +202,7 @@ export default function ContactPage() {
                       <FormField
                         control={form.control}
                         name="name"
-                        render={({ field }) => (
+                        render={({ field }: { field: any }) => (
                           <FormItem>
                             <FormLabel>Name</FormLabel>
                             <FormControl>
@@ -215,7 +216,7 @@ export default function ContactPage() {
                       <FormField
                         control={form.control}
                         name="email"
-                        render={({ field }) => (
+                        render={({ field }: { field: any }) => (
                           <FormItem>
                             <FormLabel>Email</FormLabel>
                             <FormControl>
@@ -230,7 +231,7 @@ export default function ContactPage() {
                     <FormField
                       control={form.control}
                       name="contactType"
-                      render={({ field }) => (
+                      render={({ field }: { field: any }) => (
                         <FormItem className="space-y-3">
                           <FormLabel>What are you contacting us about?</FormLabel>
                           <FormControl>
@@ -261,7 +262,7 @@ export default function ContactPage() {
                     <FormField
                       control={form.control}
                       name="subject"
-                      render={({ field }) => (
+                      render={({ field }: { field: any }) => (
                         <FormItem>
                           <FormLabel>Subject</FormLabel>
                           <FormControl>
@@ -275,7 +276,7 @@ export default function ContactPage() {
                     <FormField
                       control={form.control}
                       name="message"
-                      render={({ field }) => (
+                      render={({ field }: { field: any }) => (
                         <FormItem>
                           <FormLabel>Message</FormLabel>
                           <FormControl>

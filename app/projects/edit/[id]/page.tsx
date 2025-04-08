@@ -13,8 +13,17 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Info, Loader2 } from "lucide-react"
 import ProjectImageUpload from "@/components/ProjectImageUpload"
-import type { Project, ProjectType } from "@prisma/client"
+import type { Project } from "@prisma/client"
 import { useUniversities } from "@/hooks/useUniversities"
+
+// Define ProjectType as a string union type
+type ProjectType = "proiect" | "cerere" | "diverse"
+
+// Define a custom Project type that includes the additional fields
+interface ExtendedProject extends Project {
+  universityId?: string
+  facultyId?: string
+}
 
 const categories = [
   "Data Science",
@@ -35,7 +44,7 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState("")
-  const [project, setProject] = useState<Project | null>(null)
+  const [project, setProject] = useState<ExtendedProject | null>(null)
 
   const { universities, getFacultiesForUniversity } = useUniversities()
 
@@ -89,7 +98,7 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
         const selectedFaculty = faculties.find((f) => f.id === project.facultyId)
 
         // Update the project data
-        const { user, reviews, ...updateData } = project
+        const { universityId, facultyId, ...updateData } = project
         updateData.university = selectedUniversity?.name || ""
         updateData.faculty = selectedFaculty?.name || ""
 
@@ -255,6 +264,7 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
               })
             }}
             value={project.universityId}
+            required
           >
             <SelectTrigger>
               <SelectValue placeholder="Select a university" />
@@ -274,6 +284,7 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
           <Select
             onValueChange={(value) => setProject({ ...project, facultyId: value })}
             value={project.facultyId}
+            required
             disabled={!project.universityId}
           >
             <SelectTrigger>
@@ -290,17 +301,14 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
         </div>
 
         <div>
-          <Label htmlFor="phone">Phone Number</Label>
+          <Label htmlFor="phoneNumber">Phone Number</Label>
           <Input
-            id="phone"
-            type="tel"
+            id="phoneNumber"
             value={project.phoneNumber}
             onChange={(e) => setProject({ ...project, phoneNumber: e.target.value })}
-            placeholder="Enter your phone number"
-            pattern="[0-9]{10}"
+            placeholder="Enter phone number"
             required
           />
-          <p className="text-sm text-gray-500 mt-1">Format: 10 digits number</p>
         </div>
 
         {error && (
@@ -309,29 +317,24 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
           </Alert>
         )}
 
-        <div className="flex space-x-4">
-          <Button
-            type="submit"
-            className="flex-1 bg-purple-600 hover:bg-purple-700 transition-colors"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Updating...
-              </>
-            ) : (
-              "Update Project"
-            )}
-          </Button>
+        <div className="flex justify-end space-x-4">
           <Button
             type="button"
             variant="outline"
-            className="flex-1"
-            onClick={() => router.back()}
+            onClick={() => router.push(`/project/${params.id}`)}
             disabled={isSubmitting}
           >
             Cancel
+          </Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              "Save Changes"
+            )}
           </Button>
         </div>
       </form>

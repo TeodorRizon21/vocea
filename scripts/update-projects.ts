@@ -1,7 +1,9 @@
 import { PrismaClient } from "@prisma/client"
-import { clerkClient } from "@clerk/nextjs"
+import { createClerkClient } from "@clerk/backend"
+import { config } from 'dotenv'
 
 const prisma = new PrismaClient()
+const clerk = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY })
 
 async function main() {
   // Get all projects
@@ -11,7 +13,7 @@ async function main() {
   for (const project of projects) {
     try {
       // Get the Clerk user data
-      const user = await clerkClient.users.getUser(project.userId)
+      const user = await clerk.users.getUser(project.userId)
 
       // Update the project with author info
       await prisma.project.update({

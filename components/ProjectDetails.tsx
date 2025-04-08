@@ -37,7 +37,15 @@ interface ProjectDetailsProps {
       faculty: string | null
       avatar: string | null
     }
-    reviews: Array<{ score: number; comment: string }>
+    reviews: Array<{
+      id: string
+      score: number
+      comment: string | null
+      userId: string
+      createdAt: Date
+      updatedAt: Date
+      projectId: string
+    }>
   }
 }
 

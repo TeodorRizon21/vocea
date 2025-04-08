@@ -277,7 +277,7 @@ export default function NewsManagementPage() {
             </div>
             <Select onValueChange={handleUniversityChange}>
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select University (optional)" value={formData.university} />
+                <SelectValue placeholder="Select University (optional)" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="oricare">Oricare</SelectItem>
@@ -291,7 +291,7 @@ export default function NewsManagementPage() {
             {!formData.university || formData.university === "oricare" ? (
               <Select onValueChange={handleCityChange}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select City (required)" value={formData.city} />
+                  <SelectValue placeholder="Select City (required)" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="oricare">Oricare</SelectItem>

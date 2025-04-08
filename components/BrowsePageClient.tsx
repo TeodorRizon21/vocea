@@ -13,6 +13,18 @@ import ProductGrid from "@/components/ProductGrid"
 import FilterDialog from "@/components/FilterDialog"
 import { useUniversities } from "@/hooks/useUniversities"
 
+// Define the ExtendedProject type to match what ProductGrid expects
+interface ExtendedProject extends Project {
+  user: {
+    firstName: string | null
+    lastName: string | null
+    university: string | null
+    faculty: string | null
+    avatar: string | null
+  }
+  reviews: Array<{ score: number }>
+}
+
 interface BrowsePageClientProps {
   projects: Project[]
   tabsData: Array<{
@@ -38,60 +50,72 @@ export default function BrowsePageClient({ projects, tabsData, initialTab }: Bro
   // State
   const [activeTab, setActiveTab] = useState(initialTab)
   const [diverseSubcategory, setDiverseSubcategory] = useState("all")
-  const [filteredProjects, setFilteredProjects] = useState<Project[]>([])
   const [searchQuery, setSearchQuery] = useState("")
-  const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false)
-  const [filters, setFilters] = useState({
-    university: "",
-    faculty: "",
-  })
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
+  const [filters, setFilters] = useState({ university: "", faculty: "" })
+  const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false)
+  const [extendedProjects, setExtendedProjects] = useState<ExtendedProject[]>([])
+  const [filteredProjects, setFilteredProjects] = useState<ExtendedProject[]>([])
 
-  // Count active filters
-  const activeFiltersCount = Object.values(filters).filter(Boolean).length
+  // Transform projects to ExtendedProject type
+  useEffect(() => {
+    const transformedProjects = projects.map(project => ({
+      ...project,
+      user: {
+        firstName: null,
+        lastName: null,
+        university: null,
+        faculty: null,
+        avatar: null
+      },
+      reviews: []
+    })) as ExtendedProject[]
+    
+    setExtendedProjects(transformedProjects)
+  }, [projects])
 
-  // Filter projects when tab, search, or filters change
+  // Apply filters to extended projects
   useEffect(() => {
     // First filter by tab
-    let result = projects.filter((project) => project.type === activeTab)
+    let result = extendedProjects.filter((project) => project.type === activeTab)
 
     // Then apply subcategory filter for diverse items
     if (activeTab === "diverse" && diverseSubcategory !== "all") {
       result = result.filter((project) => project.category === diverseSubcategory)
     }
 
-    // Then apply search filter if needed
+    // Apply search filter
     if (searchQuery) {
-      result = result.filter((project) => {
-        const searchString =
-          `${project.title} ${project.description} ${project.subject} ${project.university || ""} ${project.faculty || ""}`.toLowerCase()
-        return searchString.includes(searchQuery.toLowerCase())
-      })
+      const query = searchQuery.toLowerCase()
+      result = result.filter(
+        (project) =>
+          project.title.toLowerCase().includes(query) ||
+          project.description.toLowerCase().includes(query) ||
+          project.subject.toLowerCase().includes(query)
+      )
     }
 
-    // Then apply university filter if needed
+    // Apply university and faculty filters
     if (filters.university) {
-      const universityName = getUniversityName(filters.university)
-      result = result.filter((project) => project.university && project.university.includes(universityName))
+      result = result.filter((project) => project.university === filters.university)
+    }
+    if (filters.faculty) {
+      result = result.filter((project) => project.faculty === filters.faculty)
     }
 
-    // Then apply faculty filter if needed
-    if (filters.university && filters.faculty) {
-      const facultyName = getFacultyName(filters.university, filters.faculty)
-      result = result.filter((project) => project.faculty && project.faculty.includes(facultyName))
-    }
-
-    // Apply sort order
+    // Apply sorting
     result = [...result].sort((a, b) => {
       const dateA = new Date(a.createdAt).getTime()
       const dateB = new Date(b.createdAt).getTime()
-      return sortOrder === "desc" ? dateB - dateA : dateA - dateB
+      return sortOrder === "asc" ? dateA - dateB : dateB - dateA
     })
 
     // Update state with filtered projects
     setFilteredProjects(result)
-   }, [activeTab, diverseSubcategory, projects, searchQuery, filters, sortOrder])
+  }, [activeTab, diverseSubcategory, extendedProjects, searchQuery, filters, sortOrder])
 
+  // Count active filters
+  const activeFiltersCount = Object.values(filters).filter(Boolean).length
 
   // Handlers
   const handleTabChange = (value: string) => {

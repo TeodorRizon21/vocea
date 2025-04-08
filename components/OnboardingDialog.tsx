@@ -16,6 +16,8 @@ interface OnboardingFormData {
   lastName: string
   universityId: string
   facultyId: string
+  university: string
+  faculty: string
   city: string
   year: string
 }
@@ -33,6 +35,8 @@ export default function OnboardingDialog({ isOpen, onClose, onSubmit }: Onboardi
     lastName: "",
     universityId: "",
     facultyId: "",
+    university: "",
+    faculty: "",
     city: "",
     year: "",
   })
