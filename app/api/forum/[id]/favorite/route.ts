@@ -1,12 +1,12 @@
 import { getAuth } from "@clerk/nextjs/server"
 import { prisma } from "@/lib/prisma"
-import { NextResponse } from "next/server"
+import { NextResponse, type NextRequest } from "next/server"
 
-export async function POST(req: Request, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const { userId } = getAuth(req)
     if (!userId) {
-      return new NextResponse("Unauthorized", { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     const topic = await prisma.forumTopic.findUnique({
@@ -15,7 +15,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     })
 
     if (!topic) {
-      return new NextResponse("Topic not found", { status: 404 })
+      return NextResponse.json({ error: "Topic not found" }, { status: 404 })
     }
 
     const isFavorited = topic.favorites.includes(userId)
@@ -29,6 +29,6 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     return NextResponse.json({ isFavorited: !isFavorited })
   } catch (error) {
     console.error("Error toggling favorite:", error)
-    return new NextResponse("Internal Server Error", { status: 500 })
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
   }
 }

@@ -1,7 +1,8 @@
+import { getAuth } from "@clerk/nextjs/server"
 import { prisma } from "@/lib/prisma"
-import { NextResponse } from "next/server"
+import { NextResponse, type NextRequest } from "next/server"
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     // Find the user by their Clerk ID
     const user = await prisma.user.findUnique({

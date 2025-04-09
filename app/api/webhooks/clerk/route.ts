@@ -39,13 +39,15 @@ export async function POST(req: NextRequest) {
     if (eventType === "user.created") {
       const { id, email_addresses, first_name, last_name } = evt.data
       const email = email_addresses[0].email_address
-      const name = first_name && last_name ? `${first_name} ${last_name}` : undefined
+      const firstName = first_name || undefined
+      const lastName = last_name || undefined
 
       await prisma.user.create({
         data: {
           clerkId: id,
           email,
-          name,
+          firstName,
+          lastName,
           isOnboarded: false,
         },
       })
@@ -54,7 +56,8 @@ export async function POST(req: NextRequest) {
     if (eventType === "user.updated") {
       const { id, email_addresses, first_name, last_name } = evt.data
       const email = email_addresses[0].email_address
-      const name = first_name && last_name ? `${first_name} ${last_name}` : undefined
+      const firstName = first_name || undefined
+      const lastName = last_name || undefined
 
       // Check if user exists first
       const user = await prisma.user.findUnique({
@@ -70,7 +73,8 @@ export async function POST(req: NextRequest) {
           },
           data: {
             email,
-            name,
+            firstName,
+            lastName,
           },
         })
       } else {
@@ -79,7 +83,8 @@ export async function POST(req: NextRequest) {
           data: {
             clerkId: id,
             email,
-            name,
+            firstName,
+            lastName,
             isOnboarded: false,
           },
         })

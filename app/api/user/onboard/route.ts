@@ -1,6 +1,7 @@
 import { getAuth } from "@clerk/nextjs/server"
 import { prisma } from "@/lib/prisma"
 import { NextResponse, type NextRequest } from "next/server"
+import { Prisma } from "@prisma/client"
 
 export async function POST(req: NextRequest) {
   try {
@@ -60,7 +61,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(updatedUser)
     } catch (updateError) {
       // If update fails because user doesn't exist, create new user
-      if (updateError.code === "P2025") {
+      if (updateError instanceof Prisma.PrismaClientKnownRequestError && updateError.code === "P2025") {
         const newUser = await prisma.user.create({
           data: {
             clerkId: userId,

@@ -27,6 +27,7 @@ interface UserData extends User {
       id: number
       content: string
       projectTitle: string
+      topicId: string
     }>
   }
   averageRating: number | null
@@ -113,7 +114,12 @@ export default function DashboardPage() {
     projectsJoined: 0,
     commentsPosted: 0,
     forumTopicsCreated: 0,
-    recentComments: [],
+    recentComments: [] as Array<{
+      id: number
+      content: string
+      projectTitle: string
+      topicId: string
+    }>,
   }
 
   return (
@@ -132,10 +138,10 @@ export default function DashboardPage() {
             faculty={userData?.faculty || "Not set"}
             city={userData?.city || "Not set"}
             year={userData?.year || "Not set"}
-            reviewScore={userData?.averageRating || 0}
+            reviewScore={userData?.averageRating ?? 0}
             onEdit={() => setShowEditProfile(true)}
           />
-          <RatingCard averageRating={userData?.averageRating} reviewCount={userData?.reviewCount || 0} />
+          <RatingCard averageRating={userData?.averageRating !== undefined ? userData.averageRating : null} reviewCount={userData?.reviewCount || 0} />
           <UserActivity activity={userData?.activity || defaultActivity} />
         </div>
         <div className="space-y-6">
