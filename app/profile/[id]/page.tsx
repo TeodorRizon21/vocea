@@ -10,9 +10,21 @@ import { format } from "date-fns"
 import UserActivity from "@/components/UserActivity"
 import UserProjectsList from "@/components/UserProjectsList"
 import type { Project } from "@prisma/client"
-import type { UserActivity as UserActivityType } from "@/types"
 import { Star } from "lucide-react"
 import { useUniversities } from "@/hooks/useUniversities"
+
+interface UserActivityType {
+  projectsCreated: number
+  projectsJoined: number
+  commentsPosted: number
+  forumTopicsCreated: number
+  recentComments: Array<{
+    id: number
+    content: string
+    projectTitle: string
+    topicId: string
+  }>
+}
 
 interface User {
   firstName: string | null
@@ -61,6 +73,15 @@ export default function UserProfilePage({ params }: { params: { id: string } }) 
           throw new Error("Failed to fetch user")
         }
         const data = await response.json()
+
+        // Ensure the activity has the correct structure
+        if (data.activity && data.activity.recentComments) {
+          data.activity.recentComments = data.activity.recentComments.map((comment: any) => ({
+            ...comment,
+            topicId: comment.topicId || "unknown",
+          }))
+        }
+
         setUser(data)
       } catch (error) {
         console.error("Error fetching user:", error)
@@ -195,4 +216,3 @@ export default function UserProfilePage({ params }: { params: { id: string } }) 
     </div>
   )
 }
-

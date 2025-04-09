@@ -1,18 +1,8 @@
 import { prisma } from "@/lib/prisma"
 import { NextResponse } from "next/server"
-import type { NextRequest } from "next/server"
 
-export const runtime = "edge"
-
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: Request, { params }: { params: { id: string } }) {
   try {
-    if (!params.id) {
-      return NextResponse.json({ error: "User ID is required" }, { status: 400 })
-    }
-
     // Find the user by their Clerk ID
     const user = await prisma.user.findUnique({
       where: { clerkId: params.id },
@@ -37,7 +27,7 @@ export async function GET(
     })
 
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 })
+      return new NextResponse("User not found", { status: 404 })
     }
 
     // Get project count
@@ -84,7 +74,6 @@ export async function GET(
       id: comment.id,
       content: comment.content,
       projectTitle: comment.topic?.title || "Unknown Topic",
-      topicId: comment.topicId || "",
     }))
 
     // Get user's projects
@@ -128,10 +117,6 @@ export async function GET(
     return NextResponse.json(userData)
   } catch (error) {
     console.error("Error fetching user:", error)
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
-    )
+    return new NextResponse("Internal Server Error", { status: 500 })
   }
 }
-

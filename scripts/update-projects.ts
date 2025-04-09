@@ -1,13 +1,14 @@
 import { PrismaClient } from "@prisma/client"
-import { createClerkClient } from "@clerk/backend"
-import { config } from 'dotenv'
+import { clerkClient } from "@clerk/nextjs/server"
 
 const prisma = new PrismaClient()
-const clerk = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY })
 
 async function main() {
   // Get all projects
   const projects = await prisma.project.findMany()
+
+  // Get the clerk client instance
+  const clerk = await clerkClient()
 
   // Update each project
   for (const project of projects) {
@@ -34,4 +35,3 @@ async function main() {
 main()
   .catch(console.error)
   .finally(() => prisma.$disconnect())
-

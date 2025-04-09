@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
-import { toast } from "sonner"
+import { toast } from "@/hooks/use-toast"
 import ContactRevealDialog from "@/components/ContactRevealDialog"
 import ReportButton from "@/components/ReportButton"
 import ReviewForm from "@/components/ReviewForm"
@@ -38,13 +38,13 @@ interface ProjectDetailsProps {
       avatar: string | null
     }
     reviews: Array<{
-      id: string
+      id?: string
       score: number
       comment: string | null
-      userId: string
-      createdAt: Date
-      updatedAt: Date
-      projectId: string
+      userId?: string
+      projectId?: string
+      createdAt?: Date
+      updatedAt?: Date
     }>
   }
 }
@@ -104,19 +104,24 @@ export default function ProjectDetails({ project }: ProjectDetailsProps) {
       })
 
       if (response.ok) {
-        toast.success("Project deleted", {
-          description: "The project has been successfully deleted",
+        toast({
+          title: "Project deleted",
+          description: "The project has been successfully deleted"
         })
         router.push("/browse")
       } else {
-        toast.error("Error", {
-          description: "Failed to delete project",
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to delete project"
         })
       }
     } catch (error) {
       console.error("Error deleting project:", error)
-      toast.error("Error", {
-        description: "An unexpected error occurred",
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "An unexpected error occurred"
       })
     }
   }
@@ -314,8 +319,9 @@ export default function ProjectDetails({ project }: ProjectDetailsProps) {
                 onSubmit={() => {
                   setShowReviewForm(false)
                   setHasReviewed(true)
-                  toast.success("Thank you for your review!", {
-                    description: "Your appreciation has been recorded.",
+                  toast({
+                    title: "Thank you for your review!",
+                    description: "Your appreciation has been recorded."
                   })
                 }}
               />
@@ -339,4 +345,3 @@ export default function ProjectDetails({ project }: ProjectDetailsProps) {
     </div>
   )
 }
-

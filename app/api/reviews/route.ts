@@ -3,22 +3,17 @@ import { prisma } from "@/lib/prisma"
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
-export const runtime = "edge"
-
 export async function POST(req: NextRequest) {
   try {
     const { userId } = getAuth(req)
     if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return new NextResponse("Unauthorized", { status: 401 })
     }
 
     const { projectId, score, comment } = await req.json()
 
     if (!projectId || !score || score < 1 || score > 5) {
-      return NextResponse.json(
-        { error: "Invalid request data" },
-        { status: 400 }
-      )
+      return new NextResponse("Invalid request data", { status: 400 })
     }
 
     // Check if project exists
@@ -27,15 +22,12 @@ export async function POST(req: NextRequest) {
     })
 
     if (!project) {
-      return NextResponse.json({ error: "Project not found" }, { status: 404 })
+      return new NextResponse("Project not found", { status: 404 })
     }
 
     // Check if user is trying to review their own project
     if (project.userId === userId) {
-      return NextResponse.json(
-        { error: "You cannot review your own project" },
-        { status: 400 }
-      )
+      return new NextResponse("You cannot review your own project", { status: 400 })
     }
 
     // Check if user has already reviewed this project
@@ -83,10 +75,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(review)
   } catch (error) {
     console.error("Error creating review:", error)
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
-    )
+    return new NextResponse("Internal Server Error", { status: 500 })
   }
 }
 
@@ -97,10 +86,7 @@ export async function GET(req: NextRequest) {
     const userId = searchParams.get("userId")
 
     if (!projectId && !userId) {
-      return NextResponse.json(
-        { error: "Missing projectId or userId parameter" },
-        { status: 400 }
-      )
+      return new NextResponse("Missing projectId or userId parameter", { status: 400 })
     }
 
     const whereClause: any = {}
@@ -126,10 +112,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(reviews)
   } catch (error) {
     console.error("Error fetching reviews:", error)
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
-    )
+    return new NextResponse("Internal Server Error", { status: 500 })
   }
 }
-

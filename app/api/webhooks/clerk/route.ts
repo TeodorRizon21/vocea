@@ -5,8 +5,6 @@ import { Webhook } from "svix"
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
-export const runtime = "edge"
-
 export async function POST(req: NextRequest) {
   const headerPayload = headers()
   const svix_id = headerPayload.get("svix-id")
@@ -14,10 +12,7 @@ export async function POST(req: NextRequest) {
   const svix_signature = headerPayload.get("svix-signature")
 
   if (!svix_id || !svix_timestamp || !svix_signature) {
-    return NextResponse.json(
-      { error: "Missing required Svix headers" },
-      { status: 400 }
-    )
+    return new NextResponse("Error occurred -- no svix headers", { status: 400 })
   }
 
   const payload = await req.json()
@@ -35,10 +30,7 @@ export async function POST(req: NextRequest) {
     }) as WebhookEvent
   } catch (err) {
     console.error("Error verifying webhook:", err)
-    return NextResponse.json(
-      { error: "Invalid webhook signature" },
-      { status: 400 }
-    )
+    return new NextResponse("Error occurred", { status: 400 })
   }
 
   const eventType = evt.type
@@ -47,13 +39,13 @@ export async function POST(req: NextRequest) {
     if (eventType === "user.created") {
       const { id, email_addresses, first_name, last_name } = evt.data
       const email = email_addresses[0].email_address
+      const name = first_name && last_name ? `${first_name} ${last_name}` : undefined
 
       await prisma.user.create({
         data: {
           clerkId: id,
           email,
-          firstName: first_name,
-          lastName: last_name,
+          name,
           isOnboarded: false,
         },
       })
@@ -62,6 +54,7 @@ export async function POST(req: NextRequest) {
     if (eventType === "user.updated") {
       const { id, email_addresses, first_name, last_name } = evt.data
       const email = email_addresses[0].email_address
+      const name = first_name && last_name ? `${first_name} ${last_name}` : undefined
 
       // Check if user exists first
       const user = await prisma.user.findUnique({
@@ -77,8 +70,7 @@ export async function POST(req: NextRequest) {
           },
           data: {
             email,
-            firstName: first_name,
-            lastName: last_name,
+            name,
           },
         })
       } else {
@@ -87,8 +79,7 @@ export async function POST(req: NextRequest) {
           data: {
             clerkId: id,
             email,
-            firstName: first_name,
-            lastName: last_name,
+            name,
             isOnboarded: false,
           },
         })
@@ -104,16 +95,9 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    return NextResponse.json({ success: true })
+    return new NextResponse("", { status: 200 })
   } catch (error) {
     console.error("Error processing webhook:", error)
-    return NextResponse.json(
-      {
-        error: "Internal Server Error",
-        details: error instanceof Error ? error.message : "Unknown error",
-      },
-      { status: 500 }
-    )
+    return new NextResponse("Internal Server Error", { status: 500 })
   }
 }
-

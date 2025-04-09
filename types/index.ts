@@ -21,7 +21,5 @@ export interface UserActivity {
     id: number
     content: string
     projectTitle: string
-    topicId: string
   }>
 }
-

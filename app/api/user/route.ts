@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
   try {
     const { userId: clerkId } = getAuth(req)
     if (!clerkId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return new NextResponse("Unauthorized", { status: 401 })
     }
 
     // Find the user by their Clerk ID
@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
     })
 
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 })
+      return new NextResponse("User not found", { status: 404 })
     }
 
     console.log("Found user:", user.id, user.email)
@@ -107,13 +107,9 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(userData)
   } catch (error) {
     console.error("Error fetching user activity:", error)
-    return NextResponse.json(
-      {
-        error: "Internal Server Error",
-        details: error instanceof Error ? error.message : "Unknown error",
-      },
-      { status: 500 }
-    )
+    return new NextResponse(`Internal Server Error: ${error instanceof Error ? error.message : "Unknown error"}`, {
+      status: 500,
+    })
   }
 }
 
@@ -122,7 +118,7 @@ export async function PATCH(req: NextRequest) {
   try {
     const { userId } = getAuth(req)
     if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return new NextResponse("Unauthorized", { status: 401 })
     }
 
     const data = await req.json()
@@ -170,13 +166,8 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json(updatedUser)
   } catch (error) {
     console.error("Error updating user:", error)
-    return NextResponse.json(
-      {
-        error: "Internal Server Error",
-        details: error instanceof Error ? error.message : "Unknown error",
-      },
-      { status: 500 }
-    )
+    return new NextResponse(`Internal Server Error: ${error instanceof Error ? error.message : "Unknown error"}`, {
+      status: 500,
+    })
   }
 }
-

@@ -16,15 +16,6 @@ import ProjectImageUpload from "@/components/ProjectImageUpload"
 import type { Project } from "@prisma/client"
 import { useUniversities } from "@/hooks/useUniversities"
 
-// Define ProjectType as a string union type
-type ProjectType = "proiect" | "cerere" | "diverse"
-
-// Define a custom Project type that includes the additional fields
-interface ExtendedProject extends Project {
-  universityId?: string
-  facultyId?: string
-}
-
 const categories = [
   "Data Science",
   "Business",
@@ -38,6 +29,30 @@ const categories = [
   "Arts and Humanities",
   "Math and Logic",
 ]
+
+// Define the project type enum
+type ProjectType = "proiect" | "cerere" | "diverse"
+
+interface ExtendedProject extends Project {
+  universityId?: string
+  facultyId?: string
+  user?: {
+    firstName: string | null
+    lastName: string | null
+    university: string | null
+    faculty: string | null
+    avatar: string | null
+  }
+  reviews?: Array<{
+    id?: string
+    score: number
+    comment: string | null
+    userId?: string
+    projectId?: string
+    createdAt?: Date
+    updatedAt?: Date
+  }>
+}
 
 export default function EditProjectPage({ params }: { params: { id: string } }) {
   const router = useRouter()
@@ -98,7 +113,7 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
         const selectedFaculty = faculties.find((f) => f.id === project.facultyId)
 
         // Update the project data
-        const { universityId, facultyId, ...updateData } = project
+        const { user, reviews, ...updateData } = project
         updateData.university = selectedUniversity?.name || ""
         updateData.faculty = selectedFaculty?.name || ""
 
@@ -264,7 +279,6 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
               })
             }}
             value={project.universityId}
-            required
           >
             <SelectTrigger>
               <SelectValue placeholder="Select a university" />
@@ -284,7 +298,6 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
           <Select
             onValueChange={(value) => setProject({ ...project, facultyId: value })}
             value={project.facultyId}
-            required
             disabled={!project.universityId}
           >
             <SelectTrigger>
@@ -301,14 +314,17 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
         </div>
 
         <div>
-          <Label htmlFor="phoneNumber">Phone Number</Label>
+          <Label htmlFor="phone">Phone Number</Label>
           <Input
-            id="phoneNumber"
+            id="phone"
+            type="tel"
             value={project.phoneNumber}
             onChange={(e) => setProject({ ...project, phoneNumber: e.target.value })}
-            placeholder="Enter phone number"
+            placeholder="Enter your phone number"
+            pattern="[0-9]{10}"
             required
           />
+          <p className="text-sm text-gray-500 mt-1">Format: 10 digits number</p>
         </div>
 
         {error && (
@@ -317,28 +333,32 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
           </Alert>
         )}
 
-        <div className="flex justify-end space-x-4">
+        <div className="flex space-x-4">
           <Button
-            type="button"
-            variant="outline"
-            onClick={() => router.push(`/project/${params.id}`)}
+            type="submit"
+            className="flex-1 bg-purple-600 hover:bg-purple-700 transition-colors"
             disabled={isSubmitting}
           >
-            Cancel
-          </Button>
-          <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Saving...
+                Updating...
               </>
             ) : (
-              "Save Changes"
+              "Update Project"
             )}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            className="flex-1"
+            onClick={() => router.back()}
+            disabled={isSubmitting}
+          >
+            Cancel
           </Button>
         </div>
       </form>
     </div>
   )
 }
-

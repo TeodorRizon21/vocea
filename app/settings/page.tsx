@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { motion } from "framer-motion"
-import { toast } from "sonner"
+import { toast } from "@/hooks/use-toast"
 import { useUser } from "@clerk/nextjs"
 import AvatarUpload from "@/components/AvatarUpload"
 import { Separator } from "@/components/ui/separator"
@@ -46,8 +46,10 @@ export default function SettingsPage() {
     e.preventDefault()
 
     if (newPassword !== confirmPassword) {
-      toast.error("Passwords don't match", {
-        description: "Please make sure your passwords match.",
+      toast({
+        variant: "destructive",
+        title: "Passwords don't match",
+        description: "Please make sure your passwords match."
       })
       return
     }
@@ -61,16 +63,19 @@ export default function SettingsPage() {
         newPassword,
       })
 
-      toast.success("Password updated", {
-        description: "Your password has been updated successfully.",
+      toast({
+        title: "Password updated",
+        description: "Your password has been updated successfully."
       })
 
       setCurrentPassword("")
       setNewPassword("")
       setConfirmPassword("")
     } catch (error) {
-      toast.error("Failed to update password", {
-        description: "Please check your current password and try again.",
+      toast({
+        variant: "destructive",
+        title: "Failed to update password",
+        description: "Please check your current password and try again."
       })
     } finally {
       setIsLoading(false)
@@ -87,12 +92,15 @@ export default function SettingsPage() {
         email: email,
       })
 
-      toast.success("Email updated", {
-        description: "Your email has been updated successfully.",
+      toast({
+        title: "Email updated",
+        description: "Your email has been updated successfully."
       })
     } catch (error) {
-      toast.error("Failed to update email", {
-        description: "Please try again later.",
+      toast({
+        variant: "destructive",
+        title: "Failed to update email",
+        description: "Please try again later."
       })
     } finally {
       setIsLoading(false)
@@ -121,14 +129,17 @@ export default function SettingsPage() {
 
       setAvatar(url)
 
-      toast.success("Avatar updated", {
-        description: "Your profile picture has been updated successfully.",
+      toast({
+        title: "Avatar updated",
+        description: "Your profile picture has been updated successfully."
       })
 
       return Promise.resolve()
     } catch (error) {
-      toast.error("Failed to update avatar", {
-        description: "Please try again later.",
+      toast({
+        variant: "destructive",
+        title: "Failed to update avatar",
+        description: "Please try again later."
       })
 
       return Promise.reject(error)
@@ -154,12 +165,15 @@ export default function SettingsPage() {
         throw new Error("Failed to update notifications")
       }
 
-      toast.success("Notification settings updated", {
-        description: "Your notification preferences have been saved.",
+      toast({
+        title: "Notification settings updated",
+        description: "Your notification preferences have been saved."
       })
     } catch (error) {
-      toast.error("Failed to update notifications", {
-        description: "Please try again later.",
+      toast({
+        variant: "destructive",
+        title: "Failed to update notifications",
+        description: "Please try again later."
       })
     }
   }

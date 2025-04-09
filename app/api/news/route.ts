@@ -13,10 +13,7 @@ export async function GET() {
     return NextResponse.json(news)
   } catch (error) {
     console.error("Error fetching news:", error)
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
-    )
+    return new NextResponse("Internal Server Error", { status: 500 })
   }
 }
 
@@ -24,25 +21,19 @@ export async function POST(req: NextRequest) {
   try {
     const { userId } = getAuth(req)
     if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return new NextResponse("Unauthorized", { status: 401 })
     }
 
     const data = await req.json()
 
     // Validate required fields
     if (!data.title || !data.description || !data.city) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      )
+      return new NextResponse("Missing required fields", { status: 400 })
     }
 
     // Validate description length
     if (data.description.length < 300) {
-      return NextResponse.json(
-        { error: "News description must be at least 300 characters" },
-        { status: 400 }
-      )
+      return new NextResponse("News description must be at least 300 characters", { status: 400 })
     }
 
     const news = await prisma.news.create({
@@ -58,10 +49,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(news)
   } catch (error) {
     console.error("Error creating news:", error)
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
-    )
+    return new NextResponse("Internal Server Error", { status: 500 })
   }
 }
-

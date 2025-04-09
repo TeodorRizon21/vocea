@@ -46,8 +46,6 @@ export default function TopicList({ topics, onFavoriteToggle, onDelete }: TopicL
               title={topic.title}
               university={topic.university}
               faculty={topic.faculty}
-              universityName={topic.universityName}
-              facultyName={topic.facultyName}
               comments={topic.comments.length}
               commenters={uniqueCommenters}
               createdAt={new Date(topic.createdAt)}
@@ -70,4 +68,3 @@ export default function TopicList({ topics, onFavoriteToggle, onDelete }: TopicL
     </div>
   )
 }
-

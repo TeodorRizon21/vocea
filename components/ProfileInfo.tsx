@@ -69,9 +69,9 @@ export default function ProfileInfo({
         {/*<div className="flex items-center">
           <Star className="mr-2 h-4 w-4 text-purple-600" />
           <span>Review Score: {reviewScore}</span>
-        </div>*/}
+        </div>
+        */}
       </CardContent>
     </Card>
   )
 }
-

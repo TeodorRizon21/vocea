@@ -1,24 +1,18 @@
 import { getAuth } from "@clerk/nextjs/server"
 import { prisma } from "@/lib/prisma"
 import { NextResponse } from "next/server"
-import type { NextRequest } from "next/server"
 
-export const runtime = "edge"
-
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
   try {
     const { userId } = getAuth(req)
     if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return new NextResponse("Unauthorized", { status: 401 })
     }
 
     const { type, contentId, reason } = await req.json()
 
     if (!type || !contentId || !reason) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      )
+      return new NextResponse("Missing required fields", { status: 400 })
     }
 
     // Create the report
@@ -45,17 +39,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(report)
   } catch (error) {
     console.error("Error creating report:", error)
-    return NextResponse.json(
-      {
-        error: "Internal Server Error",
-        details: error instanceof Error ? error.message : "Unknown error",
-      },
-      { status: 500 }
-    )
+    return new NextResponse(`Internal Server Error: ${error instanceof Error ? error.message : "Unknown error"}`, {
+      status: 500,
+    })
   }
 }
 
-export async function GET(req: NextRequest) {
+export async function GET(req: Request) {
   try {
     // For testing purposes, allow all users to see reports
     // In production, you should check if the user is an admin
@@ -109,13 +99,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(reports)
   } catch (error) {
     console.error("Error fetching reports:", error)
-    return NextResponse.json(
-      {
-        error: "Internal Server Error",
-        details: error instanceof Error ? error.message : "Unknown error",
-      },
-      { status: 500 }
-    )
+    return new NextResponse(`Internal Server Error: ${error instanceof Error ? error.message : "Unknown error"}`, {
+      status: 500,
+    })
   }
 }
-

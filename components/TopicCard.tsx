@@ -16,8 +16,6 @@ interface TopicCardProps {
   title: string
   university: string
   faculty: string
-  universityName?: string
-  facultyName?: string
   comments: number
   commenters: number
   createdAt: Date
@@ -40,8 +38,6 @@ export default function TopicCard({
   title,
   university,
   faculty,
-  universityName,
-  facultyName,
   comments,
   commenters,
   createdAt,
@@ -115,7 +111,7 @@ export default function TopicCard({
               <span>{format(new Date(createdAt), "PPP 'at' HH:mm")}</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              {universityName || university}, {facultyName || faculty}
+              {university}, {faculty}
             </p>
           </div>
           <div className="flex gap-2">
@@ -158,4 +154,3 @@ export default function TopicCard({
     </Card>
   )
 }
-

@@ -3,21 +3,11 @@ import { prisma } from "@/lib/prisma"
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
-export const runtime = "edge"
-
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string; commentId: string } }
-) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string; commentId: string } }) {
   try {
     const { userId } = getAuth(req)
-    
     if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
-    if (!params.commentId) {
-      return NextResponse.json({ error: "Comment ID is required" }, { status: 400 })
+      return new NextResponse("Unauthorized", { status: 401 })
     }
 
     const comment = await prisma.forumComment.findUnique({
@@ -26,12 +16,12 @@ export async function DELETE(
     })
 
     if (!comment) {
-      return NextResponse.json({ error: "Comment not found" }, { status: 404 })
+      return new NextResponse("Comment not found", { status: 404 })
     }
 
     // Allow deletion if user is comment author or topic owner
     if (comment.userId !== userId && comment.topic.userId !== userId) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+      return new NextResponse("Unauthorized", { status: 403 })
     }
 
     // Delete all replies first
@@ -44,13 +34,9 @@ export async function DELETE(
       where: { id: params.commentId },
     })
 
-    return NextResponse.json(null, { status: 204 })
+    return new NextResponse(null, { status: 204 })
   } catch (error) {
     console.error("Error deleting comment:", error)
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
-    )
+    return new NextResponse("Internal Server Error", { status: 500 })
   }
 }
-

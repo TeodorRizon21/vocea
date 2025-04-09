@@ -8,7 +8,7 @@ import { useUser } from "@clerk/nextjs"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { format } from "date-fns"
 import { Loader2, Reply, Star, Trash2, ChevronDown, ChevronUp } from "lucide-react"
 import UserTooltip from "@/components/UserTooltip"
@@ -24,9 +24,6 @@ interface Comment {
     lastName: string | null
     university: string | null
     faculty: string | null
-    universityName?: string | null
-    facultyName?: string | null
-    avatar: string | null
   }
   replies: Comment[]
   parentId?: string | null
@@ -39,16 +36,12 @@ interface Topic {
   createdAt: string
   university: string
   faculty: string
-  universityName?: string
-  facultyName?: string
   userId: string
   user: {
     firstName: string | null
     lastName: string | null
     university: string | null
     faculty: string | null
-    universityName?: string | null
-    facultyName?: string | null
     avatar: string | null
   }
   comments: Comment[]
@@ -92,7 +85,6 @@ function CommentReplies({ replies, topicOwnerId, onDeleteReply, isAdmin }: Comme
               >
                 <div className="flex items-center space-x-4 mb-4">
                   <Avatar>
-                    <AvatarImage src={reply.user.avatar || undefined} />
                     <AvatarFallback>
                       {reply.user.firstName?.[0]}
                       {reply.user.lastName?.[0]}
@@ -101,6 +93,9 @@ function CommentReplies({ replies, topicOwnerId, onDeleteReply, isAdmin }: Comme
                   <div>
                     <p className="font-medium hover:underline">
                       {reply.user.firstName} {reply.user.lastName}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {reply.user.university}, {reply.user.faculty}
                     </p>
                     <p className="text-sm text-muted-foreground">
                       {format(new Date(reply.createdAt), "PPP 'at' HH:mm")}
@@ -327,9 +322,9 @@ export default function TopicPage({ params }: { params: { id: string } }) {
           <div className="flex items-center space-x-4 text-sm text-muted-foreground">
             <span>{format(new Date(topic.createdAt), "PPP 'at' HH:mm")}</span>
             <span>•</span>
-            <span>{topic.universityName || topic.university}</span>
+            <span>{topic.university}</span>
             <span>•</span>
-            <span>{topic.facultyName || topic.faculty}</span>
+            <span>{topic.faculty}</span>
           </div>
         </CardHeader>
         <CardContent>
@@ -344,7 +339,6 @@ export default function TopicPage({ params }: { params: { id: string } }) {
             >
               <div className="flex items-center space-x-4">
                 <Avatar>
-                  <AvatarImage src={topic.user.avatar || undefined} />
                   <AvatarFallback>
                     {topic.user.firstName?.[0]}
                     {topic.user.lastName?.[0]}
@@ -353,6 +347,9 @@ export default function TopicPage({ params }: { params: { id: string } }) {
                 <div>
                   <p className="font-medium hover:underline">
                     {topic.user.firstName} {topic.user.lastName}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {topic.user.university}, {topic.user.faculty}
                   </p>
                 </div>
               </div>
@@ -395,7 +392,6 @@ export default function TopicPage({ params }: { params: { id: string } }) {
                       >
                         <div className="flex items-center space-x-4 mb-4">
                           <Avatar>
-                            <AvatarImage src={comment.user.avatar || undefined} />
                             <AvatarFallback>
                               {comment.user.firstName?.[0]}
                               {comment.user.lastName?.[0]}
@@ -404,6 +400,9 @@ export default function TopicPage({ params }: { params: { id: string } }) {
                           <div>
                             <p className="font-medium hover:underline">
                               {comment.user.firstName} {comment.user.lastName}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {comment.user.university}, {comment.user.faculty}
                             </p>
                             <p className="text-sm text-muted-foreground">
                               {format(new Date(comment.createdAt), "PPP 'at' HH:mm")}
@@ -480,4 +479,3 @@ export default function TopicPage({ params }: { params: { id: string } }) {
     </div>
   )
 }
-

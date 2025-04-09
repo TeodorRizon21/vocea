@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { format } from "date-fns"
 import { Check, X, ExternalLink, Trash2, AlertTriangle } from "lucide-react"
 import Link from "next/link"
-import { toast } from "sonner"
+import { toast } from "@/hooks/use-toast"
 import { useUser } from "@clerk/nextjs"
 import { useRouter } from "next/navigation"
 
@@ -72,7 +72,9 @@ export default function ReportsPage() {
         console.error("Error response:", errorText)
 
         if (response.status === 403) {
-          toast.error("Access Denied", {
+          toast({
+            variant: "destructive",
+            title: "Access Denied",
             description: "You don't have permission to view this page"
           })
           router.push("/dashboard")
@@ -80,7 +82,9 @@ export default function ReportsPage() {
         }
 
         setError(`Error ${response.status}: ${response.statusText}`)
-        toast.error("Error", {
+        toast({
+          variant: "destructive",
+          title: "Error",
           description: `Failed to fetch reports: ${response.statusText}`
         })
       }
@@ -88,7 +92,9 @@ export default function ReportsPage() {
       console.error("Error fetching reports:", error)
       const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred"
       setError(errorMessage)
-      toast.error("Error", {
+      toast({
+        variant: "destructive",
+        title: "Error",
         description: errorMessage
       })
     } finally {
@@ -108,17 +114,22 @@ export default function ReportsPage() {
 
       if (response.ok) {
         setReports((prevReports) => prevReports.map((report) => (report.id === id ? { ...report, status } : report)))
-        toast.success("Status updated", {
+        toast({
+          title: "Status updated",
           description: `Report marked as ${status}`
         })
       } else {
-        toast.error("Error", {
+        toast({
+          variant: "destructive",
+          title: "Error",
           description: "Failed to update report status"
         })
       }
     } catch (error) {
       console.error("Error updating report status:", error)
-      toast.error("Error", {
+      toast({
+        variant: "destructive",
+        title: "Error",
         description: "An unexpected error occurred"
       })
     }
@@ -140,7 +151,9 @@ export default function ReportsPage() {
       } else if (report.type === "forum_comment" && report.comment) {
         endpoint = `/api/forum/${report.comment.topicId}/comment/${report.comment.id}`
       } else {
-        toast.error("Error", {
+        toast({
+          variant: "destructive",
+          title: "Error",
           description: "Invalid content type"
         })
         return
@@ -150,17 +163,22 @@ export default function ReportsPage() {
 
       if (response.ok) {
         await updateReportStatus(report.id, "resolved")
-        toast.success("Content deleted", {
+        toast({
+          title: "Content deleted",
           description: "The reported content has been deleted"
         })
       } else {
-        toast.error("Error", {
+        toast({
+          variant: "destructive",
+          title: "Error",
           description: "Failed to delete content"
         })
       }
     } catch (error) {
       console.error("Error deleting content:", error)
-      toast.error("Error", {
+      toast({
+        variant: "destructive",
+        title: "Error",
         description: "An unexpected error occurred"
       })
     }

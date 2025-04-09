@@ -11,29 +11,23 @@ import UserActivity from "@/components/UserActivity"
 import OnboardingDialog from "@/components/OnboardingDialog"
 import EditProfileDialog from "@/components/EditProfileDialog"
 import UserProjects from "@/components/UserProjects"
-import UserRatings from "@/components/UserRatings"
 import { useRouter } from "next/navigation"
 import type { User } from "@/types"
 import RatingCard from "@/components/RatingCard"
 
 interface UserData extends User {
-  firstName: string
-  lastName: string
-  university: string
-  faculty: string
-  city: string
-  year: string
-  activity: {
+  firstName?: string
+  lastName?: string
+  activity?: {
     projectsCreated: number
     projectsJoined: number
     commentsPosted: number
     forumTopicsCreated: number
-    recentComments: {
+    recentComments: Array<{
       id: number
       content: string
       projectTitle: string
-      topicId: string
-    }[]
+    }>
   }
   averageRating: number | null
   reviewCount: number
@@ -119,7 +113,7 @@ export default function DashboardPage() {
     projectsJoined: 0,
     commentsPosted: 0,
     forumTopicsCreated: 0,
-    recentComments: [] as { id: number; content: string; projectTitle: string; topicId: string }[]
+    recentComments: [],
   }
 
   return (
@@ -141,8 +135,7 @@ export default function DashboardPage() {
             reviewScore={userData?.averageRating || 0}
             onEdit={() => setShowEditProfile(true)}
           />
-          <RatingCard averageRating={userData?.averageRating ?? null} reviewCount={userData?.reviewCount || 0} />
-          <UserRatings />
+          <RatingCard averageRating={userData?.averageRating} reviewCount={userData?.reviewCount || 0} />
           <UserActivity activity={userData?.activity || defaultActivity} />
         </div>
         <div className="space-y-6">
@@ -226,4 +219,3 @@ export default function DashboardPage() {
     </div>
   )
 }
-

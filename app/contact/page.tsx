@@ -10,11 +10,10 @@ import { Card, CardContent } from "@/components/ui/card"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Check, Send, AlertCircle } from "lucide-react"
 import { z } from "zod"
-import { useForm } from "react-hook-form"
+import { useForm, ControllerRenderProps, FieldValues } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { ControllerRenderProps } from "react-hook-form"
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters" }),
@@ -202,7 +201,7 @@ export default function ContactPage() {
                       <FormField
                         control={form.control}
                         name="name"
-                        render={({ field }: { field: any }) => (
+                        render={({ field }: { field: ControllerRenderProps<FormValues, "name"> }) => (
                           <FormItem>
                             <FormLabel>Name</FormLabel>
                             <FormControl>
@@ -216,7 +215,7 @@ export default function ContactPage() {
                       <FormField
                         control={form.control}
                         name="email"
-                        render={({ field }: { field: any }) => (
+                        render={({ field }: { field: ControllerRenderProps<FormValues, "email"> }) => (
                           <FormItem>
                             <FormLabel>Email</FormLabel>
                             <FormControl>
@@ -231,7 +230,7 @@ export default function ContactPage() {
                     <FormField
                       control={form.control}
                       name="contactType"
-                      render={({ field }: { field: any }) => (
+                      render={({ field }: { field: ControllerRenderProps<FormValues, "contactType"> }) => (
                         <FormItem className="space-y-3">
                           <FormLabel>What are you contacting us about?</FormLabel>
                           <FormControl>
@@ -262,11 +261,11 @@ export default function ContactPage() {
                     <FormField
                       control={form.control}
                       name="subject"
-                      render={({ field }: { field: any }) => (
+                      render={({ field }: { field: ControllerRenderProps<FormValues, "subject"> }) => (
                         <FormItem>
                           <FormLabel>Subject</FormLabel>
                           <FormControl>
-                            <Input placeholder="Brief description of your inquiry" {...field} />
+                            <Input placeholder="What's your message about?" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -276,14 +275,14 @@ export default function ContactPage() {
                     <FormField
                       control={form.control}
                       name="message"
-                      render={({ field }: { field: any }) => (
+                      render={({ field }: { field: ControllerRenderProps<FormValues, "message"> }) => (
                         <FormItem>
                           <FormLabel>Message</FormLabel>
                           <FormControl>
-                            <Textarea
-                              placeholder="Please provide details about your inquiry or issue..."
-                              className="min-h-[120px]"
-                              {...field}
+                            <Textarea 
+                              placeholder="Tell us how we can help..." 
+                              className="min-h-32" 
+                              {...field} 
                             />
                           </FormControl>
                           <FormMessage />
@@ -338,4 +337,3 @@ export default function ContactPage() {
     </motion.div>
   )
 }
-

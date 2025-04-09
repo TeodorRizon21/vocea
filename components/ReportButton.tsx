@@ -12,7 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
-import { toast } from "sonner"
+import { toast } from "@/hooks/use-toast"
 import { useUser } from "@clerk/nextjs"
 
 interface ReportButtonProps {
@@ -37,16 +37,20 @@ export default function ReportButton({
 
   const handleReport = async () => {
     if (!isSignedIn) {
-      toast.error("Authentication required", {
+      toast({
+        title: "Authentication required",
         description: "Please sign in to report content",
+        variant: "destructive",
       })
       setIsOpen(false)
       return
     }
 
     if (!reason.trim()) {
-      toast.error("Reason required", {
+      toast({
+        title: "Reason required",
         description: "Please provide a reason for your report",
+        variant: "destructive",
       })
       return
     }
@@ -66,21 +70,27 @@ export default function ReportButton({
       })
 
       if (response.ok) {
-        toast.success("Report submitted", {
+        toast({
+          title: "Report submitted",
           description: "Thank you for your report. Our team will review it shortly.",
+          variant: "default",
         })
         setIsOpen(false)
         setReason("")
       } else {
         const error = await response.json()
-        toast.error("Error", {
+        toast({
+          title: "Error",
           description: error.message || "Failed to submit report",
+          variant: "destructive",
         })
       }
     } catch (error) {
       console.error("Error submitting report:", error)
-      toast.error("Error", {
+      toast({
+        title: "Error",
         description: "An unexpected error occurred",
+        variant: "destructive",
       })
     } finally {
       setIsSubmitting(false)

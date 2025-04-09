@@ -1,11 +1,43 @@
+import { prisma } from "@/lib/prisma"
 import UserProfile from "@/components/UserProfile"
 import NewsCarousel from "@/components/NewsCarousel"
 import AboutUs from "@/components/AboutUs"
-import { Suspense } from "react"
-import { Loader2 } from "lucide-react"
-import NewsList from "@/components/NewsList"
 
-export default function Home() {
+// Define the News type to match what NewsCarousel expects
+interface News {
+  id: string
+  title: string
+  description: string
+  image: string
+  university?: string
+  city?: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+async function getNews() {
+  try {
+    const news = await prisma.news.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
+    })
+
+    // Transform the news data to ensure image is never null and university is undefined instead of null
+    return news.map((item) => ({
+      ...item,
+      image: item.image || "/placeholder.svg?key=mgnk0",
+      university: item.university || undefined
+    })) as News[]
+  } catch (error) {
+    console.error("Error fetching news:", error)
+    return []
+  }
+}
+
+export default async function Home() {
+  const news = await getNews()
+
   return (
     <div className="space-y-12">
       <div className="flex justify-between items-center">
@@ -15,13 +47,7 @@ export default function Home() {
 
       <section>
         <h2 className="text-2xl font-semibold mb-4">Latest News</h2>
-        <Suspense fallback={
-          <div className="flex justify-center items-center h-64">
-            <Loader2 className="h-8 w-8 animate-spin" />
-          </div>
-        }>
-          <NewsList />
-        </Suspense>
+        <NewsCarousel news={news} />
       </section>
 
       <section>
@@ -31,4 +57,3 @@ export default function Home() {
     </div>
   )
 }
-

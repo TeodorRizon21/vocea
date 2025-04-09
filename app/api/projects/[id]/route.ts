@@ -1,19 +1,9 @@
 import { getAuth } from "@clerk/nextjs/server"
 import { prisma } from "@/lib/prisma"
-import { NextResponse } from "next/server"
-import type { NextRequest } from "next/server"
+import { type NextRequest, NextResponse } from "next/server"
 
-export const runtime = "edge"
-
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
-    if (!params.id) {
-      return NextResponse.json({ error: "Project ID is required" }, { status: 400 })
-    }
-
     const project = await prisma.project.findUnique({
       where: { id: params.id },
       include: {
@@ -31,32 +21,21 @@ export async function GET(
     })
 
     if (!project) {
-      return NextResponse.json({ error: "Project not found" }, { status: 404 })
+      return new NextResponse("Project not found", { status: 404 })
     }
 
     return NextResponse.json(project)
   } catch (error) {
     console.error("Error fetching project:", error)
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
-    )
+    return new NextResponse("Internal Server Error", { status: 500 })
   }
 }
 
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const { userId } = getAuth(req)
-    
     if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
-    if (!params.id) {
-      return NextResponse.json({ error: "Project ID is required" }, { status: 400 })
+      return new NextResponse("Unauthorized", { status: 401 })
     }
 
     const data = await req.json()
@@ -68,11 +47,11 @@ export async function PATCH(
     })
 
     if (!project) {
-      return NextResponse.json({ error: "Project not found" }, { status: 404 })
+      return new NextResponse("Project not found", { status: 404 })
     }
 
     if (project.userId !== userId) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+      return new NextResponse("Unauthorized", { status: 401 })
     }
 
     const updatedProject = await prisma.project.update({
@@ -94,26 +73,15 @@ export async function PATCH(
     return NextResponse.json(updatedProject)
   } catch (error) {
     console.error("Error updating project:", error)
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
-    )
+    return new NextResponse("Internal Server Error", { status: 500 })
   }
 }
 
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const { userId } = getAuth(req)
-    
     if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
-    if (!params.id) {
-      return NextResponse.json({ error: "Project ID is required" }, { status: 400 })
+      return new NextResponse("Unauthorized", { status: 401 })
     }
 
     // Check if the user is the owner of the project
@@ -123,24 +91,20 @@ export async function DELETE(
     })
 
     if (!project) {
-      return NextResponse.json({ error: "Project not found" }, { status: 404 })
+      return new NextResponse("Project not found", { status: 404 })
     }
 
     if (project.userId !== userId) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+      return new NextResponse("Unauthorized", { status: 401 })
     }
 
     await prisma.project.delete({
       where: { id: params.id },
     })
 
-    return NextResponse.json(null, { status: 204 })
+    return new NextResponse(null, { status: 204 })
   } catch (error) {
     console.error("Error deleting project:", error)
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
-    )
+    return new NextResponse("Internal Server Error", { status: 500 })
   }
 }
-

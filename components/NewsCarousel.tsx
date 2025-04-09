@@ -12,11 +12,10 @@ interface News {
   id: string
   title: string
   description: string
-  image: string | null
-  university?: string | null
+  image: string
+  university?: string
   city?: string
   createdAt: Date
-  updatedAt: Date
 }
 
 interface NewsCarouselProps {
@@ -150,4 +149,3 @@ export default function NewsCarousel({ news }: NewsCarouselProps) {
     </div>
   )
 }
-

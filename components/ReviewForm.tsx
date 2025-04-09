@@ -5,7 +5,7 @@ import type React from "react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import { toast } from "sonner"
+import { toast } from "@/hooks/use-toast"
 import { Star } from "lucide-react"
 
 interface ReviewFormProps {
@@ -23,8 +23,10 @@ export default function ReviewForm({ projectId, onSubmit }: ReviewFormProps) {
     e.preventDefault()
 
     if (rating === 0) {
-      toast.error("Please select a rating", {
+      toast({
+        title: "Please select a rating",
         description: "You must select a rating between 1 and 5 stars",
+        variant: "destructive",
       })
       return
     }
@@ -54,8 +56,10 @@ export default function ReviewForm({ projectId, onSubmit }: ReviewFormProps) {
       onSubmit(reviewData)
     } catch (error) {
       console.error("Error submitting review:", error)
-      toast.error("Failed to submit review", {
+      toast({
+        title: "Failed to submit review",
         description: "Please try again later",
+        variant: "destructive",
       })
     } finally {
       setIsSubmitting(false)

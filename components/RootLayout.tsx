@@ -6,7 +6,6 @@ import { useState, useEffect } from "react"
 import { useUser } from "@clerk/nextjs"
 import OnboardingDialog from "./OnboardingDialog"
 import { usePathname } from "next/navigation"
-import { toast } from "sonner"
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const { user, isLoaded } = useUser()
@@ -59,10 +58,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       {children}
       <OnboardingDialog
         isOpen={showOnboarding}
-        onClose={() => setShowOnboarding(false)} // Allow closing the dialog
+        onClose={() => {}} // Empty function as we don't want to allow closing
         onSubmit={async (data) => {
           try {
-            console.log("Submitting onboarding data:", data)
             const response = await fetch("/api/user/onboard", {
               method: "POST",
               headers: {
@@ -71,25 +69,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               body: JSON.stringify(data),
             })
 
-            if (!response.ok) {
-              const errorData = await response.json()
-              throw new Error(errorData.error || "Failed to save user data")
-            }
+            if (!response.ok) throw new Error("Failed to save user data")
 
             const updatedUser = await response.json()
-            console.log("Onboarding successful:", updatedUser)
-            
             if (updatedUser.isOnboarded) {
               setShowOnboarding(false)
-              toast.success("Profile updated successfully!")
             }
           } catch (error) {
             console.error("Error during onboarding:", error)
-            toast.error(error instanceof Error ? error.message : "Failed to save your information")
           }
         }}
       />
     </>
   )
 }
-
