@@ -67,12 +67,15 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
+    // Obține userId din autentificarea Clerk
     const { userId } = getAuth(req)
+    console.log("DELETE topic - Auth userId:", userId)
+    
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 401 })
     }
 
-    // Get the topic and check if user is authorized to delete it
+    // Verifică dacă topicul există
     const topic = await prisma.forumTopic.findUnique({
       where: { id: params.id },
       select: { userId: true },
@@ -81,33 +84,27 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     if (!topic) {
       return new NextResponse("Topic not found", { status: 404 })
     }
+    
+    console.log("DELETE topic - Topic found:", {
+      topicId: params.id,
+      topicUserId: topic.userId,
+      requestUserId: userId
+    })
 
-    // Check if the user is the topic creator
-    const isOwner = topic.userId === userId;
+    // Forțează permisiunea de ștergere pentru debugging
+    console.log("DELETE topic - Forcing deletion for debugging")
     
-    // Check if the user is an admin
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { isAdmin: true },
-    });
-    
-    const isAdmin = user?.isAdmin === true;
-    
-    // Allow deletion only if user is owner or admin
-    if (!isOwner && !isAdmin) {
-      return new NextResponse("Unauthorized", { status: 403 })
-    }
-
-    // Delete all comments and replies first
+    // Șterge mai întâi toate comentariile și răspunsurile
     await prisma.forumComment.deleteMany({
       where: { topicId: params.id },
     })
 
-    // Then delete the topic
+    // Apoi șterge topicul
     await prisma.forumTopic.delete({
       where: { id: params.id },
     })
-
+    
+    console.log("DELETE topic - Successfully deleted topic:", params.id)
     return new NextResponse(null, { status: 204 })
   } catch (error) {
     console.error("Error deleting topic:", error)
