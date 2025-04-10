@@ -17,28 +17,7 @@ import { useUploadThing } from "@/lib/uploadthing"
 import ProjectImageUpload from "@/components/ProjectImageUpload"
 import { useUniversities } from "@/hooks/useUniversities"
 import { ScrollArea } from "@/components/ui/scroll-area"
-
-// Regular categories for projects
-const projectCategories = [
-  "Data Science",
-  "Business",
-  "Computer Science",
-  "Information Technology",
-  "Language Learning",
-  "Health",
-  "Personal Development",
-  "Physical Science and Engineering",
-  "Social Sciences",
-  "Arts and Humanities",
-  "Math and Logic",
-]
-
-// Categories specifically for diverse items
-const diverseCategories = [
-  { id: "oferte-munca", label: "Oferte muncă" },
-  { id: "obiecte", label: "Obiecte" },
-  { id: "servicii", label: "Servicii" },
-]
+import { ACADEMIC_CATEGORIES, DIVERSE_CATEGORIES } from "@/lib/constants"
 
 export default function NewProjectPage() {
   const router = useRouter()
@@ -121,8 +100,15 @@ export default function NewProjectPage() {
     }
 
     // Validate that diverse projects have a diverse category
-    if (projectType === "diverse" && !diverseCategories.some((cat) => cat.id === formData.category)) {
+    if (projectType === "diverse" && !DIVERSE_CATEGORIES.some((cat) => cat.id === formData.category)) {
       setError("Please select a valid category for diverse items")
+      return
+    }
+
+    // Validate that proiect and cerere have academic categories
+    if ((projectType === "proiect" || projectType === "cerere") && 
+        !ACADEMIC_CATEGORIES.includes(formData.category)) {
+      setError("Please select a valid academic category")
       return
     }
 
@@ -225,7 +211,7 @@ export default function NewProjectPage() {
           <div className="space-y-4">
             <Label>Diverse Category</Label>
             <div className="flex flex-wrap gap-2">
-              {diverseCategories.map((category) => (
+              {DIVERSE_CATEGORIES.map((category) => (
                 <Button
                   key={category.id}
                   type="button"
@@ -311,8 +297,8 @@ export default function NewProjectPage() {
                 <SelectValue placeholder="Select a category" />
               </SelectTrigger>
               <SelectContent>
-                {projectCategories.map((category) => (
-                  <SelectItem key={category} value={category.toLowerCase().replace(/\s+/g, "-")}>
+                {ACADEMIC_CATEGORIES.map((category) => (
+                  <SelectItem key={category} value={category}>
                     {category}
                   </SelectItem>
                 ))}

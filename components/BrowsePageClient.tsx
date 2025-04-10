@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import TabsSection from "@/components/TabsSection"
 import SearchBar from "@/components/SearchBar"
 import SortButton from "@/components/SortButton"
@@ -11,6 +12,7 @@ import HeroSection from "@/components/HeroSection"
 import ProductGrid from "@/components/ProductGrid"
 import FilterDialog from "@/components/FilterDialog"
 import { useUniversities } from "@/hooks/useUniversities"
+import { ACADEMIC_CATEGORIES } from "@/lib/constants"
 
 // Import the ExtendedProject type from ProductGrid
 interface ExtendedProject {
@@ -68,61 +70,161 @@ export default function BrowsePageClient({ projects, tabsData, initialTab }: Bro
   const [searchQuery, setSearchQuery] = useState("")
   const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false)
   const [filters, setFilters] = useState({
-    university: "",
-    faculty: "",
+    university: "_all",
+    faculty: "_all",
+    category: "_all",
   })
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
 
-  // Count active filters
-  const activeFiltersCount = Object.values(filters).filter(Boolean).length
+  // Determine if category filter should be shown (only for proiect and cerere tabs)
+  const showCategoryFilter = activeTab === "proiect" || activeTab === "cerere"
 
-  // Filter projects when tab, search, or filters change
+  // Count active filters (excluding _all values)
+  const activeFiltersCount = Object.entries(filters)
+    .filter(([key, value]) => value !== "_all" && 
+      // Only count category if it's being shown
+      (key !== "category" || showCategoryFilter))
+    .length
+
+  // Filter projects based on active tab, diverse subcategory, search query, and filters
   useEffect(() => {
-    // First filter by tab
-    let result = projects.filter((project) => project.type === activeTab)
-
-    // Then apply subcategory filter for diverse items
-    if (activeTab === "diverse" && diverseSubcategory !== "all") {
-      result = result.filter((project) => project.category === diverseSubcategory)
+    // Make sure projects is an array before proceeding
+    if (!projects || !Array.isArray(projects) || projects.length === 0) {
+      setFilteredProjects([]);
+      return;
     }
 
-    // Then apply search filter if needed
+    let filtered = [...projects];
+    
+    // Debug logging
+    console.log('Filtering projects...');
+    console.log('Current filters:', filters);
+    
+    if (filtered.length > 0) {
+      const sampleProject = filtered[0];
+      console.log('Sample project for filtering:', {
+        id: sampleProject.id,
+        title: sampleProject.title,
+        type: sampleProject.type,
+        university: sampleProject.university,
+        faculty: sampleProject.faculty,
+        subject: sampleProject.subject,
+        category: sampleProject.category,
+        user: {
+          university: sampleProject.user?.university,
+          faculty: sampleProject.user?.faculty
+        }
+      });
+    }
+
+    // Step 1: First filter by project type (proiect, cerere, diverse)
+    if (activeTab !== 'diverse') {
+      // If not diverse, filter by project type
+      filtered = filtered.filter(project => project.type === activeTab);
+    } else {
+      // If diverse tab, only show projects with type='diverse'
+      filtered = filtered.filter(project => project.type === 'diverse');
+      
+      // Then apply the diverse subcategory filter if needed
+      if (diverseSubcategory !== 'all') {
+        filtered = filtered.filter(project => project.category === diverseSubcategory);
+      }
+    }
+
+    console.log(`After tab filtering (${activeTab}): ${filtered.length} projects remain`);
+
+    // Filter by search query
     if (searchQuery) {
-      result = result.filter((project) => {
-        const searchString =
-          `${project.title} ${project.description} ${project.subject} ${project.university || ""} ${project.faculty || ""}`.toLowerCase()
-        return searchString.includes(searchQuery.toLowerCase())
-      })
+      const lowercaseQuery = searchQuery.toLowerCase();
+      filtered = filtered.filter(project => {
+        return (
+          project.title.toLowerCase().includes(lowercaseQuery) ||
+          (project.description && project.description.toLowerCase().includes(lowercaseQuery))
+        );
+      });
+      console.log(`After search query filtering: ${filtered.length} projects remain`);
+    }
+    
+    // Apply university filter - check only project.university
+    if (filters.university !== "_all") {
+      console.log(`Filtering by university: ${filters.university}`);
+      
+      // Get the university name from the selected ID
+      const selectedUniversityName = getUniversityName(filters.university);
+      console.log(`Selected university name: ${selectedUniversityName}`);
+      
+      filtered = filtered.filter(project => {
+        // Try matching by ID or name, but only on project fields
+        const matchesProjectUniversity = project.university === filters.university;
+        const matchesProjectUniversityName = project.university === selectedUniversityName;
+        
+        const matches = matchesProjectUniversity || matchesProjectUniversityName;
+        
+        console.log(`Project ${project.id} - project.university: "${project.university}", matches: ${matches}`);
+        
+        return matches;
+      });
+      console.log(`After university filtering: ${filtered.length} projects remain`);
+    }
+    
+    // Apply faculty filter - check only project.faculty
+    if (filters.faculty !== "_all") {
+      console.log(`Filtering by faculty: ${filters.faculty}`);
+      
+      // Get the faculty name from the selected ID
+      const selectedFacultyName = getFacultyName(filters.university, filters.faculty);
+      console.log(`Selected faculty name: ${selectedFacultyName}`);
+      
+      filtered = filtered.filter(project => {
+        // Try matching by ID or name, but only on project fields
+        const matchesProjectFaculty = project.faculty === filters.faculty;
+        const matchesProjectFacultyName = project.faculty === selectedFacultyName;
+        
+        const matches = matchesProjectFaculty || matchesProjectFacultyName;
+        
+        console.log(`Project ${project.id} - project.faculty: "${project.faculty}", matches: ${matches}`);
+        
+        return matches;
+      });
+      console.log(`After faculty filtering: ${filtered.length} projects remain`);
+    }
+    
+    // Apply category filter (only for proiect and cerere tabs)
+    if (showCategoryFilter && filters.category !== "_all") {
+      console.log(`Filtering by category/subject: ${filters.category}`);
+      filtered = filtered.filter(project => {
+        // Check different field combinations that might match the category
+        const matchesCategory = project.category === filters.category;
+        const matchesSubject = project.subject === filters.category;
+        
+        console.log(`Project ${project.id} - category: ${project.category}, subject: ${project.subject}, matches: ${matchesCategory || matchesSubject}`);
+        
+        return matchesCategory || matchesSubject;
+      });
+      console.log(`After category filtering: ${filtered.length} projects remain`);
     }
 
-    // Then apply university filter if needed
-    if (filters.university) {
-      const universityName = getUniversityName(filters.university)
-      result = result.filter((project) => project.university && project.university.includes(universityName))
+    // Sort projects
+    if (sortOrder === 'desc') {
+      filtered = filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    } else if (sortOrder === 'asc') {
+      filtered = filtered.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
     }
 
-    // Then apply faculty filter if needed
-    if (filters.university && filters.faculty) {
-      const facultyName = getFacultyName(filters.university, filters.faculty)
-      result = result.filter((project) => project.faculty && project.faculty.includes(facultyName))
-    }
-
-    // Apply sort order
-    result = [...result].sort((a, b) => {
-      const dateA = new Date(a.createdAt).getTime()
-      const dateB = new Date(b.createdAt).getTime()
-      return sortOrder === "desc" ? dateB - dateA : dateA - dateB
-    })
-
-    // Update state with filtered projects
-    setFilteredProjects(result)
-   }, [activeTab, diverseSubcategory, projects, searchQuery, filters, sortOrder])
-
+    console.log(`Final filtered projects count: ${filtered.length}`);
+    setFilteredProjects(filtered);
+  }, [activeTab, diverseSubcategory, projects, searchQuery, sortOrder, filters, showCategoryFilter]);
 
   // Handlers
   const handleTabChange = (value: string) => {
     setActiveTab(value)
     setDiverseSubcategory("all") // Reset subcategory when changing tabs
+    
+    // Reset category filter if switching to diverse tab
+    if (value === "diverse" && filters.category !== "_all") {
+      setFilters(prev => ({ ...prev, category: "_all" }));
+    }
+    
     router.push(`/browse?tab=${value}`)
   }
 
@@ -134,12 +236,54 @@ export default function BrowsePageClient({ projects, tabsData, initialTab }: Bro
     setSortOrder((prev) => (prev === "desc" ? "asc" : "desc"))
   }
 
-  const handleFilter = () => {
-    setIsFilterDialogOpen(true)
+  // Disable filter button functionality for now
+  const openDialog = () => {
+    setIsFilterDialogOpen(true);
   }
 
-  const handleApplyFilters = (newFilters: { university: string; faculty: string }) => {
-    setFilters(newFilters)
+  // Replace the simplified handler with a real implementation
+  const handleApplyFilters = (newFilters: {
+    university: string;
+    faculty: string;
+    category: string;
+  }) => {
+    console.log('Applying filters:', newFilters);
+    
+    // Log sample project data
+    if (projects.length > 0) {
+      const sampleProject = projects[0];
+      console.log('Sample project data for comparison:');
+      console.log({
+        'Project ID': sampleProject.id,
+        'Project title': sampleProject.title,
+        'Project university': sampleProject.university,
+        'Project faculty': sampleProject.faculty,
+        'Project category': sampleProject.category,
+        'Project subject': sampleProject.subject,
+        'Filter university': newFilters.university,
+        'Filter faculty': newFilters.faculty,
+        'Filter category': newFilters.category
+      });
+      
+      // Check if any projects would match these filters
+      const matchingProjects = projects.filter(project => {
+        const matchesUniversity = newFilters.university === "_all" || project.university === newFilters.university;
+        const matchesFaculty = newFilters.faculty === "_all" || project.faculty === newFilters.faculty;
+        const matchesCategory = newFilters.category === "_all" || 
+                               project.category === newFilters.category || 
+                               project.subject === newFilters.category;
+        
+        return matchesUniversity && matchesFaculty && matchesCategory;
+      });
+      
+      console.log(`Found ${matchingProjects.length} projects matching these filters out of ${projects.length} total`);
+      
+      if (matchingProjects.length > 0) {
+        console.log('First matching project:', matchingProjects[0].title);
+      }
+    }
+    
+    setFilters(newFilters);
   }
 
   return (
@@ -147,7 +291,7 @@ export default function BrowsePageClient({ projects, tabsData, initialTab }: Bro
       <div className="flex justify-between items-center">
         <TabsSection tabs={tabsData} activeTab={activeTab} setActiveTab={handleTabChange} />
         <Button className="bg-purple-600 hover:bg-purple-700 text-white" asChild>
-          <a href="/projects/new">Add a new project</a>
+          <Link href="/projects/new">Add a new project</Link>
         </Button>
       </div>
 
@@ -177,7 +321,7 @@ export default function BrowsePageClient({ projects, tabsData, initialTab }: Bro
           <SearchBar onSearch={handleSearch} />
         </div>
         <SortButton onSort={handleSort} />
-        <FilterButton onFilter={handleFilter} activeFiltersCount={activeFiltersCount} />
+        <FilterButton onFilter={openDialog} activeFiltersCount={activeFiltersCount} />
       </div>
 
       <div className="mt-6">
@@ -190,12 +334,15 @@ export default function BrowsePageClient({ projects, tabsData, initialTab }: Bro
         )}
       </div>
 
-      <FilterDialog
-        isOpen={isFilterDialogOpen}
-        onClose={() => setIsFilterDialogOpen(false)}
-        onApplyFilters={handleApplyFilters}
-        currentFilters={filters}
-      />
+      {isFilterDialogOpen && (
+        <FilterDialog
+          isOpen={true} 
+          onClose={() => setIsFilterDialogOpen(false)}
+          onApplyFilters={handleApplyFilters}
+          showCategoryFilter={showCategoryFilter}
+          currentFilters={filters}
+        />
+      )}
     </>
   )
 }
