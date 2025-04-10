@@ -21,7 +21,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       }
 
       try {
-        const response = await fetch("/api/user")
+        const response = await fetch(`${window.location.origin}/api/user`)
         
         // If the response is 404 (user not found), show onboarding
         if (response.status === 404) {
@@ -58,10 +58,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       {children}
       <OnboardingDialog
         isOpen={showOnboarding}
-        onClose={() => {}} // Empty function as we don't want to allow closing
+        onClose={() => {
+          // Allow closing if there was an error with the API
+          setShowOnboarding(false);
+        }}
         onSubmit={async (data) => {
           try {
-            const response = await fetch("/api/user/onboard", {
+            console.log("Submitting onboarding data:", data);
+            const response = await fetch(`${window.location.origin}/api/user/onboard`, {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
@@ -69,14 +73,24 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               body: JSON.stringify(data),
             })
 
-            if (!response.ok) throw new Error("Failed to save user data")
+            if (!response.ok) {
+              console.error("Failed to save user data:", await response.text());
+              throw new Error("Failed to save user data")
+            }
 
             const updatedUser = await response.json()
+            console.log("Received user data:", updatedUser);
             if (updatedUser.isOnboarded) {
               setShowOnboarding(false)
+            } else {
+              console.error("User wasn't marked as onboarded");
+              // Allow dialog to be closed anyway
+              setShowOnboarding(false);
             }
           } catch (error) {
             console.error("Error during onboarding:", error)
+            // Allow dialog to be closed if there's an error
+            setShowOnboarding(false);
           }
         }}
       />

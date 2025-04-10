@@ -1,4 +1,8 @@
 import { clerkMiddleware } from "@clerk/nextjs/server"
+import { NextResponse } from "next/server"
+
+// Add logging for debugging
+console.log("Middleware loaded");
 
 export default clerkMiddleware()
 

@@ -16,6 +16,8 @@ interface OnboardingFormData {
   lastName: string
   universityId: string
   facultyId: string
+  university?: string
+  faculty?: string
   city: string
   year: string
 }
@@ -75,11 +77,24 @@ export default function OnboardingDialog({ isOpen, onClose, onSubmit }: Onboardi
       const selectedUniversity = universities.find((u) => u.id === formData.universityId)
       const selectedFaculty = faculties.find((f) => f.id === formData.facultyId)
 
-      await onSubmit({
+      console.log("Selected university:", selectedUniversity);
+      console.log("Selected faculty:", selectedFaculty);
+      
+      if (!selectedUniversity || !selectedFaculty) {
+        throw new Error("Could not find selected university or faculty");
+      }
+
+      const submissionData = {
         ...formData,
-        universityId: selectedUniversity?.id || "",
-        facultyId: selectedFaculty?.id || "",
-      })
+        universityId: selectedUniversity.id,
+        facultyId: selectedFaculty.id,
+        university: selectedUniversity.name,
+        faculty: selectedFaculty.name,
+      };
+      
+      console.log("Submitting onboarding data:", submissionData);
+      
+      await onSubmit(submissionData);
     } catch (error) {
       console.error("Error submitting onboarding data:", error)
       setError(error instanceof Error ? error.message : "Failed to save your information. Please try again.")

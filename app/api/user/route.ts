@@ -5,9 +5,13 @@ import type { NextRequest } from "next/server"
 
 export async function GET(req: NextRequest) {
   try {
+    console.log("User API called");
     const { userId: clerkId } = getAuth(req)
+    console.log("Auth userId in GET /api/user:", clerkId);
+    
     if (!clerkId) {
-      return new NextResponse("Unauthorized", { status: 401 })
+      console.error("Unauthorized: No userId found in GET /api/user");
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     // Find the user by their Clerk ID
@@ -18,7 +22,8 @@ export async function GET(req: NextRequest) {
     })
 
     if (!user) {
-      return new NextResponse("User not found", { status: 404 })
+      console.log("User not found for clerkId:", clerkId);
+      return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
     console.log("Found user:", user.id, user.email)
@@ -116,12 +121,17 @@ export async function GET(req: NextRequest) {
 // Add PATCH method to handle user updates
 export async function PATCH(req: NextRequest) {
   try {
+    console.log("PATCH /api/user called");
     const { userId } = getAuth(req)
+    console.log("Auth userId in PATCH /api/user:", userId);
+    
     if (!userId) {
-      return new NextResponse("Unauthorized", { status: 401 })
+      console.error("Unauthorized: No userId found in PATCH /api/user");
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     const data = await req.json()
+    console.log("Update data received:", data);
 
     // First check if the user exists
     const existingUser = await prisma.user.findUnique({
@@ -163,11 +173,13 @@ export async function PATCH(req: NextRequest) {
       })
     }
 
+    console.log("User updated/created successfully:", updatedUser);
     return NextResponse.json(updatedUser)
   } catch (error) {
     console.error("Error updating user:", error)
-    return new NextResponse(`Internal Server Error: ${error instanceof Error ? error.message : "Unknown error"}`, {
-      status: 500,
-    })
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Unknown error" },
+      { status: 500 }
+    )
   }
 }

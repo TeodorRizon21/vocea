@@ -170,7 +170,7 @@ export default function DashboardPage() {
         }}
         onSubmit={async (data) => {
           try {
-            const response = await fetch("/api/user/onboard", {
+            const response = await fetch(`${window.location.origin}/api/user/onboard`, {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
@@ -182,6 +182,8 @@ export default function DashboardPage() {
               setUserData(updatedUser)
               setShowOnboarding(false)
               router.refresh()
+            } else {
+              console.error("Error during onboarding:", await response.text())
             }
           } catch (error) {
             console.error("Error during onboarding:", error)
@@ -194,7 +196,7 @@ export default function DashboardPage() {
         initialData={userData}
         onSave={async (data) => {
           try {
-            const response = await fetch("/api/user", {
+            const response = await fetch(`${window.location.origin}/api/user`, {
               method: "PATCH",
               headers: {
                 "Content-Type": "application/json",

@@ -5,29 +5,37 @@ import { Prisma } from "@prisma/client"
 
 export async function POST(req: NextRequest) {
   try {
+    console.log("Onboarding API route called");
     const { userId } = getAuth(req)
+    console.log("Clerk auth userId:", userId);
+    
     if (!userId) {
       console.error("Unauthorized: No userId found")
-      return new NextResponse("Unauthorized", { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { firstName, lastName, university, faculty, city, year } = await req.json()
+    const body = await req.json();
+    console.log("Request body received:", body);
+    
+    // Extract fields, prefer direct university/faculty names if provided
+    const { 
+      firstName, 
+      lastName, 
+      university = body.universityId, // Use universityId as fallback
+      faculty = body.facultyId,       // Use facultyId as fallback
+      city, 
+      year 
+    } = body;
 
     // Validate required fields
     if (!firstName || !lastName || !university || !faculty || !city || !year) {
       console.error("Missing required fields:", { firstName, lastName, university, faculty, city, year })
-      return new NextResponse(JSON.stringify({ error: "All fields are required" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      })
+      return NextResponse.json({ error: "All fields are required" }, { status: 400 })
     }
 
     // Validate name fields are not empty strings after trimming
     if (!firstName.trim() || !lastName.trim()) {
-      return new NextResponse(JSON.stringify({ error: "First name and last name cannot be empty" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      })
+      return NextResponse.json({ error: "First name and last name cannot be empty" }, { status: 400 })
     }
 
     console.log("Attempting to update user with data:", {
@@ -84,6 +92,9 @@ export async function POST(req: NextRequest) {
     }
   } catch (error) {
     console.error("Error in onboarding:", error)
-    return new NextResponse(error instanceof Error ? error.message : "Internal Server Error", { status: 500 })
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Internal Server Error" }, 
+      { status: 500 }
+    )
   }
 }
