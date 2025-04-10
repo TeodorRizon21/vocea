@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Flag } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { useState } from "react";
+import { Flag } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -10,30 +10,36 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Textarea } from "@/components/ui/textarea"
-import { toast } from "@/hooks/use-toast"
-import { useUser } from "@clerk/nextjs"
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/hooks/use-toast";
+import { useUser } from "@clerk/nextjs";
 
 interface ReportButtonProps {
-  contentType: "project" | "forum_topic" | "forum_comment" | "review"
-  contentId: string
-  variant?: "ghost" | "outline" | "default" | "destructive" | "secondary" | "link"
-  size?: "default" | "sm" | "lg" | "icon"
-  className?: string
+  contentType: "project" | "forum_topic" | "forum_comment" | "review";
+  contentId: string;
+  variant?:
+    | "ghost"
+    | "outline"
+    | "default"
+    | "destructive"
+    | "secondary"
+    | "link";
+  size?: "default" | "sm" | "lg" | "icon";
+  className?: string;
 }
 
 export default function ReportButton({
   contentType,
   contentId,
   variant = "ghost",
-  size = "sm",
+  size = "icon",
   className,
 }: ReportButtonProps) {
-  const [isOpen, setIsOpen] = useState(false)
-  const [reason, setReason] = useState("")
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const { isSignedIn } = useUser()
+  const [isOpen, setIsOpen] = useState(false);
+  const [reason, setReason] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isSignedIn } = useUser();
 
   const handleReport = async () => {
     if (!isSignedIn) {
@@ -41,9 +47,9 @@ export default function ReportButton({
         title: "Authentication required",
         description: "Please sign in to report content",
         variant: "destructive",
-      })
-      setIsOpen(false)
-      return
+      });
+      setIsOpen(false);
+      return;
     }
 
     if (!reason.trim()) {
@@ -51,11 +57,11 @@ export default function ReportButton({
         title: "Reason required",
         description: "Please provide a reason for your report",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     try {
       const response = await fetch("/api/reports", {
         method: "POST",
@@ -67,35 +73,36 @@ export default function ReportButton({
           contentId,
           reason,
         }),
-      })
+      });
 
       if (response.ok) {
         toast({
           title: "Report submitted",
-          description: "Thank you for your report. Our team will review it shortly.",
+          description:
+            "Thank you for your report. Our team will review it shortly.",
           variant: "default",
-        })
-        setIsOpen(false)
-        setReason("")
+        });
+        setIsOpen(false);
+        setReason("");
       } else {
-        const error = await response.json()
+        const error = await response.json();
         toast({
           title: "Error",
           description: error.message || "Failed to submit report",
           variant: "destructive",
-        })
+        });
       }
     } catch (error) {
-      console.error("Error submitting report:", error)
+      console.error("Error submitting report:", error);
       toast({
         title: "Error",
         description: "An unexpected error occurred",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <>
@@ -106,8 +113,7 @@ export default function ReportButton({
         className={className}
         aria-label="Report content"
       >
-        <Flag className="h-4 w-4 mr-2" />
-        Report
+        <Flag className="h-4 w-4" />
       </Button>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -115,7 +121,8 @@ export default function ReportButton({
           <DialogHeader>
             <DialogTitle>Report Content</DialogTitle>
             <DialogDescription>
-              Please provide a reason for reporting this content. Our team will review your report.
+              Please provide a reason for reporting this content. Our team will
+              review your report.
             </DialogDescription>
           </DialogHeader>
           <Textarea
@@ -128,13 +135,15 @@ export default function ReportButton({
             <Button variant="outline" onClick={() => setIsOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleReport} disabled={isSubmitting || !reason.trim()}>
+            <Button
+              onClick={handleReport}
+              disabled={isSubmitting || !reason.trim()}
+            >
               Submit Report
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </>
-  )
+  );
 }
-
