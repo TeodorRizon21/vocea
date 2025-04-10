@@ -13,28 +13,40 @@ export type University = {
 export type Faculty = {
   id: string
   name: string
+  universityId: string
   specializations: string[]
 }
 
 export function useUniversities() {
   const [universities, setUniversities] = useState<University[]>([])
+  const [allFaculties, setAllFaculties] = useState<Faculty[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     // Transform the data to match our expected format
-    const transformedData = universitiesData.map((uni, index) => ({
-      id: `uni_${index}`,
-      name: uni.institutie,
-      city: uni.oras,
-      faculties: uni.facultati.map((fac, facIndex) => ({
+    const transformedData = universitiesData.map((uni, index) => {
+      const universityId = `uni_${index}`;
+      const faculties = uni.facultati.map((fac, facIndex) => ({
         id: `fac_${index}_${facIndex}`,
         name: fac.nume,
+        universityId,
         specializations: fac.specializari,
-      })),
-    }))
+      }));
+      
+      return {
+        id: universityId,
+        name: uni.institutie,
+        city: uni.oras,
+        faculties,
+      };
+    });
 
-    setUniversities(transformedData)
-    setLoading(false)
+    // Extract all faculties into a flat array
+    const allFacs = transformedData.flatMap((uni) => uni.faculties);
+
+    setUniversities(transformedData);
+    setAllFaculties(allFacs);
+    setLoading(false);
   }, [])
 
   const getFacultiesForUniversity = (universityId: string): Faculty[] => {
@@ -60,6 +72,7 @@ export function useUniversities() {
 
   return {
     universities,
+    faculties: allFaculties,
     loading,
     getFacultiesForUniversity,
     getUniversityName,
