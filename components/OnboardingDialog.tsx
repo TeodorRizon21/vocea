@@ -84,16 +84,29 @@ export default function OnboardingDialog({ isOpen, onClose, onSubmit }: Onboardi
         throw new Error("Could not find selected university or faculty");
       }
 
+      // Ensure university and faculty names are properly defined
+      if (!selectedUniversity.name || !selectedFaculty.name) {
+        console.error("Missing name in selected university or faculty:", {
+          university: selectedUniversity,
+          faculty: selectedFaculty
+        });
+        throw new Error("University or faculty name is missing");
+      }
+
+      // Create the submission data with explicit name properties
       const submissionData = {
         ...formData,
         universityId: selectedUniversity.id,
         facultyId: selectedFaculty.id,
-        university: selectedUniversity.name,
-        faculty: selectedFaculty.name,
+        university: selectedUniversity.name,  // Explicitly include the name
+        faculty: selectedFaculty.name,        // Explicitly include the name
       };
       
-      console.log("Submitting onboarding data:", submissionData);
+      console.log("Submitting onboarding data from dialog:", submissionData);
+      console.log("University name being sent:", submissionData.university);
+      console.log("Faculty name being sent:", submissionData.faculty);
       
+      // Submit the data
       await onSubmit(submissionData);
     } catch (error) {
       console.error("Error submitting onboarding data:", error)

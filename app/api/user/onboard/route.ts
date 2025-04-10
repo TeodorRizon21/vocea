@@ -17,84 +17,99 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     console.log("Request body received:", body);
     
-    // Extract fields, prefer direct university/faculty names if provided
+    // Extract all fields from the request body
     const { 
       firstName, 
       lastName, 
-      university = body.universityId, // Use universityId as fallback
-      faculty = body.facultyId,       // Use facultyId as fallback
+      universityId,
+      facultyId,
+      university,   // This should be the full university name
+      faculty,      // This should be the full faculty name
       city, 
       year 
     } = body;
 
+    console.log("Data to be saved:", { 
+      firstName, 
+      lastName, 
+      universityId,
+      facultyId, 
+      university, 
+      faculty,
+      city, 
+      year 
+    });
+
+    // Ensure we're using the university and faculty name strings (not IDs)
+    if (!university || !faculty) {
+      console.error("Missing university or faculty name");
+      return NextResponse.json({ error: "University and faculty names are required" }, { status: 400 });
+    }
+
     // Validate required fields
     if (!firstName || !lastName || !university || !faculty || !city || !year) {
-      console.error("Missing required fields:", { firstName, lastName, university, faculty, city, year })
-      return NextResponse.json({ error: "All fields are required" }, { status: 400 })
+      console.error("Missing required fields");
+      return NextResponse.json({ error: "All fields are required" }, { status: 400 });
     }
 
     // Validate name fields are not empty strings after trimming
     if (!firstName.trim() || !lastName.trim()) {
-      return NextResponse.json({ error: "First name and last name cannot be empty" }, { status: 400 })
+      return NextResponse.json({ error: "First name and last name cannot be empty" }, { status: 400 });
     }
 
-    console.log("Attempting to update user with data:", {
-      clerkId: userId,
-      firstName,
-      lastName,
-      university,
-      faculty,
-      city,
-      year,
-    })
-
-    // First try to update the existing user
+    // Try to update or create the user with the extracted data
     try {
-      const updatedUser = await prisma.user.update({
+      // First check if user exists
+      const existingUser = await prisma.user.findUnique({
         where: {
           clerkId: userId,
-        },
-        data: {
-          firstName,
-          lastName,
-          university,
-          faculty,
-          city,
-          year,
-          isOnboarded: true,
-        },
-      })
+        }
+      });
 
-      console.log("Successfully updated user:", updatedUser)
-      return NextResponse.json(updatedUser)
-    } catch (updateError) {
-      // If update fails because user doesn't exist, create new user
-      if (updateError instanceof Prisma.PrismaClientKnownRequestError && updateError.code === "P2025") {
-        const newUser = await prisma.user.create({
-          data: {
+      let user;
+      if (existingUser) {
+        console.log("Updating existing user with university:", university, "and faculty:", faculty);
+        user = await prisma.user.update({
+          where: {
             clerkId: userId,
+          },
+          data: {
             firstName,
             lastName,
-            university,
-            faculty,
+            university,        // Store the full university name string
+            faculty,           // Store the full faculty name string
             city,
             year,
             isOnboarded: true,
           },
-        })
-
-        console.log("Successfully created new user:", newUser)
-        return NextResponse.json(newUser)
+        });
+      } else {
+        console.log("Creating new user with university:", university, "and faculty:", faculty);
+        user = await prisma.user.create({
+          data: {
+            clerkId: userId,
+            firstName,
+            lastName,
+            university,        // Store the full university name string
+            faculty,           // Store the full faculty name string
+            city,
+            year,
+            isOnboarded: true,
+          },
+        });
       }
 
-      // If it's a different error, throw it
-      throw updateError
+      console.log("Successfully saved user with university and faculty:", user);
+      return NextResponse.json(user);
+    } catch (error) {
+      console.error("Error saving user data:", error);
+      throw error;
     }
   } catch (error) {
-    console.error("Error in onboarding:", error)
+    console.error("Error in onboarding:", error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Internal Server Error" }, 
       { status: 500 }
-    )
+    );
   }
 }
