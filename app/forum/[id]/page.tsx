@@ -180,7 +180,19 @@ export default function TopicPage({ params }: { params: { id: string } }) {
     if (user) {
       // Check for admin role in public metadata
       const publicMetadata = user.publicMetadata;
-      setIsAdmin(publicMetadata.isAdmin === true);
+      console.log("User data available:", {
+        id: user.id,
+        publicMetadata: publicMetadata,
+      });
+
+      // Este important să ne asigurăm că isAdmin este boolean
+      const adminValue = publicMetadata.isAdmin === true;
+      console.log("Setting isAdmin to:", adminValue);
+      setIsAdmin(adminValue);
+
+      if (adminValue) {
+        console.log("User is an admin!");
+      }
     }
   }, [user]);
 
@@ -279,15 +291,31 @@ export default function TopicPage({ params }: { params: { id: string } }) {
       return;
 
     try {
+      console.log("Attempting to delete topic:", {
+        topicId: topic.id,
+        isAdmin: isAdmin,
+        userId: user?.id,
+        topicUserId: topic.userId,
+        isOwner: topic.isOwner,
+      });
+
       const response = await fetch(`/api/forum/${params.id}`, {
         method: "DELETE",
       });
 
+      console.log("Delete topic response status:", response.status);
+
       if (response.ok) {
+        console.log("Topic deleted successfully, redirecting to forum");
         router.push("/forum");
+      } else {
+        const errorText = await response.text();
+        console.error("Failed to delete topic:", errorText);
+        alert("Failed to delete topic: " + errorText);
       }
     } catch (error) {
       console.error("Error deleting topic:", error);
+      alert("Error deleting topic: " + error);
     }
   };
 
@@ -296,6 +324,21 @@ export default function TopicPage({ params }: { params: { id: string } }) {
       return;
 
     try {
+      const comment =
+        topic?.comments.find((c) => c.id === commentId) ||
+        topic?.comments
+          .flatMap((c) => c.replies || [])
+          .find((c) => c.id === commentId);
+
+      console.log("Attempting to delete comment:", {
+        commentId: commentId,
+        isAdmin: isAdmin,
+        userId: user?.id,
+        commentUserId: comment?.userId,
+        topicUserId: topic?.userId,
+        isOwner: topic?.isOwner,
+      });
+
       const response = await fetch(
         `/api/forum/${params.id}/comment/${commentId}`,
         {
@@ -303,11 +346,19 @@ export default function TopicPage({ params }: { params: { id: string } }) {
         }
       );
 
+      console.log("Delete comment response status:", response.status);
+
       if (response.ok) {
+        console.log("Comment deleted successfully, refreshing topic");
         await fetchTopic();
+      } else {
+        const errorText = await response.text();
+        console.error("Failed to delete comment:", errorText);
+        alert("Failed to delete comment: " + errorText);
       }
     } catch (error) {
       console.error("Error deleting comment:", error);
+      alert("Error deleting comment: " + error);
     }
   };
 
