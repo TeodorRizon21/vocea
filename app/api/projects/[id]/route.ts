@@ -20,6 +20,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       },
     })
 
+
     if (!project) {
       return new NextResponse("Project not found", { status: 404 })
     }
@@ -65,7 +66,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
             university: true,
             faculty: true,
             avatar: true,
-          },
+          }, //ia vezi pe ce rand e comentariul asta :*
         },
       },
     })
