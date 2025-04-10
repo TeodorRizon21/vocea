@@ -1,62 +1,68 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useCallback } from "react"
-import { useUser } from "@clerk/nextjs"
-import UserProfile from "@/components/UserProfile"
-import DashboardHero from "@/components/DashboardHero"
-import ProfileInfo from "@/components/ProfileInfo"
-import SubscriptionCards from "@/components/SubscriptionCards"
-import ConfirmationDialog from "@/components/ConfirmationDialog"
-import UserActivity from "@/components/UserActivity"
-import OnboardingDialog from "@/components/OnboardingDialog"
-import EditProfileDialog from "@/components/EditProfileDialog"
-import UserProjects from "@/components/UserProjects"
-import { useRouter } from "next/navigation"
-import type { User } from "@/types"
-import RatingCard from "@/components/RatingCard"
+import { useState, useEffect, useCallback } from "react";
+import { useUser } from "@clerk/nextjs";
+import UserProfile from "@/components/UserProfile";
+import DashboardHero from "@/components/DashboardHero";
+import ProfileInfo from "@/components/ProfileInfo";
+import SubscriptionCards from "@/components/SubscriptionCards";
+import ConfirmationDialog from "@/components/ConfirmationDialog";
+import UserActivity from "@/components/UserActivity";
+import OnboardingDialog from "@/components/OnboardingDialog";
+import EditProfileDialog from "@/components/EditProfileDialog";
+import UserProjects from "@/components/UserProjects";
+import { useRouter } from "next/navigation";
+import type { User } from "@/types";
+import RatingCard from "@/components/RatingCard";
 
 interface UserData extends User {
-  firstName?: string
-  lastName?: string
+  firstName?: string;
+  lastName?: string;
   activity?: {
-    projectsCreated: number
-    projectsJoined: number
-    commentsPosted: number
-    forumTopicsCreated: number
+    projectsCreated: number;
+    projectsJoined: number;
+    commentsPosted: number;
+    forumTopicsCreated: number;
     recentComments: Array<{
-      id: number
-      content: string
-      projectTitle: string
-      topicId: string
-    }>
-  }
-  averageRating: number | null
-  reviewCount: number
+      id: number;
+      content: string;
+      projectTitle: string;
+      topicId: string;
+    }>;
+  };
+  averageRating: number | null;
+  reviewCount: number;
 }
 
 export default function DashboardPage() {
-  const { isLoaded } = useUser()
-  const router = useRouter()
-  const [selectedSubscription, setSelectedSubscription] = useState("Basic")
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [pendingSubscription, setPendingSubscription] = useState("")
-  const [showOnboarding, setShowOnboarding] = useState(false)
-  const [showEditProfile, setShowEditProfile] = useState(false)
-  const [userData, setUserData] = useState<UserData | null>(null)
-  const [loading, setLoading] = useState(true)
+  const { isLoaded } = useUser();
+  const router = useRouter();
+  const [selectedSubscription, setSelectedSubscription] = useState("Basic");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [pendingSubscription, setPendingSubscription] = useState("");
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showEditProfile, setShowEditProfile] = useState(false);
+  const [userData, setUserData] = useState<UserData | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const checkRequiredInformation = useCallback((data: UserData | null) => {
-    return !data?.firstName || !data?.lastName || !data?.university || !data?.city || !data?.year
-  }, [])
+    return (
+      !data?.firstName ||
+      !data?.lastName ||
+      !data?.university ||
+      !data?.city ||
+      !data?.year
+    );
+  }, []);
 
   const handleSubscriptionChange = (newSubscription: string) => {
-    setPendingSubscription(newSubscription)
-    setIsDialogOpen(true)
-  }
+    setPendingSubscription(newSubscription);
+    setIsDialogOpen(true);
+  };
 
   const confirmSubscriptionChange = async () => {
-    setIsDialogOpen(false)
-    setSelectedSubscription(pendingSubscription)
+    setIsDialogOpen(false);
+    setSelectedSubscription(pendingSubscription);
 
     try {
       const response = await fetch("/api/subscription", {
@@ -65,48 +71,61 @@ export default function DashboardPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ subscription: pendingSubscription }),
-      })
+      });
 
       if (!response.ok) {
-        console.error("Failed to update subscription")
+        console.error("Failed to update subscription");
       }
     } catch (error) {
-      console.error("Error updating subscription:", error)
+      console.error("Error updating subscription:", error);
     }
-  }
+  };
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await fetch("/api/user")
+        const response = await fetch("/api/user");
         if (!response.ok) {
-          throw new Error("Failed to fetch user data")
+          throw new Error("Failed to fetch user data");
         }
-        const data = await response.json()
-        setUserData(data)
+        const data = await response.json();
+        setUserData(data);
 
         // Check if user has all required information
         if (checkRequiredInformation(data)) {
-          setShowOnboarding(true)
+          setShowOnboarding(true);
         }
       } catch (error) {
-        console.error("Error fetching user data:", error)
+        console.error("Error fetching user data:", error);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
+
+    const fetchSubscription = async () => {
+      try {
+        const response = await fetch("/api/subscription");
+        if (response.ok) {
+          const data = await response.json();
+          setSelectedSubscription(data.plan || "Basic");
+        }
+      } catch (error) {
+        console.error("Error fetching subscription data:", error);
+      }
+    };
 
     if (isLoaded) {
-      fetchUserData()
+      fetchUserData();
+      fetchSubscription();
     }
-  }, [isLoaded, checkRequiredInformation])
+  }, [isLoaded, checkRequiredInformation]);
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
       </div>
-    )
+    );
   }
 
   const defaultActivity = {
@@ -115,18 +134,18 @@ export default function DashboardPage() {
     commentsPosted: 0,
     forumTopicsCreated: 0,
     recentComments: [] as Array<{
-      id: number
-      content: string
-      projectTitle: string
-      topicId: string
+      id: number;
+      content: string;
+      projectTitle: string;
+      topicId: string;
     }>,
-  }
+  };
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-4xl font-bold text-purple-600">Dashboard</h1>
-        <UserProfile membershipPlan={selectedSubscription} />
+        <UserProfile />
       </div>
       <DashboardHero name={userData?.firstName || "User"} />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -141,7 +160,14 @@ export default function DashboardPage() {
             reviewScore={userData?.averageRating ?? 0}
             onEdit={() => setShowEditProfile(true)}
           />
-          <RatingCard averageRating={userData?.averageRating !== undefined ? userData.averageRating : null} reviewCount={userData?.reviewCount || 0} />
+          <RatingCard
+            averageRating={
+              userData?.averageRating !== undefined
+                ? userData.averageRating
+                : null
+            }
+            reviewCount={userData?.reviewCount || 0}
+          />
           <UserActivity activity={userData?.activity || defaultActivity} />
         </div>
         <div className="space-y-6">
@@ -165,28 +191,31 @@ export default function DashboardPage() {
         onClose={() => {
           // Only allow closing if all required information is present
           if (!checkRequiredInformation(userData)) {
-            setShowOnboarding(false)
+            setShowOnboarding(false);
           }
         }}
         onSubmit={async (data) => {
           try {
-            const response = await fetch(`${window.location.origin}/api/user/onboard`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify(data),
-            })
+            const response = await fetch(
+              `${window.location.origin}/api/user/onboard`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify(data),
+              }
+            );
             if (response.ok) {
-              const updatedUser = await response.json()
-              setUserData(updatedUser)
-              setShowOnboarding(false)
-              router.refresh()
+              const updatedUser = await response.json();
+              setUserData(updatedUser);
+              setShowOnboarding(false);
+              router.refresh();
             } else {
-              console.error("Error during onboarding:", await response.text())
+              console.error("Error during onboarding:", await response.text());
             }
           } catch (error) {
-            console.error("Error during onboarding:", error)
+            console.error("Error during onboarding:", error);
           }
         }}
       />
@@ -209,21 +238,21 @@ export default function DashboardPage() {
                 city: data.city,
                 year: data.year,
               }),
-            })
+            });
             if (response.ok) {
-              const updatedData = await response.json()
-              setUserData(updatedData)
-              setShowEditProfile(false)
+              const updatedData = await response.json();
+              setUserData(updatedData);
+              setShowEditProfile(false);
               // Check if all required information is now present
               if (checkRequiredInformation(updatedData)) {
-                setShowOnboarding(true)
+                setShowOnboarding(true);
               }
             }
           } catch (error) {
-            console.error("Error updating profile:", error)
+            console.error("Error updating profile:", error);
           }
         }}
       />
     </div>
-  )
+  );
 }
