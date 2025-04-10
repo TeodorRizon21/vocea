@@ -8,7 +8,7 @@ import { useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from "date-fns";
 import {
   Loader2,
@@ -17,6 +17,8 @@ import {
   Trash2,
   ChevronDown,
   ChevronUp,
+  Send,
+  SortDesc,
 } from "lucide-react";
 import UserTooltip from "@/components/UserTooltip";
 import ReportButton from "@/components/ReportButton";
@@ -31,6 +33,9 @@ interface Comment {
     lastName: string | null;
     university: string | null;
     faculty: string | null;
+    universityName?: string | null;
+    facultyName?: string | null;
+    avatar: string | null;
   };
   replies: Comment[];
   parentId?: string | null;
@@ -43,12 +48,16 @@ interface Topic {
   createdAt: string;
   university: string;
   faculty: string;
+  universityName?: string;
+  facultyName?: string;
   userId: string;
   user: {
     firstName: string | null;
     lastName: string | null;
     university: string | null;
     faculty: string | null;
+    universityName?: string | null;
+    facultyName?: string | null;
     avatar: string | null;
   };
   comments: Comment[];
@@ -94,9 +103,13 @@ function CommentReplies({
                 lastName={reply.user.lastName}
                 university={reply.user.university}
                 faculty={reply.user.faculty}
+                universityName={reply.user.universityName}
+                facultyName={reply.user.facultyName}
+                avatar={reply.user.avatar}
               >
                 <div className="flex items-center space-x-4 mb-4">
                   <Avatar>
+                    <AvatarImage src={reply.user.avatar || undefined} />
                     <AvatarFallback>
                       {reply.user.firstName?.[0]}
                       {reply.user.lastName?.[0]}
@@ -105,9 +118,17 @@ function CommentReplies({
                   <div>
                     <p className="font-medium hover:underline">
                       {reply.user.firstName} {reply.user.lastName}
+                      {reply.userId === topicOwnerId && (
+                        <span className="text-yellow-500 text-sm ml-1">
+                          (Autor)
+                        </span>
+                      )}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      {reply.user.university}, {reply.user.faculty}
+                      {reply.user.universityName || reply.user.university}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {reply.user.facultyName || reply.user.faculty}
                     </p>
                     <p className="text-sm text-muted-foreground">
                       {format(new Date(reply.createdAt), "PPP 'at' HH:mm")}
@@ -173,6 +194,9 @@ export default function TopicPage({ params }: { params: { id: string } }) {
   const [replyContent, setReplyContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [sortOption, setSortOption] = useState<
+    "relevance" | "newest" | "oldest"
+  >("newest");
 
   useEffect(() => {
     fetchTopic();
@@ -362,6 +386,28 @@ export default function TopicPage({ params }: { params: { id: string } }) {
     }
   };
 
+  const sortComments = (comments: Comment[]) => {
+    const filteredComments = comments.filter((comment) => !comment.parentId);
+
+    switch (sortOption) {
+      case "relevance":
+        return [...filteredComments].sort(
+          (a, b) => b.replies.length - a.replies.length
+        );
+      case "oldest":
+        return [...filteredComments].sort(
+          (a, b) =>
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        );
+      case "newest":
+      default:
+        return [...filteredComments].sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -407,50 +453,53 @@ export default function TopicPage({ params }: { params: { id: string } }) {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">{topic.title}</CardTitle>
-          <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-            <span>{format(new Date(topic.createdAt), "PPP 'at' HH:mm")}</span>
-            <span>•</span>
-            <span>{topic.university}</span>
-            <span>•</span>
-            <span>{topic.faculty}</span>
+          <div className="flex justify-between items-start mb-4">
+            <div className="flex items-center space-x-4">
+              <UserTooltip
+                userId={topic.userId}
+                firstName={topic.user.firstName}
+                lastName={topic.user.lastName}
+                university={topic.user.university}
+                faculty={topic.user.faculty}
+                universityName={topic.user.universityName}
+                facultyName={topic.user.facultyName}
+                avatar={topic.user.avatar}
+              >
+                <div className="flex items-center space-x-2">
+                  <Avatar>
+                    <AvatarImage src={topic.user.avatar || undefined} />
+                    <AvatarFallback>
+                      {topic.user.firstName?.[0]}
+                      {topic.user.lastName?.[0]}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="font-medium hover:underline">
+                      {topic.user.firstName} {topic.user.lastName}{" "}
+                      <span className="text-gray-500 text-sm">(Autor)</span>
+                    </p>
+                  </div>
+                </div>
+              </UserTooltip>
+            </div>
+            <div className="text-sm text-muted-foreground">
+              {format(new Date(topic.createdAt), "PPP 'at' HH:mm")}
+            </div>
+          </div>
+          <CardTitle className="text-2xl mb-2">{topic.title}</CardTitle>
+          <div className="space-y-1 text-sm text-muted-foreground">
+            <p>{topic.facultyName || topic.faculty}</p>
+            <p>{topic.universityName || topic.university}</p>
           </div>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center space-x-4 mb-4">
-            <UserTooltip
-              userId={topic.userId}
-              firstName={topic.user.firstName}
-              lastName={topic.user.lastName}
-              university={topic.user.university}
-              faculty={topic.user.faculty}
-              avatar={topic.user.avatar}
-            >
-              <div className="flex items-center space-x-4">
-                <Avatar>
-                  <AvatarFallback>
-                    {topic.user.firstName?.[0]}
-                    {topic.user.lastName?.[0]}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <p className="font-medium hover:underline">
-                    {topic.user.firstName} {topic.user.lastName}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {topic.user.university}, {topic.user.faculty}
-                  </p>
-                </div>
-              </div>
-            </UserTooltip>
-          </div>
           <p className="whitespace-pre-line">{topic.content}</p>
         </CardContent>
       </Card>
 
       <div className="space-y-6">
         <h2 className="text-xl font-semibold">
-          Comments ({topic.comments.length})
+          Comments ({topic.comments.filter((c) => !c.parentId).length})
         </h2>
 
         <form onSubmit={handleSubmitComment} className="space-y-4">
@@ -460,18 +509,41 @@ export default function TopicPage({ params }: { params: { id: string } }) {
             placeholder="Add a comment..."
             className="min-h-[100px]"
           />
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : null}
-            Post Comment
-          </Button>
+          <div className="flex items-center justify-between">
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Send className="mr-2 h-4 w-4" />
+              )}
+              Post Comment
+            </Button>
+
+            <div className="flex items-center">
+              <Button variant="outline" className="flex items-center gap-2">
+                <SortDesc className="h-4 w-4" />
+                <span className="mr-1">Sortează:</span>
+                <select
+                  value={sortOption}
+                  onChange={(e) =>
+                    setSortOption(
+                      e.target.value as "relevance" | "newest" | "oldest"
+                    )
+                  }
+                  className="bg-transparent border-none focus:outline-none"
+                >
+                  <option value="relevance">După relevanță</option>
+                  <option value="newest">Cele mai noi</option>
+                  <option value="oldest">Cele mai vechi</option>
+                </select>
+              </Button>
+            </div>
+          </div>
         </form>
 
         <div className="space-y-6">
-          {topic.comments
-            .filter((comment) => !comment.parentId)
-            .map((comment) => (
+          {topic.comments &&
+            sortComments(topic.comments).map((comment) => (
               <div key={comment.id} className="space-y-4">
                 <Card>
                   <CardContent className="pt-6">
@@ -482,9 +554,15 @@ export default function TopicPage({ params }: { params: { id: string } }) {
                         lastName={comment.user.lastName}
                         university={comment.user.university}
                         faculty={comment.user.faculty}
+                        universityName={comment.user.universityName}
+                        facultyName={comment.user.facultyName}
+                        avatar={comment.user.avatar}
                       >
                         <div className="flex items-center space-x-4 mb-4">
                           <Avatar>
+                            <AvatarImage
+                              src={comment.user.avatar || undefined}
+                            />
                             <AvatarFallback>
                               {comment.user.firstName?.[0]}
                               {comment.user.lastName?.[0]}
@@ -493,9 +571,18 @@ export default function TopicPage({ params }: { params: { id: string } }) {
                           <div>
                             <p className="font-medium hover:underline">
                               {comment.user.firstName} {comment.user.lastName}
+                              {comment.userId === topic.userId && (
+                                <span className="text-yellow-500 text-sm ml-1">
+                                  (Autor)
+                                </span>
+                              )}
                             </p>
                             <p className="text-sm text-muted-foreground">
-                              {comment.user.university}, {comment.user.faculty}
+                              {comment.user.universityName ||
+                                comment.user.university}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {comment.user.facultyName || comment.user.faculty}
                             </p>
                             <p className="text-sm text-muted-foreground">
                               {format(

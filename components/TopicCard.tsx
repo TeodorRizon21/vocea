@@ -16,6 +16,8 @@ interface TopicCardProps {
   title: string;
   university: string;
   faculty: string;
+  universityName?: string;
+  facultyName?: string;
   comments: number;
   commenters: number;
   createdAt: Date;
@@ -27,6 +29,8 @@ interface TopicCardProps {
     lastName: string | null;
     university: string | null;
     faculty: string | null;
+    universityName?: string | null;
+    facultyName?: string | null;
     avatar?: string | null;
   };
   onFavoriteToggle: (topicId: string) => Promise<void>;
@@ -38,6 +42,8 @@ export default function TopicCard({
   title,
   university,
   faculty,
+  universityName,
+  facultyName,
   comments,
   commenters,
   createdAt,
@@ -87,6 +93,10 @@ export default function TopicCard({
     }
   };
 
+  // Folosim numele universității și facultății dacă sunt disponibile, altfel folosim ID-urile
+  const displayUniversity = universityName || university;
+  const displayFaculty = facultyName || faculty;
+
   return (
     <Card className="mb-4 shadow-md hover:shadow-lg transition-shadow relative group">
       <CardHeader>
@@ -100,6 +110,8 @@ export default function TopicCard({
                 lastName={author.lastName}
                 university={author.university}
                 faculty={author.faculty}
+                universityName={author.universityName}
+                facultyName={author.facultyName}
                 avatar={author.avatar}
               >
                 <span className="hover:underline">
@@ -109,9 +121,8 @@ export default function TopicCard({
               <span>•</span>
               <span>{format(new Date(createdAt), "PPP 'at' HH:mm")}</span>
             </div>
-            <p className="text-sm text-muted-foreground">
-              {university}, {faculty}
-            </p>
+            <p className="text-sm text-muted-foreground">{displayUniversity}</p>
+            <p className="text-sm text-muted-foreground">{displayFaculty}</p>
           </div>
           <div className="flex gap-2">
             <ReportButton contentType="forum_topic" contentId={id} />

@@ -82,13 +82,30 @@ export async function GET(req: NextRequest) {
     })
 
     // Transform the topics to include university and faculty names
-    const transformedTopics = topics.map(topic => ({
-      ...topic,
-      universityName: getUniversityName(topic.university),
-      facultyName: getFacultyName(topic.university, topic.faculty),
-      isFavorited: userId ? topic.favorites.includes(userId) : false,
-      isOwner: userId === topic.userId
-    }))
+    const transformedTopics = topics.map(topic => {
+      // Obține numele universității și facultății pentru topic
+      const topicUniversityName = getUniversityName(topic.university);
+      const topicFacultyName = getFacultyName(topic.university, topic.faculty);
+      
+      // Obține numele universității și facultății pentru utilizator
+      const userUniversityName = topic.user.university ? getUniversityName(topic.user.university) : null;
+      const userFacultyName = topic.user.university && topic.user.faculty 
+        ? getFacultyName(topic.user.university, topic.user.faculty) 
+        : null;
+      
+      return {
+        ...topic,
+        universityName: topicUniversityName,
+        facultyName: topicFacultyName,
+        isFavorited: userId ? topic.favorites.includes(userId) : false,
+        isOwner: userId === topic.userId,
+        user: {
+          ...topic.user,
+          universityName: userUniversityName,
+          facultyName: userFacultyName
+        }
+      };
+    });
 
     return NextResponse.json(transformedTopics)
   } catch (error) {
