@@ -59,8 +59,10 @@ function getFacultyName(universityId: string, facultyId: string): string {
   return university.facultati[facIndex].nume
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    const { userId } = getAuth(req)
+    
     const topics = await prisma.forumTopic.findMany({
       include: {
         comments: true,
@@ -84,6 +86,8 @@ export async function GET() {
       ...topic,
       universityName: getUniversityName(topic.university),
       facultyName: getFacultyName(topic.university, topic.faculty),
+      isFavorited: userId ? topic.favorites.includes(userId) : false,
+      isOwner: userId === topic.userId
     }))
 
     return NextResponse.json(transformedTopics)

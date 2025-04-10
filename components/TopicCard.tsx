@@ -1,36 +1,36 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { MessageSquare, Users, Star, Trash2 } from "lucide-react"
-import { format } from "date-fns"
-import { Button } from "@/components/ui/button"
-import { useState, useEffect } from "react"
-import UserTooltip from "./UserTooltip"
-import ReportButton from "@/components/ReportButton"
-import { useUser } from "@clerk/nextjs"
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { MessageSquare, Users, Star, Trash2 } from "lucide-react";
+import { format } from "date-fns";
+import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
+import UserTooltip from "./UserTooltip";
+import ReportButton from "@/components/ReportButton";
+import { useUser } from "@clerk/nextjs";
 
 interface TopicCardProps {
-  id: string
-  title: string
-  university: string
-  faculty: string
-  comments: number
-  commenters: number
-  createdAt: Date
-  isFavorited: boolean
-  isOwner: boolean
+  id: string;
+  title: string;
+  university: string;
+  faculty: string;
+  comments: number;
+  commenters: number;
+  createdAt: Date;
+  isFavorited: boolean;
+  isOwner: boolean;
   author: {
-    id: string
-    firstName: string | null
-    lastName: string | null
-    university: string | null
-    faculty: string | null
-    avatar?: string | null
-  }
-  onFavoriteToggle: (topicId: string) => Promise<void>
-  onDelete?: (topicId: string) => Promise<void>
+    id: string;
+    firstName: string | null;
+    lastName: string | null;
+    university: string | null;
+    faculty: string | null;
+    avatar?: string | null;
+  };
+  onFavoriteToggle: (topicId: string) => Promise<void>;
+  onDelete?: (topicId: string) => Promise<void>;
 }
 
 export default function TopicCard({
@@ -47,46 +47,45 @@ export default function TopicCard({
   onFavoriteToggle,
   onDelete,
 }: TopicCardProps) {
-  const [isLoading, setIsLoading] = useState(false)
-  const [isFavorite, setIsFavorite] = useState(isFavorited)
-  const { user } = useUser()
-  const [isAdmin, setIsAdmin] = useState(false)
+  const [isLoading, setIsLoading] = useState(false);
+  const { user } = useUser();
+  const [isAdmin, setIsAdmin] = useState(false);
 
-  // Update local state when prop changes
   useEffect(() => {
-    setIsFavorite(isFavorited)
-
     if (user) {
       // Check for admin role in public metadata
-      const publicMetadata = user.publicMetadata
-      setIsAdmin(publicMetadata.isAdmin === true)
+      const publicMetadata = user.publicMetadata;
+      setIsAdmin(publicMetadata.isAdmin === true);
     }
-  }, [isFavorited, user])
+  }, [user]);
 
   const handleFavoriteClick = async (e: React.MouseEvent) => {
-    e.preventDefault() // Prevent navigation
-    if (isLoading) return
+    e.preventDefault(); // Prevent navigation
+    if (isLoading) return;
 
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      await onFavoriteToggle(id)
-      setIsFavorite(!isFavorite)
+      await onFavoriteToggle(id);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleDelete = async (e: React.MouseEvent) => {
-    e.preventDefault() // Prevent navigation
-    if (!onDelete || !window.confirm("Are you sure you want to delete this topic?")) return
+    e.preventDefault(); // Prevent navigation
+    if (
+      !onDelete ||
+      !window.confirm("Are you sure you want to delete this topic?")
+    )
+      return;
 
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      await onDelete(id)
+      await onDelete(id);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <Card className="mb-4 shadow-md hover:shadow-lg transition-shadow relative group">
@@ -119,11 +118,15 @@ export default function TopicCard({
             <Button
               variant="ghost"
               size="icon"
-              className={`${isFavorite ? "text-yellow-500" : "text-gray-400"} hover:text-yellow-500`}
+              className={`${
+                isFavorited ? "text-yellow-500" : "text-gray-400"
+              } hover:text-yellow-500`}
               onClick={handleFavoriteClick}
               disabled={isLoading}
             >
-              <Star className={`h-5 w-5 ${isFavorite ? "fill-current" : ""}`} />
+              <Star
+                className={`h-5 w-5 ${isFavorited ? "fill-current" : ""}`}
+              />
             </Button>
             {(isOwner || isAdmin) && (
               <Button
@@ -152,5 +155,5 @@ export default function TopicCard({
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
