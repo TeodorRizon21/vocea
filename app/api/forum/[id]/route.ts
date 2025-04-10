@@ -72,6 +72,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
       return new NextResponse("Unauthorized", { status: 401 })
     }
 
+    // Get the topic and check if user is authorized to delete it
     const topic = await prisma.forumTopic.findUnique({
       where: { id: params.id },
       select: { userId: true },
@@ -81,7 +82,19 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
       return new NextResponse("Topic not found", { status: 404 })
     }
 
-    if (topic.userId !== userId) {
+    // Check if the user is the topic creator
+    const isOwner = topic.userId === userId;
+    
+    // Check if the user is an admin
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { isAdmin: true },
+    });
+    
+    const isAdmin = user?.isAdmin === true;
+    
+    // Allow deletion only if user is owner or admin
+    if (!isOwner && !isAdmin) {
       return new NextResponse("Unauthorized", { status: 403 })
     }
 

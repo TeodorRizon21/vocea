@@ -19,8 +19,20 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
       return new NextResponse("Comment not found", { status: 404 })
     }
 
-    // Allow deletion if user is comment author or topic owner
-    if (comment.userId !== userId && comment.topic.userId !== userId) {
+    // Check if the user is comment author or topic owner
+    const isCommentAuthor = comment.userId === userId;
+    const isTopicOwner = comment.topic.userId === userId;
+    
+    // Check if the user is an admin
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { isAdmin: true },
+    });
+    
+    const isAdmin = user?.isAdmin === true;
+    
+    // Allow deletion if user is comment author, topic owner, or admin
+    if (!isCommentAuthor && !isTopicOwner && !isAdmin) {
       return new NextResponse("Unauthorized", { status: 403 })
     }
 
