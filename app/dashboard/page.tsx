@@ -32,6 +32,16 @@ interface UserData extends User {
   };
   averageRating: number | null;
   reviewCount: number;
+  reviews?: Array<{
+    id: string;
+    score: number;
+    comment?: string;
+    createdAt: string;
+    user?: {
+      firstName: string | null;
+      lastName: string | null;
+    };
+  }>;
 }
 
 export default function DashboardPage() {
@@ -167,6 +177,7 @@ export default function DashboardPage() {
                 : null
             }
             reviewCount={userData?.reviewCount || 0}
+            reviews={userData?.reviews || []}
           />
           <UserActivity activity={userData?.activity || defaultActivity} />
         </div>
