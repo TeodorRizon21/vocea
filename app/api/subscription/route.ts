@@ -83,7 +83,6 @@ export async function GET(req: NextRequest) {
       where: {
         clerkId: userId,
       },
-      // @ts-ignore - planType exists in the schema but TypeScript definitions aren't updated
       select: {
         planType: true,
       },

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -80,9 +79,9 @@ export default function BrowsePageClient({
   const [searchQuery, setSearchQuery] = useState("");
   const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false);
   const [filters, setFilters] = useState({
-
     university: "",
     faculty: "",
+    category: "",
   });
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [showAccessDenied, setShowAccessDenied] = useState(false);
@@ -171,6 +170,7 @@ export default function BrowsePageClient({
   const handleApplyFilters = (newFilters: {
     university: string;
     faculty: string;
+    category: string;
   }) => {
     setFilters(newFilters);
   };
