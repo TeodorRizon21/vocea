@@ -1,7 +1,9 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
+
 import UserProfile from "@/components/UserProfile";
 import BrowsePageClient from "@/components/BrowsePageClient";
 import AccessDeniedDialog from "@/components/AccessDeniedDialog";
@@ -87,12 +89,15 @@ export default function BrowsePage() {
     fetchProjects();
   }, [activeTab]);
 
+
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-4xl font-bold text-purple-600">Browse projects</h1>
         <UserProfile />
       </div>
+
 
       {loading ? (
         <div className="flex items-center justify-center h-64">
@@ -111,7 +116,9 @@ export default function BrowsePage() {
         isOpen={showAccessDenied}
         onClose={() => setShowAccessDenied(false)}
         originalPath={originalPath}
+
       />
+
     </div>
   );
 }

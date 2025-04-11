@@ -64,31 +64,61 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         }}
         onSubmit={async (data) => {
           try {
-            console.log("Submitting onboarding data:", data);
+            console.log("Submitting onboarding data from RootLayout:", data);
+            console.log("University:", data.university);
+            console.log("Faculty:", data.faculty);
+            
+            // Ensure the data structure is correct for the API
+            if (!data.university || !data.faculty) {
+              console.error("Missing university or faculty name in data:", data);
+              alert("Missing university or faculty information. Please try again.");
+              return;
+            }
+            
             const response = await fetch(`${window.location.origin}/api/user/onboard`, {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
               },
-              body: JSON.stringify(data),
-            })
+              body: JSON.stringify({
+                firstName: data.firstName,
+                lastName: data.lastName,
+                universityId: data.universityId,
+                facultyId: data.facultyId,
+                university: data.university, // Ensure this is being sent explicitly
+                faculty: data.faculty,       // Ensure this is being sent explicitly
+                city: data.city,
+                year: data.year
+              }),
+            });
 
             if (!response.ok) {
-              console.error("Failed to save user data:", await response.text());
-              throw new Error("Failed to save user data")
+              const errorText = await response.text();
+              console.error("Failed to save user data:", errorText);
+              throw new Error(`Failed to save user data: ${errorText}`);
             }
 
-            const updatedUser = await response.json()
-            console.log("Received user data:", updatedUser);
+            const updatedUser = await response.json();
+            console.log("Received user data after onboarding:", updatedUser);
+            
+            // Verify that university and faculty were saved
+            if (!updatedUser.university || !updatedUser.faculty) {
+              console.error("University or faculty missing in saved user data:", updatedUser);
+              alert("There was an issue saving your university and faculty information. Please try again.");
+              return;
+            }
+            
             if (updatedUser.isOnboarded) {
-              setShowOnboarding(false)
+              console.log("User successfully onboarded with university:", updatedUser.university, "and faculty:", updatedUser.faculty);
+              setShowOnboarding(false);
             } else {
               console.error("User wasn't marked as onboarded");
               // Allow dialog to be closed anyway
               setShowOnboarding(false);
             }
           } catch (error) {
-            console.error("Error during onboarding:", error)
+            console.error("Error during onboarding:", error);
+            alert("There was an error saving your information. Please try again.");
             // Allow dialog to be closed if there's an error
             setShowOnboarding(false);
           }

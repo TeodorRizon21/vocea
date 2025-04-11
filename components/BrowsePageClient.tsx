@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -79,6 +80,7 @@ export default function BrowsePageClient({
   const [searchQuery, setSearchQuery] = useState("");
   const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false);
   const [filters, setFilters] = useState({
+
     university: "",
     faculty: "",
   });
@@ -152,6 +154,7 @@ export default function BrowsePageClient({
     router.push(`/browse?tab=${value}`);
   };
 
+
   const handleSearch = (query: string) => {
     setSearchQuery(query);
   };
@@ -159,6 +162,7 @@ export default function BrowsePageClient({
   const handleSort = () => {
     setSortOrder((prev) => (prev === "desc" ? "asc" : "desc"));
   };
+
 
   const handleFilter = () => {
     setIsFilterDialogOpen(true);
@@ -184,9 +188,11 @@ export default function BrowsePageClient({
     router.push("/projects/new");
   };
 
+
   return (
     <>
       <div className="flex justify-between items-center">
+
         <TabsSection
           tabs={tabsData}
           activeTab={activeTab}
@@ -197,6 +203,7 @@ export default function BrowsePageClient({
           onClick={handleNewProjectClick}
         >
           Add a new project
+
         </Button>
       </div>
 
@@ -234,10 +241,12 @@ export default function BrowsePageClient({
           <SearchBar onSearch={handleSearch} />
         </div>
         <SortButton onSort={handleSort} />
+
         <FilterButton
           onFilter={handleFilter}
           activeFiltersCount={activeFiltersCount}
         />
+
       </div>
 
       <div className="mt-6">
@@ -252,6 +261,7 @@ export default function BrowsePageClient({
         )}
       </div>
 
+
       <FilterDialog
         isOpen={isFilterDialogOpen}
         onClose={() => setIsFilterDialogOpen(false)}
@@ -264,6 +274,7 @@ export default function BrowsePageClient({
         onClose={() => setShowAccessDenied(false)}
         originalPath="/projects/new"
       />
+
     </>
   );
 }

@@ -94,21 +94,22 @@ export default function NewsCarousel({ news }: NewsCarouselProps) {
       </div>
 
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <div className="flex flex-col md:flex-row">
+        <div className="flex flex-col md:flex-row items-center">
           {/* Image on the left */}
           {currentNews.image && (
-            <div className="relative w-full md:w-2/5 h-80 md:h-[400px]">
+            <div className="relative w-full md:w-2/5 h-80 md:h-[400px] flex items-center justify-center">
               <Image
                 src={currentNews.image || "/placeholder.svg?height=600&width=600"}
                 alt={currentNews.title}
                 fill
                 style={{ objectFit: "contain" }}
+                className="p-4"
               />
             </div>
           )}
 
           {/* Content on the right */}
-          <div className="w-full md:w-3/5 p-6 space-y-4">
+          <div className="w-full md:w-3/5 p-6 space-y-4 self-center">
             <h3 className="text-xl font-semibold">{currentNews.title}</h3>
             <div className="flex items-center text-sm text-muted-foreground mb-2">
               {currentNews.city && currentNews.city !== "oricare" && (

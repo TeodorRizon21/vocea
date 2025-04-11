@@ -23,6 +23,7 @@ import { Separator } from "@/components/ui/separator"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Card } from "@/components/ui/card"
 import { useEffect, useState } from "react"
+import Image from "next/image"
 
 interface NavItemProps {
   href: string
@@ -72,8 +73,8 @@ const Navbar = () => {
     <div className="fixed left-[2rem] top-[1.5rem] bottom-[1.5rem] w-64 bg-white dark:bg-gray-800 rounded-3xl flex flex-col justify-between py-6 px-4 shadow-lg text-gray-800 dark:text-gray-200">
       <div className="space-y-8">
         {/* Logo */}
-        <div className="flex justify-center bg-indigo-500 w-16 h-16 rounded-full items-center mx-auto shadow-md">
-          <Student size={36} color="#ffffff" />
+        <div className="flex justify-center bg-white dark:bg-white w-24 h-24 rounded-full items-center mx-auto shadow-md p-2">
+          <Image src="/logo.png" alt="VOC Logo" width={160} height={160} className="object-contain" />
         </div>
 
         {/* Menu Section */}
