@@ -1,36 +1,54 @@
-"use client"
+"use client";
 
-import { useEffect, useRef } from "react"
-import { motion, useInView, useAnimation, AnimatePresence } from "framer-motion"
-import { Users, Newspaper, Share2, MessageSquare, Lightbulb, GraduationCap, Building2, Trophy } from "lucide-react"
-import { Card, CardContent } from "@/components/ui/card"
+import { useEffect, useRef } from "react";
+import {
+  motion,
+  useInView,
+  useAnimation,
+  AnimatePresence,
+} from "framer-motion";
+import {
+  Users,
+  Newspaper,
+  Share2,
+  MessageSquare,
+  Lightbulb,
+  GraduationCap,
+  Building2,
+  Trophy,
+} from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 
 const features = [
   {
     icon: Users,
     title: "Student Community",
-    description: "Connect with fellow students across different universities and departments.",
+    description:
+      "Connect with fellow students across different universities and departments.",
     color: "bg-blue-500",
   },
   {
     icon: Share2,
     title: "Project Sharing",
-    description: "Share your academic projects, research work, and creative endeavors with peers.",
+    description:
+      "Share your academic projects, research work, and creative endeavors with peers.",
     color: "bg-purple-500",
   },
   {
     icon: MessageSquare,
     title: "Open Discussions",
-    description: "Engage in meaningful discussions about academic and campus life topics.",
+    description:
+      "Engage in meaningful discussions about academic and campus life topics.",
     color: "bg-green-500",
   },
   {
     icon: Newspaper,
     title: "Campus News",
-    description: "Stay updated with the latest news and events from your university.",
+    description:
+      "Stay updated with the latest news and events from your university.",
     color: "bg-red-500",
   },
-]
+];
 
 const stats = [
   {
@@ -57,7 +75,7 @@ const stats = [
     label: "Success Stories",
     color: "bg-emerald-500",
   },
-]
+];
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -68,7 +86,7 @@ const containerVariants = {
       delayChildren: 0.3,
     },
   },
-}
+};
 
 const itemVariants = {
   hidden: { y: 20, opacity: 0, scale: 0.9 },
@@ -82,18 +100,18 @@ const itemVariants = {
       damping: 10,
     },
   },
-}
+};
 
 export default function AboutUs() {
-  const controls = useAnimation()
-  const ref = useRef(null)
-  const isInView = useInView(ref, { once: true, margin: "-100px" })
+  const controls = useAnimation();
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   useEffect(() => {
     if (isInView) {
-      controls.start("visible")
+      controls.start("visible");
     }
-  }, [controls, isInView])
+  }, [controls, isInView]);
 
   return (
     <div className="space-y-16 px-4" ref={ref}>
@@ -174,7 +192,9 @@ export default function AboutUs() {
                     >
                       {stat.value}
                     </motion.h3>
-                    <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300">{stat.label}</p>
+                    <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300">
+                      {stat.label}
+                    </p>
                   </motion.div>
                 </CardContent>
                 <motion.div
@@ -216,11 +236,17 @@ export default function AboutUs() {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
         >
-          Vocea Campusului is more than just a platform - it&apos;s a vibrant community of students, researchers, and
-          innovators. Whether you&apos;re looking to showcase your work, collaborate on projects, or stay informed about
-          campus life, we&apos;re here to amplify your voice and connect you with like-minded peers.
+          Vocea Campusului is more than just a platform - it&apos;s a vibrant
+          community of students, researchers, and innovators. Whether
+          you&apos;re looking to showcase your work, collaborate on projects, or
+          stay informed about campus life, we&apos;re here to amplify your voice
+          and connect you with like-minded peers.
         </motion.p>
-        <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="inline-block relative">
+        <motion.div
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
+          className="inline-block relative"
+        >
           <div className="relative inline-flex group">
             <div className="absolute -inset-px bg-gradient-to-r from-purple-600 to-blue-500 rounded-lg blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-pulse" />
             <button className="relative px-6 sm:px-8 py-3 sm:py-4 bg-white dark:bg-gray-800 rounded-lg leading-none flex items-center">
@@ -232,6 +258,5 @@ export default function AboutUs() {
         </motion.div>
       </motion.div>
     </div>
-  )
+  );
 }
-
