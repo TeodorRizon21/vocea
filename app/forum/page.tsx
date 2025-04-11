@@ -58,10 +58,26 @@ export default function ForumPage() {
     faculty: "",
     category: "",
   });
+  const [userPlan, setUserPlan] = useState("Basic");
 
   useEffect(() => {
     fetchTopics();
+    fetchUserPlan();
   }, []);
+
+  const fetchUserPlan = async () => {
+    if (user?.id) {
+      try {
+        const response = await fetch(`/api/user`);
+        if (response.ok) {
+          const userData = await response.json();
+          setUserPlan(userData.planType || "Basic");
+        }
+      } catch (error) {
+        console.error("Error fetching user plan:", error);
+      }
+    }
+  };
 
   const filterTopics = useCallback(() => {
     let filtered = [...topics];
@@ -222,7 +238,10 @@ export default function ForumPage() {
           activeTab={activeTab}
           setActiveTab={setActiveTab}
         />
-        <CreateTopicButton onClick={() => router.push("/forum/new")} />
+        <CreateTopicButton
+          onClick={() => router.push("/forum/new")}
+          userPlan={userPlan}
+        />
       </div>
       <div className="flex items-center space-x-4">
         <div className="flex-grow">
@@ -240,6 +259,7 @@ export default function ForumPage() {
             topics={filteredTopics}
             onFavoriteToggle={handleFavoriteToggle}
             onDelete={handleDelete}
+            userPlan={userPlan}
           />
         ) : (
           <div className="flex flex-col items-center justify-center h-64 text-gray-500">

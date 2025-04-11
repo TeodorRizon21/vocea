@@ -1,10 +1,6 @@
-import { clerkMiddleware } from "@clerk/nextjs/server"
-import { NextResponse } from "next/server"
+import { clerkMiddleware } from "@clerk/nextjs/server";
 
-// Add logging for debugging
-console.log("Middleware loaded");
-
-export default clerkMiddleware()
+export default clerkMiddleware();
 
 export const config = {
   matcher: [

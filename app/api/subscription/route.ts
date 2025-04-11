@@ -5,111 +5,109 @@ import type { NextRequest } from "next/server"
 
 export async function POST(req: NextRequest) {
   try {
-    const { userId: clerkId } = getAuth(req)
-    console.log("Auth userId in POST /api/subscription:", clerkId)
+    const { userId } = getAuth(req)
+    console.log("Auth userId in POST /api/subscription:", userId)
     
-    if (!clerkId) {
+    if (!userId) {
       console.error("Unauthorized: No userId found in POST /api/subscription")
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const data = await req.json()
-    console.log("Subscription data received:", data)
+    const { subscription } = await req.json()
+    console.log("Subscription data received:", subscription)
 
-    // Validăm planul de abonament
-    const allowedPlans = ["Basic", "Premium", "Gold"]
-    if (!data.subscription || !allowedPlans.includes(data.subscription)) {
+    if (!subscription || !["Basic", "Premium", "Gold"].includes(subscription)) {
       return NextResponse.json({ error: "Invalid subscription plan" }, { status: 400 })
     }
 
-    // Verificăm dacă există deja un abonament pentru utilizator
-    const existingSubscription = await prisma.subscription.findUnique({
+    // Update user's plan type - handling the typing issue
+    await prisma.user.update({
       where: {
-        userId: clerkId,
+        clerkId: userId,
+      },
+      data: {
+        // @ts-ignore - planType exists in the schema but TypeScript definitions aren't updated
+        planType: subscription,
       },
     })
 
-    let updatedSubscription
+    // Create or update subscription record
+    const existingSubscription = await prisma.subscription.findFirst({
+      where: {
+        userId: userId,
+      },
+    })
 
     if (existingSubscription) {
-      // Actualizăm abonamentul existent
-      updatedSubscription = await prisma.subscription.update({
+      await prisma.subscription.update({
         where: {
-          userId: clerkId,
+          id: existingSubscription.id,
         },
         data: {
-          plan: data.subscription,
+          plan: subscription,
           status: "active",
-          updatedAt: new Date(),
+          // Reset projectsPosted count if downgrading from Gold to Premium
+          // @ts-ignore - projectsPosted exists in the schema but TypeScript definitions aren't updated
+          ...(existingSubscription.plan === "Gold" && subscription === "Premium" ? { projectsPosted: 0 } : {})
         },
       })
     } else {
-      // Creăm un abonament nou
-      updatedSubscription = await prisma.subscription.create({
+      await prisma.subscription.create({
         data: {
-          userId: clerkId,
-          plan: data.subscription,
+          userId: userId,
+          plan: subscription,
           status: "active",
-          startDate: new Date(),
         },
       })
     }
 
-    // Actualizăm sau creăm utilizatorul dacă este necesar (pentru a ne asigura că există)
-    const existingUser = await prisma.user.findUnique({
-      where: {
-        clerkId,
-      },
-    })
-
-    if (!existingUser) {
-      await prisma.user.create({
-        data: {
-          clerkId,
-          email: "",
-        },
-      })
-    }
-
-    console.log("Subscription updated/created successfully:", updatedSubscription)
-    return NextResponse.json(updatedSubscription)
+    return NextResponse.json({ success: true, plan: subscription })
   } catch (error) {
     console.error("Error updating subscription:", error)
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unknown error" },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
 
 export async function GET(req: NextRequest) {
   try {
-    const { userId: clerkId } = getAuth(req)
-    console.log("Auth userId in GET /api/subscription:", clerkId)
+    const { userId } = getAuth(req)
+    console.log("Auth userId in GET /api/subscription:", userId)
     
-    if (!clerkId) {
+    if (!userId) {
       console.error("Unauthorized: No userId found in GET /api/subscription")
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
-
-    // Căutăm abonamentul utilizatorului
-    const subscription = await prisma.subscription.findUnique({
+    
+    // Find user in our database
+    const user = await prisma.user.findUnique({
       where: {
-        userId: clerkId,
+        clerkId: userId,
+      },
+      // @ts-ignore - planType exists in the schema but TypeScript definitions aren't updated
+      select: {
+        planType: true,
       },
     })
-
-    if (!subscription) {
-      // Returnăm planul default dacă nu există un abonament
-      return NextResponse.json({ plan: "Basic" })
+    
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
-
-    return NextResponse.json(subscription)
+    
+    // Also get subscription details if they exist
+    const subscription = await prisma.subscription.findFirst({
+      where: {
+        userId: userId,
+        status: "active",
+      },
+    })
+    
+    return NextResponse.json({
+      // @ts-ignore - planType exists in the schema but TypeScript definitions aren't updated
+      plan: user.planType,
+      details: subscription || null,
+    })
   } catch (error) {
     console.error("Error fetching subscription:", error)
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unknown error" },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 } 

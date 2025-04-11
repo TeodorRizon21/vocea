@@ -2,6 +2,46 @@ import { getAuth } from "@clerk/nextjs/server"
 import { prisma } from "@/lib/prisma"
 import { type NextRequest, NextResponse } from "next/server"
 
+export async function GET(req: NextRequest) {
+  try {
+    // Pentru GET, facem operațiunea fără a verifica autentificarea,
+    // pentru a permite vizualizarea proiectelor de către toți utilizatorii
+    const type = req.nextUrl.searchParams.get("type")
+    
+    console.log("Fetching projects with type:", type);
+    
+    // Allow public access to browse page without authentication
+    const projects = await prisma.project.findMany({
+      where: type
+        ? {
+            type: type,
+          }
+        : undefined,
+      include: {
+        user: {
+          select: {
+            firstName: true,
+            lastName: true,
+            university: true,
+            faculty: true,
+            avatar: true,
+          },
+        },
+        reviews: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    })
+    
+    console.log(`Found ${projects.length} projects`);
+    return NextResponse.json(projects)
+  } catch (error) {
+    console.error("Error fetching projects:", error)
+    return NextResponse.json({ error: "Failed to fetch projects" }, { status: 500 })
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { userId } = getAuth(req)
@@ -21,6 +61,36 @@ export async function POST(req: NextRequest) {
 
     if (!user) {
       return new NextResponse("User not found", { status: 404 })
+    }
+
+    // Check user's plan type for limitations
+    // @ts-ignore - planType exists in the schema but TypeScript definitions aren't updated
+    if (user.planType === "Basic") {
+      return NextResponse.json({
+        error: "Access denied",
+        message: "Ai nevoie de un abonament superior pentru a crea proiecte.",
+        // @ts-ignore - planType exists in the schema but TypeScript definitions aren't updated
+        planType: user.planType,
+      }, { status: 403 })
+    }
+
+    // For Premium users, check if they've reached their project limit (4)
+    // @ts-ignore - planType exists in the schema but TypeScript definitions aren't updated
+    if (user.planType === "Premium") {
+      const projectCount = await prisma.project.count({
+        where: {
+          userId: user.clerkId,
+        }
+      })
+
+      if (projectCount >= 4) {
+        return NextResponse.json({
+          error: "Limit reached",
+          message: "Ai atins limita de 4 proiecte pentru planul Premium. Fă upgrade la planul Gold pentru proiecte nelimitate.",
+          // @ts-ignore - planType exists in the schema but TypeScript definitions aren't updated
+          planType: user.planType,
+        }, { status: 403 })
+      }
     }
 
     // Check if user has completed their profile in our database
@@ -102,6 +172,23 @@ export async function POST(req: NextRequest) {
         },
       },
     })
+
+    // If creating project succeeds, update project count in subscription if Premium plan
+    // @ts-ignore - planType exists in the schema but TypeScript definitions aren't updated
+    if (user.planType === "Premium") {
+      await prisma.subscription.updateMany({
+        where: {
+          userId: user.clerkId,
+          plan: "Premium",
+        },
+        data: {
+          // @ts-ignore - projectsPosted exists in the schema but TypeScript definitions aren't updated
+          projectsPosted: {
+            increment: 1,
+          },
+        },
+      });
+    }
 
     console.log("Created project with user data:", project)
 

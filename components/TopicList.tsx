@@ -1,5 +1,7 @@
-import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import TopicCard from "./TopicCard";
+import AccessDeniedDialog from "@/components/AccessDeniedDialog";
 
 interface Topic {
   id: string;
@@ -33,13 +35,31 @@ export interface TopicListProps {
   topics: Topic[];
   onFavoriteToggle: (topicId: string) => Promise<void>;
   onDelete: (topicId: string) => Promise<void>;
+  userPlan?: string;
 }
 
 export default function TopicList({
   topics,
   onFavoriteToggle,
   onDelete,
+  userPlan = "Basic",
 }: TopicListProps) {
+  const router = useRouter();
+  const [showAccessDenied, setShowAccessDenied] = useState(false);
+  const [selectedTopicId, setSelectedTopicId] = useState("");
+
+  const handleTopicClick = (e: React.MouseEvent, topicId: string) => {
+    if (userPlan === "Basic") {
+      e.preventDefault();
+      setSelectedTopicId(topicId);
+      setShowAccessDenied(true);
+      return;
+    }
+
+    // Pentru planurile premium, navigare către pagina de topic
+    router.push(`/forum/${topicId}`);
+  };
+
   return (
     <div className="space-y-4">
       {topics.map((topic) => {
@@ -48,7 +68,11 @@ export default function TopicList({
         ).size;
 
         return (
-          <Link key={topic.id} href={`/forum/${topic.id}`}>
+          <div
+            key={topic.id}
+            onClick={(e) => handleTopicClick(e, topic.id)}
+            className="cursor-pointer"
+          >
             <TopicCard
               id={topic.id}
               title={topic.title}
@@ -76,9 +100,15 @@ export default function TopicList({
               }
               onDelete={async (topicId) => await onDelete(topicId)}
             />
-          </Link>
+          </div>
         );
       })}
+
+      <AccessDeniedDialog
+        isOpen={showAccessDenied}
+        onClose={() => setShowAccessDenied(false)}
+        originalPath={`/forum/${selectedTopicId}`}
+      />
     </div>
   );
 }
