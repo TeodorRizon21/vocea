@@ -1,3 +1,4 @@
+
 import { prisma } from "@/lib/prisma";
 import UserProfile from "@/components/UserProfile";
 import BrowsePageClient from "@/components/BrowsePageClient";
@@ -58,12 +59,15 @@ async function getProjects(type?: string) {
 }
 
 export default async function BrowsePage({
+
   searchParams,
 }: {
   searchParams: { [key: string]: string | string[] | undefined };
 }) {
+
   const activeTab = (searchParams.tab as string) || "proiect";
   const projects = await getProjects(activeTab);
+
 
   return (
     <div className="space-y-6">
@@ -72,11 +76,13 @@ export default async function BrowsePage({
         <UserProfile />
       </div>
 
+
       <BrowsePageClient
         tabsData={tabsData}
         initialTab={activeTab}
         projects={projects}
       />
+
     </div>
   );
 }

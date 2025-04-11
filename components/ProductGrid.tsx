@@ -32,23 +32,30 @@ export default function ProductGrid({ projects }: ProductGridProps) {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-      {projects.map((project) => (
-        <Link key={project.id} href={`/project/${project.id}`} className="block aspect-square">
-          <ProductCard
-            title={project.title}
-            subject={project.subject}
-            thumbnailUrl={project.images[0] || "/placeholder.svg?height=192&width=192"}
-            authorFirstName={project.user.firstName}
-            authorLastName={project.user.lastName}
-            authorAvatar={project.user.avatar}
-            university={getUniversityName(project.user.university || "")}
-            faculty={getFacultyName(project.user.university || "", project.user.faculty || "")}
-            reviews={project.reviews}
-            userId={project.userId} // Pass the userId to ProductCard
-          />
-        </Link>
-      ))}
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {projects.map((project) => {
+        // Get university and faculty names, fallback to direct values if lookup fails
+        const universityName = getUniversityName(project.university || "") || project.university || "University not set";
+        const facultyName = getFacultyName(project.university || "", project.faculty || "") || project.faculty || "Faculty not set";
+        
+        return (
+          <Link key={project.id} href={`/project/${project.id}`} className="block h-full">
+            <ProductCard
+              title={project.title}
+              subject={project.subject}
+              thumbnailUrl={project.images[0] || "/placeholder.svg?height=192&width=192"}
+              authorFirstName={project.user.firstName}
+              authorLastName={project.user.lastName}
+              authorAvatar={project.user.avatar}
+              university={universityName}
+              faculty={facultyName}
+              category={project.category}
+              reviews={project.reviews}
+              userId={project.userId}
+            />
+          </Link>
+        );
+      })}
     </div>
   )
 }

@@ -26,14 +26,36 @@ export default function ProfileInfo({
   reviewScore,
   onEdit,
 }: ProfileInfoProps) {
-  const { getUniversityName, getFacultyName } = useUniversities()
+  const { getUniversityName, getFacultyName, universities } = useUniversities()
 
-  // Convert IDs to actual names
-  const universityName =
-    university && university !== "University not set" ? getUniversityName(university) : "University not set"
+  // Add console logging for debugging
+  console.log("ProfileInfo received university:", university);
+  console.log("ProfileInfo received faculty:", faculty);
 
-  const facultyName =
-    faculty && faculty !== "Faculty not set" ? getFacultyName(university || "", faculty) : "Faculty not set"
+  // Check if the university value is an ID or a name
+  const isUniversityId = university?.startsWith('uni_');
+  const isFacultyId = faculty?.startsWith('fac_');
+  
+  console.log("Is university ID?", isUniversityId);
+  console.log("Is faculty ID?", isFacultyId);
+  
+  // If it's an ID, use the lookup function; otherwise, display the name directly
+  const universityDisplay = 
+    !university || university === "University not set" 
+      ? "University not set"
+      : isUniversityId 
+        ? getUniversityName(university) || university
+        : university;
+
+  const facultyDisplay = 
+    !faculty || faculty === "Faculty not set" 
+      ? "Faculty not set"
+      : isFacultyId
+        ? getFacultyName(university || "", faculty) || faculty
+        : faculty;
+        
+  console.log("Final university display:", universityDisplay);
+  console.log("Final faculty display:", facultyDisplay);
 
   return (
     <Card className="shadow-md">
@@ -52,11 +74,11 @@ export default function ProfileInfo({
         </div>
         <div className="flex items-center">
           <School className="mr-2 h-4 w-4 text-purple-600" />
-          <span>{universityName}</span>
+          <span>{universityDisplay}</span>
         </div>
         <div className="flex items-center">
           <School className="mr-2 h-4 w-4 text-purple-600" />
-          <span>{facultyName}</span>
+          <span>{facultyDisplay}</span>
         </div>
         <div className="flex items-center">
           <MapPin className="mr-2 h-4 w-4 text-purple-600" />
