@@ -6,7 +6,7 @@ export async function GET(req: NextRequest) {
   try {
     // Pentru GET, facem operațiunea fără a verifica autentificarea,
     // pentru a permite vizualizarea proiectelor de către toți utilizatorii
-    const type = req.nextUrl.searchParams.get("type")
+    const type = req.nextUrl.searchParams.get("type") || req.url && new URL(req.url).searchParams.get('type')
     
     console.log("Fetching projects with type:", type);
     
@@ -204,40 +204,6 @@ export async function POST(req: NextRequest) {
         status: 500,
         headers: { "Content-Type": "application/json" },
       },
-    )
-  }
-}
-
-export async function GET(req: NextRequest) {
-  try {
-    const { searchParams } = new URL(req.url)
-    const type = searchParams.get('type')
-    
-    const projects = await prisma.project.findMany({
-      where: type ? { type } : undefined,
-      include: {
-        user: {
-          select: {
-            firstName: true,
-            lastName: true,
-            university: true,
-            faculty: true,
-            avatar: true,
-          },
-        },
-        reviews: true,
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    })
-    
-    return NextResponse.json({ projects })
-  } catch (error) {
-    console.error("Error fetching projects:", error)
-    return NextResponse.json(
-      { error: "Failed to fetch projects" },
-      { status: 500 }
     )
   }
 }
