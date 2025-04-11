@@ -30,6 +30,7 @@
     "clsx": "^2.0.0",
     "cmdk": "^1.1.1",
     "date-fns": "^2.30.0",
+    "emailjs-com": "^3.2.0",
     "embla-carousel-react": "^8.6.0",
     "framer-motion": "^10.16.4",
     "lucide-react": "^0.284.0",

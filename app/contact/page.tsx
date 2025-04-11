@@ -14,6 +14,7 @@ import { useForm, ControllerRenderProps, FieldValues } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import emailjs from 'emailjs-com'
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters" }),
@@ -47,20 +48,37 @@ export default function ContactPage() {
     setIsSubmitting(true)
     setIsSuccess(false)
     setIsError(false)
-
+  
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-      console.log("Form submitted:", data)
+      // Get the current time to send as part of the email content
+      const currentTime = new Date().toLocaleString()
+  
+      // Use EmailJS to send the form data
+      const result = await emailjs.send(
+        'service_g5i2hp9',           // Replace with your service ID
+        'template_fswhdgr',          // Replace with your template ID
+        {
+          name: data.name,
+          email: data.email,
+          contactType: data.contactType,
+          subject: data.subject,
+          message: data.message,
+          time: currentTime,         // Pass the current time as the 'time' placeholder
+        },
+        '-2SQ07NramZyU8SrM'          // Replace with your user ID
+      )
+      
+      console.log(result.text) // Log the result from EmailJS for debugging
       setIsSuccess(true)
-      form.reset()
+      form.reset()  // Reset the form on success
     } catch (error) {
-      console.error("Error submitting form:", error)
+      console.error("Error sending email:", error)
       setIsError(true)
     } finally {
       setIsSubmitting(false)
     }
   }
+  
 
   const containerVariants = {
     hidden: { opacity: 0 },
