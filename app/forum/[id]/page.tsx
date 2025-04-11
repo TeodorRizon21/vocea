@@ -3,7 +3,7 @@
 import type React from "react";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import UserTooltip from "@/components/UserTooltip";
 import ReportButton from "@/components/ReportButton";
+import AccessDeniedDialog from "@/components/AccessDeniedDialog";
 
 interface Comment {
   id: string;
@@ -94,7 +95,11 @@ function CommentReplies({
   return (
     <div className="space-y-4">
       {replies.slice(0, visibleReplies).map((reply) => (
-        <Card key={reply.id}>
+        <Card
+          key={reply.id}
+          id={`comment-${reply.id}`}
+          className="transition-colors duration-300"
+        >
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <UserTooltip
@@ -186,6 +191,7 @@ function CommentReplies({
 
 export default function TopicPage({ params }: { params: { id: string } }) {
   const router = useRouter();
+  const urlParams = useParams();
   const { user } = useUser();
   const [topic, setTopic] = useState<Topic | null>(null);
   const [loading, setLoading] = useState(true);
@@ -197,11 +203,70 @@ export default function TopicPage({ params }: { params: { id: string } }) {
   const [sortOption, setSortOption] = useState<
     "relevance" | "newest" | "oldest"
   >("newest");
+  const [showAccessDenied, setShowAccessDenied] = useState(false);
+
+  // Funcție pentru a gestiona scrollarea automată la comentarii
+  const scrollToComment = useEffect(() => {
+    // Se execută după ce topicul este încărcat și pagina este randată
+    if (topic && !loading && typeof window !== "undefined") {
+      // Obținem hash-ul din URL
+      const hash = window.location.hash;
+
+      // Verificăm dacă există un hash și dacă acesta corespunde formatului nostru
+      if (hash && hash.startsWith("#comment-")) {
+        const commentId = hash.replace("#comment-", "");
+        // Găsim elementul DOM și facem scroll către el
+        const commentElement = document.getElementById(`comment-${commentId}`);
+
+        if (commentElement) {
+          // Adăugăm un timeout mic pentru a ne asigura că DOM-ul este complet încărcat
+          setTimeout(() => {
+            commentElement.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+            });
+            // Adăugăm o evidențiere temporară
+            commentElement.classList.add(
+              "bg-yellow-100",
+              "dark:bg-yellow-900/20"
+            );
+            setTimeout(() => {
+              commentElement.classList.remove(
+                "bg-yellow-100",
+                "dark:bg-yellow-900/20"
+              );
+            }, 3000); // Eliminăm evidențierea după 3 secunde
+          }, 300);
+        }
+      }
+    }
+  }, [topic, loading]);
 
   useEffect(() => {
     fetchTopic();
 
+    // Verifică planul utilizatorului
+    const checkUserPlan = async () => {
+      if (user?.id) {
+        try {
+          const response = await fetch(`/api/user`);
+          if (response.ok) {
+            const userData = await response.json();
+            // Verifică dacă utilizatorul are plan Basic și afișează dialogul dacă este cazul
+            if (userData.planType === "Basic") {
+              setShowAccessDenied(true);
+              setLoading(false);
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching user plan:", error);
+        }
+      }
+    };
+
     if (user) {
+      checkUserPlan();
+
       // Check for admin role in public metadata
       const publicMetadata = user.publicMetadata;
       console.log("User data available:", {
@@ -223,6 +288,14 @@ export default function TopicPage({ params }: { params: { id: string } }) {
   const fetchTopic = async () => {
     try {
       const response = await fetch(`/api/forum/${params.id}`);
+
+      if (response.status === 403) {
+        // Access denied response - user has Basic plan
+        setShowAccessDenied(true);
+        setLoading(false);
+        return;
+      }
+
       if (response.ok) {
         const data = await response.json();
         setTopic(data);
@@ -416,262 +489,284 @@ export default function TopicPage({ params }: { params: { id: string } }) {
     );
   }
 
-  if (!topic) return null;
+  if (!topic && !showAccessDenied) return null;
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
-      <div className="flex justify-between items-center">
-        <Button variant="outline" onClick={() => router.back()}>
-          Back to Forum
-        </Button>
-        <div className="flex gap-2">
-          <ReportButton contentType="forum_topic" contentId={topic.id} />
-          <Button
-            variant="ghost"
-            size="icon"
-            className={`${
-              topic.isFavorited ? "text-yellow-500" : "text-gray-400"
-            } hover:text-yellow-500`}
-            onClick={handleFavoriteToggle}
-          >
-            <Star
-              className={`h-5 w-5 ${topic.isFavorited ? "fill-current" : ""}`}
-            />
-          </Button>
-          {(topic.isOwner || isAdmin) && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleDeleteTopic}
-              className="text-red-500 hover:text-red-700"
-            >
-              <Trash2 className="h-5 w-5" />
+    <>
+      {!showAccessDenied && topic && (
+        <div className="max-w-4xl mx-auto space-y-8">
+          <div className="flex justify-between items-center">
+            <Button variant="outline" onClick={() => router.back()}>
+              Back to Forum
             </Button>
-          )}
-        </div>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <div className="flex justify-between items-start mb-4">
-            <div className="flex items-center space-x-4">
-              <UserTooltip
-                userId={topic.userId}
-                firstName={topic.user.firstName}
-                lastName={topic.user.lastName}
-                university={topic.user.university}
-                faculty={topic.user.faculty}
-                universityName={topic.user.universityName}
-                facultyName={topic.user.facultyName}
-                avatar={topic.user.avatar}
+            <div className="flex gap-2">
+              <ReportButton contentType="forum_topic" contentId={topic.id} />
+              <Button
+                variant="ghost"
+                size="icon"
+                className={`${
+                  topic.isFavorited ? "text-yellow-500" : "text-gray-400"
+                } hover:text-yellow-500`}
+                onClick={handleFavoriteToggle}
               >
-                <div className="flex items-center space-x-2">
-                  <Avatar>
-                    <AvatarImage src={topic.user.avatar || undefined} />
-                    <AvatarFallback>
-                      {topic.user.firstName?.[0]}
-                      {topic.user.lastName?.[0]}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="font-medium hover:underline">
-                      {topic.user.firstName} {topic.user.lastName}{" "}
-                      <span className="text-gray-500 text-sm">(Autor)</span>
-                    </p>
-                  </div>
-                </div>
-              </UserTooltip>
-            </div>
-            <div className="text-sm text-muted-foreground">
-              {format(new Date(topic.createdAt), "PPP 'at' HH:mm")}
-            </div>
-          </div>
-          <CardTitle className="text-2xl mb-2">{topic.title}</CardTitle>
-          <div className="space-y-1 text-sm text-muted-foreground">
-            <p>{topic.facultyName || topic.faculty}</p>
-            <p>{topic.universityName || topic.university}</p>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <p className="whitespace-pre-line">{topic.content}</p>
-        </CardContent>
-      </Card>
-
-      <div className="space-y-6">
-        <h2 className="text-xl font-semibold">
-          Comments ({topic.comments.filter((c) => !c.parentId).length})
-        </h2>
-
-        <form onSubmit={handleSubmitComment} className="space-y-4">
-          <Textarea
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            placeholder="Add a comment..."
-            className="min-h-[100px]"
-          />
-          <div className="flex items-center justify-between">
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Send className="mr-2 h-4 w-4" />
-              )}
-              Post Comment
-            </Button>
-
-            <div className="flex items-center">
-              <Button variant="outline" className="flex items-center gap-2">
-                <SortDesc className="h-4 w-4" />
-                <span className="mr-1">Sortează:</span>
-                <select
-                  value={sortOption}
-                  onChange={(e) =>
-                    setSortOption(
-                      e.target.value as "relevance" | "newest" | "oldest"
-                    )
-                  }
-                  className="bg-transparent border-none focus:outline-none"
-                >
-                  <option value="relevance">După relevanță</option>
-                  <option value="newest">Cele mai noi</option>
-                  <option value="oldest">Cele mai vechi</option>
-                </select>
+                <Star
+                  className={`h-5 w-5 ${
+                    topic.isFavorited ? "fill-current" : ""
+                  }`}
+                />
               </Button>
+              {(topic.isOwner || isAdmin) && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleDeleteTopic}
+                  className="text-red-500 hover:text-red-700"
+                >
+                  <Trash2 className="h-5 w-5" />
+                </Button>
+              )}
             </div>
           </div>
-        </form>
 
-        <div className="space-y-6">
-          {topic.comments &&
-            sortComments(topic.comments).map((comment) => (
-              <div key={comment.id} className="space-y-4">
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="flex items-center justify-between">
-                      <UserTooltip
-                        userId={comment.userId}
-                        firstName={comment.user.firstName}
-                        lastName={comment.user.lastName}
-                        university={comment.user.university}
-                        faculty={comment.user.faculty}
-                        universityName={comment.user.universityName}
-                        facultyName={comment.user.facultyName}
-                        avatar={comment.user.avatar}
-                      >
-                        <div className="flex items-center space-x-4 mb-4">
-                          <Avatar>
-                            <AvatarImage
-                              src={comment.user.avatar || undefined}
-                            />
-                            <AvatarFallback>
-                              {comment.user.firstName?.[0]}
-                              {comment.user.lastName?.[0]}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="font-medium hover:underline">
-                              {comment.user.firstName} {comment.user.lastName}
-                              {comment.userId === topic.userId && (
-                                <span className="text-yellow-500 text-sm ml-1">
-                                  (Autor)
-                                </span>
-                              )}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {comment.user.universityName ||
-                                comment.user.university}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {comment.user.facultyName || comment.user.faculty}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {format(
-                                new Date(comment.createdAt),
-                                "PPP 'at' HH:mm"
-                              )}
-                            </p>
-                          </div>
-                        </div>
-                      </UserTooltip>
-                      <div className="flex space-x-2">
-                        <ReportButton
-                          contentType="forum_comment"
-                          contentId={comment.id}
-                        />
-                        {(user?.id === comment.userId ||
-                          topic.isOwner ||
-                          isAdmin) && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleDeleteComment(comment.id)}
-                            className="text-red-500 hover:text-red-700"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        )}
+          <Card>
+            <CardHeader>
+              <div className="flex justify-between items-start mb-4">
+                <div className="flex items-center space-x-4">
+                  <UserTooltip
+                    userId={topic.userId}
+                    firstName={topic.user.firstName}
+                    lastName={topic.user.lastName}
+                    university={topic.user.university}
+                    faculty={topic.user.faculty}
+                    universityName={topic.user.universityName}
+                    facultyName={topic.user.facultyName}
+                    avatar={topic.user.avatar}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <Avatar>
+                        <AvatarImage src={topic.user.avatar || undefined} />
+                        <AvatarFallback>
+                          {topic.user.firstName?.[0]}
+                          {topic.user.lastName?.[0]}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-medium hover:underline">
+                          {topic.user.firstName} {topic.user.lastName}{" "}
+                          <span className="text-gray-500 text-sm">(Autor)</span>
+                        </p>
                       </div>
                     </div>
-                    <p className="mb-4">{comment.content}</p>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() =>
-                        setReplyTo(replyTo === comment.id ? null : comment.id)
-                      }
-                    >
-                      <Reply className="h-4 w-4 mr-2" />
-                      Reply
-                    </Button>
-                  </CardContent>
-                </Card>
-
-                {replyTo === comment.id && (
-                  <div className="ml-12 space-y-4">
-                    <Textarea
-                      value={replyContent}
-                      onChange={(e) => setReplyContent(e.target.value)}
-                      placeholder="Write a reply..."
-                    />
-                    <div className="space-x-2">
-                      <Button
-                        onClick={() => handleSubmitReply(comment.id)}
-                        disabled={isSubmitting}
-                        size="sm"
-                      >
-                        {isSubmitting ? (
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        ) : null}
-                        Post Reply
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setReplyTo(null);
-                          setReplyContent("");
-                        }}
-                      >
-                        Cancel
-                      </Button>
-                    </div>
-                  </div>
-                )}
-
-                {comment.replies?.length > 0 && (
-                  <div className="ml-12">
-                    <CommentReplies
-                      replies={comment.replies}
-                      topicOwnerId={topic.userId}
-                      onDeleteReply={handleDeleteComment}
-                      isAdmin={isAdmin}
-                    />
-                  </div>
-                )}
+                  </UserTooltip>
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  {format(new Date(topic.createdAt), "PPP 'at' HH:mm")}
+                </div>
               </div>
-            ))}
+              <CardTitle className="text-2xl mb-2">{topic.title}</CardTitle>
+              <div className="space-y-1 text-sm text-muted-foreground">
+                <p>{topic.facultyName || topic.faculty}</p>
+                <p>{topic.universityName || topic.university}</p>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="whitespace-pre-line">{topic.content}</p>
+            </CardContent>
+          </Card>
+
+          <div className="space-y-6">
+            <h2 className="text-xl font-semibold">
+              Comments ({topic.comments.filter((c) => !c.parentId).length})
+            </h2>
+
+            <form onSubmit={handleSubmitComment} className="space-y-4">
+              <Textarea
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder="Add a comment..."
+                className="min-h-[100px]"
+              />
+              <div className="flex items-center justify-between">
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Send className="mr-2 h-4 w-4" />
+                  )}
+                  Post Comment
+                </Button>
+
+                <div className="flex items-center">
+                  <Button variant="outline" className="flex items-center gap-2">
+                    <SortDesc className="h-4 w-4" />
+                    <span className="mr-1">Sortează:</span>
+                    <select
+                      value={sortOption}
+                      onChange={(e) =>
+                        setSortOption(
+                          e.target.value as "relevance" | "newest" | "oldest"
+                        )
+                      }
+                      className="bg-transparent border-none focus:outline-none"
+                    >
+                      <option value="relevance">După relevanță</option>
+                      <option value="newest">Cele mai noi</option>
+                      <option value="oldest">Cele mai vechi</option>
+                    </select>
+                  </Button>
+                </div>
+              </div>
+            </form>
+
+            <div className="space-y-6">
+              {topic.comments &&
+                sortComments(topic.comments).map((comment) => (
+                  <div key={comment.id} className="space-y-4">
+                    <Card
+                      id={`comment-${comment.id}`}
+                      className="transition-colors duration-300"
+                    >
+                      <CardContent className="pt-6">
+                        <div className="flex items-center justify-between">
+                          <UserTooltip
+                            userId={comment.userId}
+                            firstName={comment.user.firstName}
+                            lastName={comment.user.lastName}
+                            university={comment.user.university}
+                            faculty={comment.user.faculty}
+                            universityName={comment.user.universityName}
+                            facultyName={comment.user.facultyName}
+                            avatar={comment.user.avatar}
+                          >
+                            <div className="flex items-center space-x-4 mb-4">
+                              <Avatar>
+                                <AvatarImage
+                                  src={comment.user.avatar || undefined}
+                                />
+                                <AvatarFallback>
+                                  {comment.user.firstName?.[0]}
+                                  {comment.user.lastName?.[0]}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <p className="font-medium hover:underline">
+                                  {comment.user.firstName}{" "}
+                                  {comment.user.lastName}
+                                  {comment.userId === topic.userId && (
+                                    <span className="text-yellow-500 text-sm ml-1">
+                                      (Autor)
+                                    </span>
+                                  )}
+                                </p>
+                                <p className="text-sm text-muted-foreground">
+                                  {comment.user.universityName ||
+                                    comment.user.university}
+                                </p>
+                                <p className="text-sm text-muted-foreground">
+                                  {comment.user.facultyName ||
+                                    comment.user.faculty}
+                                </p>
+                                <p className="text-sm text-muted-foreground">
+                                  {format(
+                                    new Date(comment.createdAt),
+                                    "PPP 'at' HH:mm"
+                                  )}
+                                </p>
+                              </div>
+                            </div>
+                          </UserTooltip>
+                          <div className="flex space-x-2">
+                            <ReportButton
+                              contentType="forum_comment"
+                              contentId={comment.id}
+                            />
+                            {(user?.id === comment.userId ||
+                              topic.isOwner ||
+                              isAdmin) && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleDeleteComment(comment.id)}
+                                className="text-red-500 hover:text-red-700"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                        <p className="mb-4">{comment.content}</p>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() =>
+                            setReplyTo(
+                              replyTo === comment.id ? null : comment.id
+                            )
+                          }
+                        >
+                          <Reply className="h-4 w-4 mr-2" />
+                          Reply
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    {replyTo === comment.id && (
+                      <div className="ml-12 space-y-4">
+                        <Textarea
+                          value={replyContent}
+                          onChange={(e) => setReplyContent(e.target.value)}
+                          placeholder="Write a reply..."
+                        />
+                        <div className="space-x-2">
+                          <Button
+                            onClick={() => handleSubmitReply(comment.id)}
+                            disabled={isSubmitting}
+                            size="sm"
+                          >
+                            {isSubmitting ? (
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : null}
+                            Post Reply
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setReplyTo(null);
+                              setReplyContent("");
+                            }}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+
+                    {comment.replies?.length > 0 && (
+                      <div className="ml-12">
+                        <CommentReplies
+                          replies={comment.replies}
+                          topicOwnerId={topic.userId}
+                          onDeleteReply={handleDeleteComment}
+                          isAdmin={isAdmin}
+                        />
+                      </div>
+                    )}
+                  </div>
+                ))}
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+      )}
+
+      <AccessDeniedDialog
+        isOpen={showAccessDenied}
+        onClose={() => {
+          setShowAccessDenied(false);
+          router.push("/forum");
+        }}
+        originalPath={`/forum/${params.id}`}
+      />
+    </>
   );
 }

@@ -4,6 +4,39 @@ import { type NextRequest, NextResponse } from "next/server"
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
+    // Verificăm autentificarea utilizatorului
+    const { userId } = getAuth(req)
+    
+    // Dacă utilizatorul nu este autentificat, returnăm eroare
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    // Obținem informații despre utilizator, inclusiv tipul de plan
+    const user = await prisma.user.findUnique({
+      where: {
+        clerkId: userId
+      }
+    })
+
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 })
+    }
+
+    // Verificăm dacă utilizatorul are planul Basic
+    // @ts-ignore - planType exists in the schema but TypeScript definitions aren't updated
+    if (user.planType === "Basic") {
+      // Utilizatorii Basic nu pot accesa proiecte individuale
+      return NextResponse.json({
+        error: "Access denied",
+        message: "Ai nevoie de un abonament superior pentru a accesa proiecte individuale.",
+        // @ts-ignore - planType exists in the schema but TypeScript definitions aren't updated
+        planType: user.planType,
+        originalPath: `/project/${params.id}`
+      }, { status: 403 })
+    }
+
+    // Căutăm proiectul în baza de date
     const project = await prisma.project.findUnique({
       where: { id: params.id },
       include: {
@@ -20,15 +53,17 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       },
     })
 
-
     if (!project) {
-      return new NextResponse("Project not found", { status: 404 })
+      return NextResponse.json({ error: "Project not found" }, { status: 404 })
     }
 
     return NextResponse.json(project)
   } catch (error) {
     console.error("Error fetching project:", error)
-    return new NextResponse("Internal Server Error", { status: 500 })
+    return NextResponse.json(
+      { error: "Server error", message: "A apărut o eroare la încărcarea proiectului." },
+      { status: 500 }
+    )
   }
 }
 

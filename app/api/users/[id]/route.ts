@@ -64,6 +64,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       include: {
         topic: {
           select: {
+            id: true,
             title: true,
           },
         },
@@ -75,6 +76,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       id: comment.id,
       content: comment.content,
       projectTitle: comment.topic?.title || "Unknown Topic",
+      topicId: comment.topic?.id || "",
     }))
 
     // Get user's projects

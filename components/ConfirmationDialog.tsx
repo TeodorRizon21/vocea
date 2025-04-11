@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   Dialog,
@@ -7,18 +7,24 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 interface ConfirmationDialogProps {
-  isOpen: boolean
-  onClose: () => void
-  onConfirm: () => void
-  title: string
-  message: string
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  title: string;
+  message: string;
 }
 
-export default function ConfirmationDialog({ isOpen, onClose, onConfirm, title, message }: ConfirmationDialogProps) {
+export default function ConfirmationDialog({
+  isOpen,
+  onClose,
+  onConfirm,
+  title,
+  message,
+}: ConfirmationDialogProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
@@ -26,14 +32,18 @@ export default function ConfirmationDialog({ isOpen, onClose, onConfirm, title, 
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{message}</DialogDescription>
         </DialogHeader>
-        <DialogFooter>
+        <DialogFooter className="mt-4">
           <Button variant="outline" onClick={onClose}>
-            Cancel
+            Anulează
           </Button>
-          <Button onClick={onConfirm}>Confirm</Button>
+          <Button
+            className="bg-purple-600 hover:bg-purple-700"
+            onClick={onConfirm}
+          >
+            Confirmă
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
-
