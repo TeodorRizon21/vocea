@@ -90,11 +90,44 @@ export async function GET(req: NextRequest) {
           userId: clerkId,
         },
       },
+      include: {
+        user: {
+          select: {
+            firstName: true,
+            lastName: true,
+          },
+        },
+        project: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
     })
 
     const totalScore = projectReviews.reduce((sum, review) => sum + review.score, 0)
     const averageRating = projectReviews.length > 0 ? totalScore / projectReviews.length : null
     const reviewCount = projectReviews.length
+
+    // Format reviews for UI
+    const formattedReviews = projectReviews.map(review => ({
+      id: review.id,
+      score: review.score,
+      comment: review.comment,
+      createdAt: review.createdAt.toISOString(),
+      user: {
+        firstName: review.user.firstName,
+        lastName: review.user.lastName,
+      },
+      project: {
+        id: review.project.id,
+        title: review.project.title,
+      }
+    }))
 
     const userData = {
       ...user,
@@ -107,6 +140,7 @@ export async function GET(req: NextRequest) {
       },
       averageRating,
       reviewCount,
+      reviews: formattedReviews,
     }
 
     return NextResponse.json(userData)
