@@ -54,7 +54,6 @@ export default function ProductGrid({
   };
 
   return (
-
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {projects.map((project) => (
@@ -73,18 +72,16 @@ export default function ProductGrid({
               authorFirstName={project.user.firstName}
               authorLastName={project.user.lastName}
               authorAvatar={project.user.avatar}
-              university={getUniversityName(project.user.university || "")}
-              faculty={getFacultyName(
-                project.user.university || "",
-                project.user.faculty || ""
-              )}
+              university={
+                project.university || "Nicio universitate specificată"
+              }
+              faculty={project.faculty || "Nicio facultate specificată"}
               reviews={project.reviews}
               userId={project.userId}
             />
           </a>
         ))}
       </div>
-
 
       <AccessDeniedDialog
         isOpen={showAccessDenied}
