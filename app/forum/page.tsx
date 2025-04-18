@@ -44,7 +44,7 @@ interface ExtendedForumTopic extends OmitDate {
 export default function ForumPage() {
   const router = useRouter();
   const { user } = useUser();
-  const { getUniversityName, getFacultyName } = useUniversities();
+  const { getUniversityName, getFacultyName, universities } = useUniversities();
   const [activeTab, setActiveTab] = useState("toate");
   const [searchQuery, setSearchQuery] = useState("");
   const [topics, setTopics] = useState<ExtendedForumTopic[]>([]);
@@ -57,6 +57,7 @@ export default function ForumPage() {
     university: "",
     faculty: "",
     category: "",
+    city: "",
   });
   const [userPlan, setUserPlan] = useState("Basic");
 
@@ -96,41 +97,36 @@ export default function ForumPage() {
         (topic) =>
           topic.title.toLowerCase().includes(query) ||
           topic.content.toLowerCase().includes(query) ||
-          (topic.university &&
-            topic.university.toLowerCase().includes(query)) ||
-          (topic.faculty && topic.faculty.toLowerCase().includes(query))
+          (topic.universityName && topic.universityName.toLowerCase().includes(query)) ||
+          (topic.facultyName && topic.facultyName.toLowerCase().includes(query))
       );
     }
 
     // Filter by university
     if (filters.university && filters.university !== "") {
-      filtered = filtered.filter((topic) => {
-        return (
-          topic.university === filters.university ||
-          (topic.user && topic.user.university === filters.university)
-        );
-      });
+      filtered = filtered.filter((topic) => topic.university === filters.university);
     }
 
     // Filter by faculty
     if (filters.faculty && filters.faculty !== "") {
+      filtered = filtered.filter((topic) => topic.faculty === filters.faculty);
+    }
+
+    // Filter by city - using the university's city
+    if (filters.city && filters.city !== "") {
       filtered = filtered.filter((topic) => {
-        return (
-          topic.faculty === filters.faculty ||
-          (topic.user && topic.user.faculty === filters.faculty)
-        );
+        const university = universities.find(u => u.name === topic.university);
+        return university?.city === filters.city;
       });
     }
 
     // Filter by category
     if (filters.category && filters.category !== "") {
-      filtered = filtered.filter(
-        (topic) => topic.category === filters.category
-      );
+      filtered = filtered.filter((topic) => topic.category === filters.category);
     }
 
     setFilteredTopics(filtered);
-  }, [activeTab, searchQuery, topics, user?.id, filters]);
+  }, [activeTab, searchQuery, topics, user?.id, filters, universities]);
 
   useEffect(() => {
     filterTopics();
@@ -206,7 +202,7 @@ export default function ForumPage() {
   };
 
   const handleApplyFilters = useCallback(
-    (newFilters: { university: string; faculty: string; category: string }) => {
+    (newFilters: { university: string; faculty: string; category: string; city: string }) => {
       setFilters(newFilters);
       setIsFilterDialogOpen(false);
     },
@@ -267,7 +263,7 @@ export default function ForumPage() {
             <Button
               variant="link"
               onClick={() => {
-                setFilters({ university: "", faculty: "", category: "" });
+                setFilters({ university: "", faculty: "", category: "", city: "" });
                 setSearchQuery("");
               }}
             >

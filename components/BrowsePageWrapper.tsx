@@ -90,12 +90,14 @@ export default function BrowsePageWrapper({ initialTab }: BrowsePageWrapperProps
         const data = await response.json()
         
         if (isMounted) {
-          if (data.projects && Array.isArray(data.projects)) {
-            console.log(`Received ${data.projects.length} projects from API`)
-            setProjects(data.projects)
-          } else if (Array.isArray(data)) {
+          console.log('Received data from API:', data);
+          // The API returns projects directly as an array, not in a nested 'projects' field
+          if (Array.isArray(data)) {
             console.log(`Received ${data.length} projects from API`)
             setProjects(data)
+          } else if (data.projects && Array.isArray(data.projects)) {
+            console.log(`Received ${data.projects.length} projects from API`)
+            setProjects(data.projects)
           } else {
             console.error("Invalid data format received:", data)
             throw new Error("Invalid data format received from API")

@@ -29,6 +29,7 @@ interface ExtendedProject {
   userId: string;
   authorName: string | null;
   authorAvatar: string | null;
+  studyLevel?: string;
   createdAt: Date;
   updatedAt: Date;
   user: {
@@ -56,8 +57,13 @@ interface BrowsePageClientProps {
 const diverseSubcategories = [
   { id: "all", label: "All" },
   { id: "oferte-munca", label: "Oferte muncă" },
-  { id: "obiecte", label: "Obiecte" },
   { id: "servicii", label: "Servicii" },
+  { id: "autoturisme", label: "Autoturisme" },
+  { id: "sport", label: "Sport" },
+  { id: "electronice", label: "Electronice" },
+  { id: "cosmetice", label: "Cosmetice" },
+  { id: "electrocasnice", label: "Electrocasnice" },
+  { id: "altele", label: "Altele" },
 ];
 
 export default function BrowsePageClient({
@@ -82,6 +88,7 @@ export default function BrowsePageClient({
     university: "",
     faculty: "",
     category: "",
+    studyLevel: "",
   });
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [showAccessDenied, setShowAccessDenied] = useState(false);
@@ -128,6 +135,22 @@ export default function BrowsePageClient({
       );
     }
 
+    // Apply category filter if needed
+    if (filters.category && filters.category !== "_all") {
+      result = result.filter(
+        (project) => 
+          (project.category && project.category === filters.category) || 
+          (project.subject && project.subject === filters.category)
+      );
+    }
+
+    // Apply study level filter if needed
+    if (filters.studyLevel && filters.studyLevel !== "_all") {
+      result = result.filter(
+        (project) => project.studyLevel === filters.studyLevel
+      );
+    }
+
     // Apply sort order
     result = [...result].sort((a, b) => {
       const dateA = new Date(a.createdAt).getTime();
@@ -150,6 +173,22 @@ export default function BrowsePageClient({
   const handleTabChange = (value: string) => {
     setActiveTab(value);
     setDiverseSubcategory("all"); // Reset subcategory when changing tabs
+    
+    // Reset category and study level filters when switching tabs, especially to diverse
+    if (value === "diverse") {
+      setFilters(prev => ({
+        ...prev,
+        category: "",
+        studyLevel: ""
+      }));
+    } else {
+      // Just reset the category to ensure it's appropriate for the new tab
+      setFilters(prev => ({
+        ...prev,
+        category: ""
+      }));
+    }
+    
     router.push(`/browse?tab=${value}`);
   };
 
@@ -171,6 +210,7 @@ export default function BrowsePageClient({
     university: string;
     faculty: string;
     category: string;
+    studyLevel: string;
   }) => {
     setFilters(newFilters);
   };
@@ -267,6 +307,7 @@ export default function BrowsePageClient({
         onClose={() => setIsFilterDialogOpen(false)}
         onApplyFilters={handleApplyFilters}
         currentFilters={filters}
+        showCategoryFilter={activeTab !== "diverse"}
       />
 
       <AccessDeniedDialog

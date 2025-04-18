@@ -8,7 +8,7 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Star, GraduationCap, BookOpen, Tag } from "lucide-react";
+import { Star, GraduationCap, BookOpen, Tag, Scroll } from "lucide-react";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
@@ -23,6 +23,7 @@ interface ProductCardProps {
   university: string;
   faculty: string;
   category?: string;
+  studyLevel?: string;
   reviews: Array<{ score: number }>;
   userId: string; // Added userId prop
 }
@@ -37,6 +38,7 @@ export default function ProductCard({
   university,
   faculty,
   category,
+  studyLevel,
   reviews,
   userId, // Added userId parameter
 }: ProductCardProps) {
@@ -90,16 +92,24 @@ export default function ProductCard({
             </p>
           </div>
         )}
+        {studyLevel && (
+          <div className="flex items-center">
+            <Scroll className="h-4 w-4 mr-1 text-purple-600" />
+            <p className="text-xs text-muted-foreground line-clamp-1">
+              {studyLevel}
+            </p>
+          </div>
+        )}
         <div className="flex items-center">
           <GraduationCap className="h-4 w-4 mr-1 text-purple-600" />
           <p className="text-xs text-muted-foreground line-clamp-2">
-            Pentru: {university}
+          {university}
           </p>
         </div>
         <div className="flex items-center">
           <BookOpen className="h-4 w-4 mr-1 text-purple-600" />
           <p className="text-xs text-muted-foreground line-clamp-2">
-            Facultatea: {faculty}
+             {faculty}
           </p>
         </div>
       </CardContent>

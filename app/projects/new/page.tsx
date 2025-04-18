@@ -17,7 +17,7 @@ import { useUploadThing } from "@/lib/uploadthing"
 import ProjectImageUpload from "@/components/ProjectImageUpload"
 import { useUniversities } from "@/hooks/useUniversities"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { ACADEMIC_CATEGORIES, DIVERSE_CATEGORIES } from "@/lib/constants"
+import { ACADEMIC_CATEGORIES, DIVERSE_CATEGORIES, STUDY_LEVELS } from "@/lib/constants"
 
 export default function NewProjectPage() {
   const router = useRouter()
@@ -36,6 +36,7 @@ export default function NewProjectPage() {
     facultyId: "",
     phoneNumber: "",
     city: "", // We'll keep this for display purposes only
+    studyLevel: "", // Added study level field
   })
 
   const { universities, loading, getFacultiesForUniversity } = useUniversities()
@@ -99,6 +100,12 @@ export default function NewProjectPage() {
       return
     }
 
+    // Validate study level for proiect and cerere
+    if ((projectType === "proiect" || projectType === "cerere") && !formData.studyLevel) {
+      setError("Please select a study level")
+      return
+    }
+
     // Validate that diverse projects have a diverse category
     if (projectType === "diverse" && !DIVERSE_CATEGORIES.some((cat) => cat.id === formData.category)) {
       setError("Please select a valid category for diverse items")
@@ -133,6 +140,7 @@ export default function NewProjectPage() {
         phoneNumber: formData.phoneNumber,
         type: projectType,
         images: uploadedImages,
+        studyLevel: formData.studyLevel, // Include study level in project data
       }
 
       console.log("Submitting project data:", projectData) // Debug log
@@ -300,6 +308,28 @@ export default function NewProjectPage() {
                 {ACADEMIC_CATEGORIES.map((category) => (
                   <SelectItem key={category} value={category}>
                     {category}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
+        {projectType !== "diverse" && (
+          <div>
+            <Label htmlFor="studyLevel">Study Level</Label>
+            <Select
+              value={formData.studyLevel}
+              onValueChange={(value) => setFormData((prev) => ({ ...prev, studyLevel: value }))}
+              required
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select a study level" />
+              </SelectTrigger>
+              <SelectContent>
+                {STUDY_LEVELS.map((level) => (
+                  <SelectItem key={level} value={level}>
+                    {level}
                   </SelectItem>
                 ))}
               </SelectContent>

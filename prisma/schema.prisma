@@ -44,6 +44,7 @@ model Project {
   userId       String // References clerkId from User
   authorName   String? // Will be formatted as "firstName lastName"
   authorAvatar String? // Will reference user's avatar URL
+  studyLevel   String? // Will be one of: "Bachelors", "Masters", "PhD"
   user         User     @relation("UserProjects", fields: [userId], references: [clerkId])
   reviews      Review[] @relation("ProjectReviews")
   reports      Report[] @relation("ProjectReports") // Added relation to reports

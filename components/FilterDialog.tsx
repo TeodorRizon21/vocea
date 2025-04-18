@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { useUniversities } from "@/hooks/useUniversities"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ACADEMIC_CATEGORIES } from "@/lib/constants"
+import { ACADEMIC_CATEGORIES, STUDY_LEVELS } from "@/lib/constants"
 import { RefreshCw } from "lucide-react"
 
 interface FilterDialogProps {
@@ -16,12 +16,14 @@ interface FilterDialogProps {
     university: string
     faculty: string
     category: string
+    studyLevel: string
   }) => void
   showCategoryFilter?: boolean
   currentFilters?: {
     university: string
     faculty: string
     category: string
+    studyLevel: string
   }
 }
 
@@ -29,7 +31,7 @@ export default function FilterDialog({
   isOpen, 
   onClose, 
   onApplyFilters,
-  showCategoryFilter = false,
+  showCategoryFilter = true,
   currentFilters
 }: FilterDialogProps) {
   const { universities, faculties, getUniversityName, getFacultyName } = useUniversities()
@@ -38,6 +40,7 @@ export default function FilterDialog({
     university: "_all",
     faculty: "_all",
     category: "_all",
+    studyLevel: "_all",
   }
   
   const [filters, setFilters] = useState(currentFilters || defaultFilters)
@@ -154,6 +157,28 @@ export default function FilterDialog({
                   {ACADEMIC_CATEGORIES.map(category => (
                     <SelectItem key={category} value={category}>
                       {category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+          
+          {showCategoryFilter && (
+            <div className="space-y-2">
+              <Label htmlFor="studyLevel">Study Level</Label>
+              <Select
+                value={filters.studyLevel}
+                onValueChange={(value) => setFilters(prev => ({ ...prev, studyLevel: value }))}
+              >
+                <SelectTrigger id="studyLevel">
+                  <SelectValue placeholder="All Study Levels" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="_all">All Study Levels</SelectItem>
+                  {STUDY_LEVELS.map(level => (
+                    <SelectItem key={level} value={level}>
+                      {level}
                     </SelectItem>
                   ))}
                 </SelectContent>
