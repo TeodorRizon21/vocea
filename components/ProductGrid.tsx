@@ -16,7 +16,7 @@ interface ExtendedProject extends Project {
     avatar: string | null;
   };
   reviews: Array<{ score: number }>;
-  studyLevel?: string;
+  studyLevel: string | null;
 }
 
 interface ProductGridProps {
@@ -80,7 +80,7 @@ export default function ProductGrid({
               category={project.category || project.subject}
               reviews={project.reviews}
               userId={project.userId}
-              studyLevel={project.studyLevel}
+              studyLevel={project.studyLevel || undefined}
             />
           </a>
         ))}
