@@ -133,6 +133,16 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // Validate study level for academic project types
+    if ((data.type === "proiect" || data.type === "cerere") && !data.studyLevel) {
+      return new NextResponse(
+        JSON.stringify({
+          error: "Study level is required for academic projects",
+        }),
+        { status: 400, headers: { "Content-Type": "application/json" } },
+      )
+    }
+
     // Validate images for non-request projects
     if (data.type !== "cerere" && (!data.images || data.images.length === 0)) {
       return new NextResponse(JSON.stringify({ error: "At least one image is required for this project type" }), {
