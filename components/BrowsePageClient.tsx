@@ -29,7 +29,7 @@ interface ExtendedProject {
   userId: string;
   authorName: string | null;
   authorAvatar: string | null;
-  studyLevel?: string;
+  studyLevel: string | null;
   createdAt: Date;
   updatedAt: Date;
   user: {
