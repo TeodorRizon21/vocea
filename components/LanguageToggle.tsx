@@ -1,7 +1,13 @@
 "use client";
 
 import { Globe } from "lucide-react";
-import { useState, useEffect, createContext, useContext } from "react";
+import {
+  useState,
+  useEffect,
+  createContext,
+  useContext,
+  useCallback,
+} from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -12,10 +18,11 @@ import {
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 
-// Crează contextul pentru limbă
+// Crează contextul pentru limbă cu versiunea de forțare a reîmprospătării
 export const LanguageContext = createContext({
   language: "ro", // Implicit română
   setLanguage: (language: string) => {},
+  forceRefresh: 0, // Valoarea pentru forțarea reîmprospătării
   translations: {
     ro: {
       home: "Acasă",
@@ -65,6 +72,7 @@ export const useLanguage = () => useContext(LanguageContext);
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [language, setLanguage] = useState("ro"); // Implicit română
   const [mounted, setMounted] = useState(false);
+  const [forceRefresh, setForceRefresh] = useState(0); // Stare pentru forțarea reîmprospătării
 
   useEffect(() => {
     // Verifică dacă există o limbă salvată în localStorage
@@ -75,10 +83,13 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     setMounted(true);
   }, []);
 
-  const handleLanguageChange = (newLanguage: string) => {
+  // Funcție pentru schimbarea limbii care declanșează și reîmprospătarea
+  const handleLanguageChange = useCallback((newLanguage: string) => {
     setLanguage(newLanguage);
     localStorage.setItem("language", newLanguage);
-  };
+    // Incrementează contorul pentru a forța reîmprospătarea componentelor
+    setForceRefresh((prev) => prev + 1);
+  }, []);
 
   if (!mounted) {
     return <>{children}</>;
@@ -89,6 +100,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
       value={{
         language,
         setLanguage: handleLanguageChange,
+        forceRefresh, // Adaugă contorul de forțare a reîmprospătării la context
         translations: {
           ro: {
             home: "Acasă",
@@ -194,7 +206,7 @@ const UKFlag = () => (
 
 // Componenta pentru butonul de schimbare a limbii
 export function LanguageToggle() {
-  const { language, setLanguage, translations } = useLanguage();
+  const { language, setLanguage, translations, forceRefresh } = useLanguage();
   const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
 

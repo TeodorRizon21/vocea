@@ -1,19 +1,21 @@
-"use client"
+"use client";
 
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { School, MapPin, Calendar, Star, Edit } from "lucide-react"
-import { useUniversities } from "@/hooks/useUniversities"
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { School, MapPin, Calendar, Star, Edit } from "lucide-react";
+import { useUniversities } from "@/hooks/useUniversities";
+import { useLanguage } from "@/components/LanguageToggle";
+import { useMemo } from "react";
 
 interface ProfileInfoProps {
-  firstName: string
-  lastName: string
-  university: string
-  faculty: string
-  city: string
-  year: string
-  reviewScore: number
-  onEdit: () => void
+  firstName: string;
+  lastName: string;
+  university: string;
+  faculty: string;
+  city: string;
+  year: string;
+  reviewScore: number;
+  onEdit: () => void;
 }
 
 export default function ProfileInfo({
@@ -26,41 +28,64 @@ export default function ProfileInfo({
   reviewScore,
   onEdit,
 }: ProfileInfoProps) {
-  const { getUniversityName, getFacultyName, universities } = useUniversities()
+  const { getUniversityName, getFacultyName, universities } = useUniversities();
+  const { language, forceRefresh } = useLanguage();
+
+  // Traduceri pentru componenta
+  const translations = useMemo(() => {
+    return {
+      myProfile: language === "ro" ? "Profilul meu" : "My Profile",
+      universityNotSet:
+        language === "ro" ? "Universitate nesetată" : "University not set",
+      facultyNotSet:
+        language === "ro" ? "Facultate nesetată" : "Faculty not set",
+      notSet: language === "ro" ? "Nesetat" : "Not set",
+    };
+  }, [language, forceRefresh]);
 
   // Add console logging for debugging
   console.log("ProfileInfo received university:", university);
   console.log("ProfileInfo received faculty:", faculty);
 
   // Check if the university value is an ID or a name
-  const isUniversityId = university?.startsWith('uni_');
-  const isFacultyId = faculty?.startsWith('fac_');
-  
+  const isUniversityId = university?.startsWith("uni_");
+  const isFacultyId = faculty?.startsWith("fac_");
+
   console.log("Is university ID?", isUniversityId);
   console.log("Is faculty ID?", isFacultyId);
-  
-  // If it's an ID, use the lookup function; otherwise, display the name directly
-  const universityDisplay = 
-    !university || university === "University not set" 
-      ? "University not set"
-      : isUniversityId 
-        ? getUniversityName(university) || university
-        : university;
 
-  const facultyDisplay = 
-    !faculty || faculty === "Faculty not set" 
-      ? "Faculty not set"
+  // If it's an ID, use the lookup function; otherwise, display the name directly
+  const universityDisplay =
+    !university ||
+    university === "Not set" ||
+    university === "University not set"
+      ? translations.universityNotSet
+      : isUniversityId
+      ? getUniversityName(university) || university
+      : university;
+
+  const facultyDisplay =
+    !faculty || faculty === "Not set" || faculty === "Faculty not set"
+      ? translations.facultyNotSet
       : isFacultyId
-        ? getFacultyName(university || "", faculty) || faculty
-        : faculty;
-        
+      ? getFacultyName(university || "", faculty) || faculty
+      : faculty;
+
   console.log("Final university display:", universityDisplay);
   console.log("Final faculty display:", facultyDisplay);
+
+  // Procesează celelalte valori pentru a afișa "Nesetat" în română sau "Not set" în engleză
+  const firstNameDisplay =
+    firstName === "Not set" ? translations.notSet : firstName;
+  const lastNameDisplay =
+    lastName === "Not set" ? translations.notSet : lastName;
+  const cityDisplay = city === "Not set" ? translations.notSet : city;
+  const yearDisplay = year === "Not set" ? translations.notSet : year;
 
   return (
     <Card className="shadow-md">
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>My Profile</CardTitle>
+        <CardTitle>{translations.myProfile}</CardTitle>
         <Button variant="ghost" size="icon" onClick={onEdit}>
           <Edit className="h-4 w-4" />
         </Button>
@@ -69,7 +94,7 @@ export default function ProfileInfo({
         <div className="flex items-center">
           <School className="mr-2 h-4 w-4 text-purple-600" />
           <span>
-            {firstName} {lastName}
+            {firstNameDisplay} {lastNameDisplay}
           </span>
         </div>
         <div className="flex items-center">
@@ -82,11 +107,11 @@ export default function ProfileInfo({
         </div>
         <div className="flex items-center">
           <MapPin className="mr-2 h-4 w-4 text-purple-600" />
-          <span>{city}</span>
+          <span>{cityDisplay}</span>
         </div>
         <div className="flex items-center">
           <Calendar className="mr-2 h-4 w-4 text-purple-600" />
-          <span>{year}</span>
+          <span>{yearDisplay}</span>
         </div>
         {/*<div className="flex items-center">
           <Star className="mr-2 h-4 w-4 text-purple-600" />
@@ -95,5 +120,5 @@ export default function ProfileInfo({
         */}
       </CardContent>
     </Card>
-  )
+  );
 }

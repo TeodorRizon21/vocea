@@ -1,32 +1,39 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Info, Loader2, Search } from "lucide-react"
-import type { ProjectType } from "@/types/project"
-import { useUploadThing } from "@/lib/uploadthing"
-import ProjectImageUpload from "@/components/ProjectImageUpload"
-import { useUniversities } from "@/hooks/useUniversities"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { ACADEMIC_CATEGORIES, DIVERSE_CATEGORIES } from "@/lib/constants"
+import { useState, useEffect, useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Info, Loader2, Search } from "lucide-react";
+import type { ProjectType } from "@/types/project";
+import { useUploadThing } from "@/lib/uploadthing";
+import ProjectImageUpload from "@/components/ProjectImageUpload";
+import { useUniversities } from "@/hooks/useUniversities";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { ACADEMIC_CATEGORIES, DIVERSE_CATEGORIES } from "@/lib/constants";
+import { useLanguage } from "@/components/LanguageToggle";
 
 export default function NewProjectPage() {
-  const router = useRouter()
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [error, setError] = useState("")
-  const [projectType, setProjectType] = useState<ProjectType>("proiect")
-  const [uploadedImages, setUploadedImages] = useState<string[]>([])
-  const [universitySearch, setUniversitySearch] = useState("")
-  const [facultySearch, setFacultySearch] = useState("")
+  const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [projectType, setProjectType] = useState<ProjectType>("proiect");
+  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const [universitySearch, setUniversitySearch] = useState("");
+  const [facultySearch, setFacultySearch] = useState("");
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -36,90 +43,218 @@ export default function NewProjectPage() {
     facultyId: "",
     phoneNumber: "",
     city: "", // We'll keep this for display purposes only
-  })
+  });
 
-  const { universities, loading, getFacultiesForUniversity } = useUniversities()
-  const faculties = getFacultiesForUniversity(formData.universityId)
+  const { universities, loading, getFacultiesForUniversity } =
+    useUniversities();
+  const faculties = getFacultiesForUniversity(formData.universityId);
+  const { language, forceRefresh } = useLanguage();
+
+  // Traduceri pentru pagina
+  const translations = useMemo(() => {
+    return {
+      pageTitle:
+        language === "ro" ? "Creează Proiect Nou" : "Create New Project",
+      pageSubtitle:
+        language === "ro"
+          ? "Distribuie proiectul tău comunității"
+          : "Share your project with the community",
+      projectType: language === "ro" ? "Tipul Proiectului" : "Project Type",
+      projectLabel: language === "ro" ? "Proiect" : "Project",
+      requestLabel: language === "ro" ? "Cerere Proiect" : "Project Request",
+      diverseLabel: language === "ro" ? "Diverse" : "Diverse",
+      diverseCategory:
+        language === "ro" ? "Categorie Diverse" : "Diverse Category",
+      selectCategory:
+        language === "ro"
+          ? "Te rugăm să selectezi o categorie pentru elementul tău divers"
+          : "Please select a category for your diverse item",
+      title: language === "ro" ? "Titlu" : "Title",
+      titlePlaceholder:
+        language === "ro"
+          ? "Introdu titlul proiectului"
+          : "Enter project title",
+      images: language === "ro" ? "Imagini" : "Images",
+      imagesOptional:
+        language === "ro"
+          ? "Imaginile sunt opționale pentru Cererile de Proiecte"
+          : "Images are optional for Project Requests",
+      description: language === "ro" ? "Descriere" : "Description",
+      descriptionPlaceholder:
+        language === "ro"
+          ? "Introdu descrierea proiectului"
+          : "Enter project description",
+      subject: language === "ro" ? "Subiect" : "Subject",
+      subjectPlaceholder:
+        language === "ro"
+          ? "Introdu subiectul proiectului"
+          : "Enter project subject",
+      category: language === "ro" ? "Categorie" : "Category",
+      selectCategoryPlaceholder:
+        language === "ro" ? "Selectează o categorie" : "Select a category",
+      university: language === "ro" ? "Universitate" : "University",
+      selectUniversity:
+        language === "ro" ? "Selectează o universitate" : "Select a university",
+      searchUniversity:
+        language === "ro" ? "Caută universitate..." : "Search university...",
+      noUniversity:
+        language === "ro"
+          ? "Nu a fost găsită nicio universitate."
+          : "No university found.",
+      faculty: language === "ro" ? "Facultate" : "Faculty",
+      selectFaculty:
+        language === "ro" ? "Selectează o facultate" : "Select a faculty",
+      selectUniversityFirst:
+        language === "ro"
+          ? "Selectează mai întâi o universitate"
+          : "Select a university first",
+      searchFaculty:
+        language === "ro" ? "Caută facultate..." : "Search faculty...",
+      noFaculty:
+        language === "ro"
+          ? "Nu a fost găsită nicio facultate."
+          : "No faculty found.",
+      city: language === "ro" ? "Oraș" : "City",
+      cityAuto:
+        language === "ro"
+          ? "Orașul este setat automat în funcție de universitatea selectată"
+          : "City is automatically set based on the selected university",
+      phoneNumber: language === "ro" ? "Număr de Telefon" : "Phone Number",
+      phonePlaceholder:
+        language === "ro"
+          ? "Introdu numărul tău de telefon"
+          : "Enter your phone number",
+      phoneFormat:
+        language === "ro"
+          ? "Format: număr de 10 cifre"
+          : "Format: 10 digits number",
+      creating: language === "ro" ? "Se creează..." : "Creating...",
+      createProject: language === "ro" ? "Creează Proiect" : "Create Project",
+      createRequest:
+        language === "ro"
+          ? "Creează Cerere de Proiect"
+          : "Create Project Request",
+      createDiverse:
+        language === "ro" ? "Creează Element Divers" : "Create Diverse Item",
+      loading: language === "ro" ? "Se încarcă..." : "Loading...",
+      // Erori
+      phoneError:
+        language === "ro"
+          ? "Numărul de telefon trebuie să aibă exact 10 cifre"
+          : "Phone number must be exactly 10 digits",
+      imagesRequired:
+        language === "ro"
+          ? "Imaginile sunt obligatorii pentru proiecte și elemente diverse"
+          : "Images are required for Projects and Diverse submissions",
+      selectUnivFac:
+        language === "ro"
+          ? "Te rugăm să selectezi o universitate și facultate"
+          : "Please select a university and faculty",
+      selectCatRequired:
+        language === "ro"
+          ? "Te rugăm să selectezi o categorie"
+          : "Please select a category",
+      diverseCatError:
+        language === "ro"
+          ? "Te rugăm să selectezi o categorie validă pentru elementele diverse"
+          : "Please select a valid category for diverse items",
+      academicCatError:
+        language === "ro"
+          ? "Te rugăm să selectezi o categorie academică validă"
+          : "Please select a valid academic category",
+    };
+  }, [language, forceRefresh]);
 
   // Filter universities based on search term
   const filteredUniversities = universities.filter(
     (university) =>
       university.name.toLowerCase().includes(universitySearch.toLowerCase()) ||
-      university.city.toLowerCase().includes(universitySearch.toLowerCase()),
-  )
+      university.city.toLowerCase().includes(universitySearch.toLowerCase())
+  );
 
   // Filter faculties based on search term
   const filteredFaculties = faculties.filter((faculty) =>
-    faculty.name.toLowerCase().includes(facultySearch.toLowerCase()),
-  )
+    faculty.name.toLowerCase().includes(facultySearch.toLowerCase())
+  );
 
-  const { startUpload } = useUploadThing("projectImage")
+  const { startUpload } = useUploadThing("projectImage");
 
   // Reset category when project type changes
   useEffect(() => {
-    setFormData((prev) => ({ ...prev, category: "" }))
-  }, [projectType])
+    setFormData((prev) => ({ ...prev, category: "" }));
+  }, [projectType]);
 
   // Update city when university changes
   useEffect(() => {
     if (formData.universityId) {
-      const university = universities.find((u) => u.id === formData.universityId)
+      const university = universities.find(
+        (u) => u.id === formData.universityId
+      );
       if (university) {
-        setFormData((prev) => ({ ...prev, city: university.city }))
+        setFormData((prev) => ({ ...prev, city: university.city }));
       }
     }
-  }, [formData.universityId, universities])
+  }, [formData.universityId, universities]);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError("")
+    e.preventDefault();
+    setError("");
 
     // Validate phone number
-    const phoneRegex = /^\d{10}$/
+    const phoneRegex = /^\d{10}$/;
     if (!phoneRegex.test(formData.phoneNumber)) {
-      setError("Phone number must be exactly 10 digits")
-      return
+      setError(translations.phoneError);
+      return;
     }
 
     // Validate images for Proiect and Diverse types
     if (projectType !== "cerere" && uploadedImages.length === 0) {
-      setError("Images are required for Projects and Diverse submissions")
-      return
+      setError(translations.imagesRequired);
+      return;
     }
 
     // Validate university and faculty
     if (!formData.universityId || !formData.facultyId) {
-      setError("Please select a university and faculty")
-      return
+      setError(translations.selectUnivFac);
+      return;
     }
 
     // Validate category
     if (!formData.category) {
-      setError("Please select a category")
-      return
+      setError(translations.selectCatRequired);
+      return;
     }
 
     // Validate that diverse projects have a diverse category
-    if (projectType === "diverse" && !DIVERSE_CATEGORIES.some((cat) => cat.id === formData.category)) {
-      setError("Please select a valid category for diverse items")
-      return
+    if (
+      projectType === "diverse" &&
+      !DIVERSE_CATEGORIES.some((cat) => cat.id === formData.category)
+    ) {
+      setError(translations.diverseCatError);
+      return;
     }
 
     // Validate that proiect and cerere have academic categories
-    if ((projectType === "proiect" || projectType === "cerere") && 
-        !ACADEMIC_CATEGORIES.includes(formData.category)) {
-      setError("Please select a valid academic category")
-      return
+    if (
+      (projectType === "proiect" || projectType === "cerere") &&
+      !ACADEMIC_CATEGORIES.includes(formData.category)
+    ) {
+      setError(translations.academicCatError);
+      return;
     }
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
 
     try {
-      const selectedUniversity = universities.find((u) => u.id === formData.universityId)
-      const selectedFaculty = faculties.find((f) => f.id === formData.facultyId)
+      const selectedUniversity = universities.find(
+        (u) => u.id === formData.universityId
+      );
+      const selectedFaculty = faculties.find(
+        (f) => f.id === formData.facultyId
+      );
 
       if (!selectedUniversity || !selectedFaculty) {
-        throw new Error("Selected university or faculty not found")
+        throw new Error("Selected university or faculty not found");
       }
 
       // Only include fields that exist in the Prisma schema
@@ -133,9 +268,9 @@ export default function NewProjectPage() {
         phoneNumber: formData.phoneNumber,
         type: projectType,
         images: uploadedImages,
-      }
+      };
 
-      console.log("Submitting project data:", projectData) // Debug log
+      console.log("Submitting project data:", projectData); // Debug log
 
       const response = await fetch("/api/projects", {
         method: "POST",
@@ -143,43 +278,50 @@ export default function NewProjectPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(projectData),
-      })
+      });
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || "Failed to create project")
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to create project");
       }
 
-      const result = await response.json()
-      console.log("Project created successfully:", result) // Debug log
+      const result = await response.json();
+      console.log("Project created successfully:", result); // Debug log
 
-      router.push("/dashboard")
+      router.push("/dashboard");
     } catch (error) {
-      console.error("Error creating project:", error)
-      setError(error instanceof Error ? error.message : "Failed to create project. Please try again.")
+      console.error("Error creating project:", error);
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Failed to create project. Please try again."
+      );
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+        <span className="ml-2">{translations.loading}</span>
       </div>
-    )
+    );
   }
 
   return (
     <div className="max-w-2xl mx-auto space-y-8">
       <div>
-        <h1 className="text-4xl font-bold text-purple-600">Create New Project</h1>
-        <p className="text-gray-600 mt-2">Share your project with the community</p>
+        <h1 className="text-4xl font-bold text-purple-600">
+          {translations.pageTitle}
+        </h1>
+        <p className="text-gray-600 mt-2">{translations.pageSubtitle}</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-4">
-          <Label>Project Type</Label>
+          <Label>{translations.projectType}</Label>
           <RadioGroup
             defaultValue="proiect"
             value={projectType}
@@ -189,19 +331,19 @@ export default function NewProjectPage() {
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="proiect" id="proiect" />
               <Label htmlFor="proiect" className="cursor-pointer">
-                Proiect
+                {translations.projectLabel}
               </Label>
             </div>
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="cerere" id="cerere" />
               <Label htmlFor="cerere" className="cursor-pointer">
-                Cerere Proiect
+                {translations.requestLabel}
               </Label>
             </div>
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="diverse" id="diverse" />
               <Label htmlFor="diverse" className="cursor-pointer">
-                Diverse
+                {translations.diverseLabel}
               </Label>
             </div>
           </RadioGroup>
@@ -209,33 +351,45 @@ export default function NewProjectPage() {
 
         {projectType === "diverse" && (
           <div className="space-y-4">
-            <Label>Diverse Category</Label>
+            <Label>{translations.diverseCategory}</Label>
             <div className="flex flex-wrap gap-2">
               {DIVERSE_CATEGORIES.map((category) => (
                 <Button
                   key={category.id}
                   type="button"
-                  variant={formData.category === category.id ? "default" : "outline"}
-                  className={formData.category === category.id ? "bg-purple-600 hover:bg-purple-700" : ""}
-                  onClick={() => setFormData((prev) => ({ ...prev, category: category.id }))}
+                  variant={
+                    formData.category === category.id ? "default" : "outline"
+                  }
+                  className={
+                    formData.category === category.id
+                      ? "bg-purple-600 hover:bg-purple-700"
+                      : ""
+                  }
+                  onClick={() =>
+                    setFormData((prev) => ({ ...prev, category: category.id }))
+                  }
                 >
                   {category.label}
                 </Button>
               ))}
             </div>
             {!formData.category && (
-              <p className="text-sm text-amber-600">Please select a category for your diverse item</p>
+              <p className="text-sm text-amber-600">
+                {translations.selectCategory}
+              </p>
             )}
           </div>
         )}
 
         <div>
-          <Label htmlFor="title">Title</Label>
+          <Label htmlFor="title">{translations.title}</Label>
           <Input
             id="title"
             value={formData.title}
-            onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
-            placeholder="Enter project title"
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, title: e.target.value }))
+            }
+            placeholder={translations.titlePlaceholder}
             required
           />
         </div>
@@ -243,7 +397,7 @@ export default function NewProjectPage() {
         {projectType !== "cerere" && (
           <div className="space-y-2">
             <Label>
-              Images
+              {translations.images}
               <span className="text-red-500 ml-1">*</span>
             </Label>
             <ProjectImageUpload
@@ -258,43 +412,51 @@ export default function NewProjectPage() {
           <Alert className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
             <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
             <AlertDescription className="text-blue-600 dark:text-blue-400">
-              Images are optional for Project Requests
+              {translations.imagesOptional}
             </AlertDescription>
           </Alert>
         )}
 
         <div>
-          <Label htmlFor="description">Description</Label>
+          <Label htmlFor="description">{translations.description}</Label>
           <Textarea
             id="description"
             value={formData.description}
-            onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
-            placeholder="Enter project description"
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, description: e.target.value }))
+            }
+            placeholder={translations.descriptionPlaceholder}
             required
           />
         </div>
 
         <div>
-          <Label htmlFor="subject">Subject</Label>
+          <Label htmlFor="subject">{translations.subject}</Label>
           <Input
             id="subject"
             value={formData.subject}
-            onChange={(e) => setFormData((prev) => ({ ...prev, subject: e.target.value }))}
-            placeholder="Enter project subject"
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, subject: e.target.value }))
+            }
+            placeholder={translations.subjectPlaceholder}
             required
           />
         </div>
 
         {projectType !== "diverse" && (
           <div>
-            <Label htmlFor="category">Category</Label>
+            <Label htmlFor="category">{translations.category}</Label>
             <Select
               value={formData.category}
-              onValueChange={(value) => setFormData((prev) => ({ ...prev, category: value }))}
+              onValueChange={(value) =>
+                setFormData((prev) => ({ ...prev, category: value }))
+              }
               required
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select a category" />
+                <SelectValue
+                  placeholder={translations.selectCategoryPlaceholder}
+                />
               </SelectTrigger>
               <SelectContent>
                 {ACADEMIC_CATEGORIES.map((category) => (
@@ -308,22 +470,26 @@ export default function NewProjectPage() {
         )}
 
         <div>
-          <Label htmlFor="university">University</Label>
+          <Label htmlFor="university">{translations.university}</Label>
           <Select
             value={formData.universityId}
             onValueChange={(value) => {
-              setFormData((prev) => ({ ...prev, universityId: value, facultyId: "" }))
+              setFormData((prev) => ({
+                ...prev,
+                universityId: value,
+                facultyId: "",
+              }));
             }}
             required
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select a university" />
+              <SelectValue placeholder={translations.selectUniversity} />
             </SelectTrigger>
             <SelectContent className="p-0">
               <div className="flex items-center px-3 pb-2 pt-3 border-b">
                 <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
                 <Input
-                  placeholder="Search university..."
+                  placeholder={translations.searchUniversity}
                   className="h-8 border-none focus-visible:ring-0 focus-visible:ring-offset-0"
                   value={universitySearch}
                   onChange={(e) => setUniversitySearch(e.target.value)}
@@ -331,13 +497,21 @@ export default function NewProjectPage() {
               </div>
               <ScrollArea className="h-72">
                 {filteredUniversities.length === 0 ? (
-                  <div className="py-6 text-center text-sm">No university found.</div>
+                  <div className="py-6 text-center text-sm">
+                    {translations.noUniversity}
+                  </div>
                 ) : (
                   filteredUniversities.map((university) => (
-                    <SelectItem key={university.id} value={university.id} className="cursor-pointer">
+                    <SelectItem
+                      key={university.id}
+                      value={university.id}
+                      className="cursor-pointer"
+                    >
                       <div className="flex flex-col">
                         <span>{university.name}</span>
-                        <span className="text-xs text-muted-foreground">{university.city}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {university.city}
+                        </span>
                       </div>
                     </SelectItem>
                   ))
@@ -348,21 +522,29 @@ export default function NewProjectPage() {
         </div>
 
         <div>
-          <Label htmlFor="faculty">Faculty</Label>
+          <Label htmlFor="faculty">{translations.faculty}</Label>
           <Select
             value={formData.facultyId}
-            onValueChange={(value) => setFormData((prev) => ({ ...prev, facultyId: value }))}
+            onValueChange={(value) =>
+              setFormData((prev) => ({ ...prev, facultyId: value }))
+            }
             disabled={!formData.universityId}
             required
           >
             <SelectTrigger>
-              <SelectValue placeholder={formData.universityId ? "Select a faculty" : "Select a university first"} />
+              <SelectValue
+                placeholder={
+                  formData.universityId
+                    ? translations.selectFaculty
+                    : translations.selectUniversityFirst
+                }
+              />
             </SelectTrigger>
             <SelectContent className="p-0">
               <div className="flex items-center px-3 pb-2 pt-3 border-b">
                 <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
                 <Input
-                  placeholder="Search faculty..."
+                  placeholder={translations.searchFaculty}
                   className="h-8 border-none focus-visible:ring-0 focus-visible:ring-offset-0"
                   value={facultySearch}
                   onChange={(e) => setFacultySearch(e.target.value)}
@@ -370,10 +552,16 @@ export default function NewProjectPage() {
               </div>
               <ScrollArea className="h-72">
                 {filteredFaculties.length === 0 ? (
-                  <div className="py-6 text-center text-sm">No faculty found.</div>
+                  <div className="py-6 text-center text-sm">
+                    {translations.noFaculty}
+                  </div>
                 ) : (
                   filteredFaculties.map((faculty) => (
-                    <SelectItem key={faculty.id} value={faculty.id} className="cursor-pointer">
+                    <SelectItem
+                      key={faculty.id}
+                      value={faculty.id}
+                      className="cursor-pointer"
+                    >
                       {faculty.name}
                     </SelectItem>
                   ))
@@ -384,23 +572,32 @@ export default function NewProjectPage() {
         </div>
 
         <div>
-          <Label htmlFor="city">City</Label>
-          <Input id="city" value={formData.city} readOnly className="bg-gray-100" />
-          <p className="text-sm text-gray-500 mt-1">City is automatically set based on the selected university</p>
+          <Label htmlFor="city">{translations.city}</Label>
+          <Input
+            id="city"
+            value={formData.city}
+            readOnly
+            className="bg-gray-100"
+          />
+          <p className="text-sm text-gray-500 mt-1">{translations.cityAuto}</p>
         </div>
 
         <div>
-          <Label htmlFor="phone">Phone Number</Label>
+          <Label htmlFor="phone">{translations.phoneNumber}</Label>
           <Input
             id="phone"
             type="tel"
             value={formData.phoneNumber}
-            onChange={(e) => setFormData((prev) => ({ ...prev, phoneNumber: e.target.value }))}
-            placeholder="Enter your phone number"
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, phoneNumber: e.target.value }))
+            }
+            placeholder={translations.phonePlaceholder}
             pattern="[0-9]{10}"
             required
           />
-          <p className="text-sm text-gray-500 mt-1">Format: 10 digits number</p>
+          <p className="text-sm text-gray-500 mt-1">
+            {translations.phoneFormat}
+          </p>
         </div>
 
         {error && (
@@ -417,14 +614,19 @@ export default function NewProjectPage() {
           {isSubmitting ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Creating...
+              {translations.creating}
             </>
           ) : (
-            `Create ${projectType === "cerere" ? "Project Request" : projectType === "diverse" ? "Diverse Item" : "Project"}`
+            `${
+              projectType === "cerere"
+                ? translations.createRequest
+                : projectType === "diverse"
+                ? translations.createDiverse
+                : translations.createProject
+            }`
           )}
         </Button>
       </form>
     </div>
-  )
+  );
 }
-

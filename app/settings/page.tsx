@@ -1,111 +1,239 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { motion } from "framer-motion"
-import { toast } from "@/hooks/use-toast"
-import { useUser } from "@clerk/nextjs"
-import AvatarUpload from "@/components/AvatarUpload"
-import { Separator } from "@/components/ui/separator"
-import { Shield, User, Bell, Eye, EyeOff } from "lucide-react"
-import { Switch } from "@/components/ui/switch"
+import { useState, useEffect, useMemo } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardDescription,
+  CardFooter,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { motion } from "framer-motion";
+import { toast } from "@/hooks/use-toast";
+import { useUser } from "@clerk/nextjs";
+import AvatarUpload from "@/components/AvatarUpload";
+import { Separator } from "@/components/ui/separator";
+import { Shield, User, Bell, Eye, EyeOff } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { useLanguage } from "@/components/LanguageToggle";
 
 export default function SettingsPage() {
-  const { user } = useUser()
-  const [isLoading, setIsLoading] = useState(false)
+  const { user } = useUser();
+  const { language, forceRefresh } = useLanguage();
+  const [isLoading, setIsLoading] = useState(false);
 
   // Form states
-  const [email, setEmail] = useState("")
-  const [currentPassword, setCurrentPassword] = useState("")
-  const [newPassword, setNewPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
-  const [showPassword, setShowPassword] = useState(false)
+  const [email, setEmail] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   // Notification settings
-  const [emailNotifications, setEmailNotifications] = useState(true)
-  const [projectUpdates, setProjectUpdates] = useState(true)
-  const [forumReplies, setForumReplies] = useState(true)
+  const [emailNotifications, setEmailNotifications] = useState(true);
+  const [projectUpdates, setProjectUpdates] = useState(true);
+  const [forumReplies, setForumReplies] = useState(true);
 
   // Avatar state
-  const [avatar, setAvatar] = useState<string | null>(null)
+  const [avatar, setAvatar] = useState<string | null>(null);
+
+  // Traduceri pentru pagina de setări
+  const translations = useMemo(() => {
+    return {
+      // Titluri și descrieri
+      accountSettings: language === "ro" ? "Setări Cont" : "Account Settings",
+      securitySettings:
+        language === "ro" ? "Setări Securitate" : "Security Settings",
+      notificationSettings:
+        language === "ro" ? "Setări Notificări" : "Notification Settings",
+      accountDescription:
+        language === "ro"
+          ? "Gestionează-ți informațiile personale și detaliile contului"
+          : "Manage your personal information and account details",
+      securityDescription:
+        language === "ro"
+          ? "Actualizează-ți parola și setările de securitate"
+          : "Update your password and security settings",
+      notificationDescription:
+        language === "ro"
+          ? "Controlează ce notificări primești din partea noastră"
+          : "Control what notifications you receive from us",
+
+      // Profile
+      profileInformation:
+        language === "ro" ? "Informații Profil" : "Profile Information",
+      updateAvatar: language === "ro" ? "Actualizează Avatar" : "Update Avatar",
+      emailAddress: language === "ro" ? "Adresă Email" : "Email Address",
+      updateEmail: language === "ro" ? "Actualizează Email" : "Update Email",
+
+      // Security
+      changePassword: language === "ro" ? "Schimbă Parola" : "Change Password",
+      currentPassword:
+        language === "ro" ? "Parola Actuală" : "Current Password",
+      newPassword: language === "ro" ? "Parola Nouă" : "New Password",
+      confirmPassword:
+        language === "ro" ? "Confirmă Parola" : "Confirm Password",
+      showPassword: language === "ro" ? "Arată Parola" : "Show Password",
+      hidePassword: language === "ro" ? "Ascunde Parola" : "Hide Password",
+      updatePassword:
+        language === "ro" ? "Actualizează Parola" : "Update Password",
+
+      // Notifications
+      emailNotifications:
+        language === "ro" ? "Notificări Email" : "Email Notifications",
+      projectUpdates:
+        language === "ro" ? "Actualizări Proiecte" : "Project Updates",
+      forumReplies: language === "ro" ? "Răspunsuri Forum" : "Forum Replies",
+      emailNotificationsDescription:
+        language === "ro"
+          ? "Primește notificări importante prin email"
+          : "Receive important notifications via email",
+      projectUpdatesDescription:
+        language === "ro"
+          ? "Primește actualizări despre proiectele care te interesează"
+          : "Receive updates about projects you're interested in",
+      forumRepliesDescription:
+        language === "ro"
+          ? "Fii notificat când cineva răspunde la comentariile tale"
+          : "Be notified when someone replies to your comments",
+      saveChanges: language === "ro" ? "Salvează Modificările" : "Save Changes",
+
+      // Toast messages
+      passwordsDontMatch:
+        language === "ro" ? "Parolele nu coincid" : "Passwords don't match",
+      passwordsDontMatchDesc:
+        language === "ro"
+          ? "Te rugăm să te asiguri că parolele coincid."
+          : "Please make sure your passwords match.",
+      passwordUpdated:
+        language === "ro" ? "Parolă actualizată" : "Password updated",
+      passwordUpdatedDesc:
+        language === "ro"
+          ? "Parola ta a fost actualizată cu succes."
+          : "Your password has been updated successfully.",
+      failedToUpdatePassword:
+        language === "ro"
+          ? "Actualizarea parolei a eșuat"
+          : "Failed to update password",
+      checkCurrentPassword:
+        language === "ro"
+          ? "Te rugăm să verifici parola actuală și să încerci din nou."
+          : "Please check your current password and try again.",
+      emailUpdated: language === "ro" ? "Email actualizat" : "Email updated",
+      emailUpdatedDesc:
+        language === "ro"
+          ? "Adresa ta de email a fost actualizată cu succes."
+          : "Your email has been updated successfully.",
+      failedToUpdateEmail:
+        language === "ro"
+          ? "Actualizarea email-ului a eșuat"
+          : "Failed to update email",
+      tryAgainLater:
+        language === "ro"
+          ? "Te rugăm să încerci din nou mai târziu."
+          : "Please try again later.",
+      avatarUpdated: language === "ro" ? "Avatar actualizat" : "Avatar updated",
+      avatarUpdatedDesc:
+        language === "ro"
+          ? "Poza ta de profil a fost actualizată cu succes."
+          : "Your profile picture has been updated successfully.",
+      failedToUpdateAvatar:
+        language === "ro"
+          ? "Actualizarea avatarului a eșuat"
+          : "Failed to update avatar",
+      notificationSettingsUpdated:
+        language === "ro"
+          ? "Setări notificări actualizate"
+          : "Notification settings updated",
+      notificationPreferencesSaved:
+        language === "ro"
+          ? "Preferințele tale de notificare au fost salvate."
+          : "Your notification preferences have been saved.",
+      failedToUpdateNotifications:
+        language === "ro"
+          ? "Actualizarea setărilor de notificare a eșuat"
+          : "Failed to update notifications",
+    };
+  }, [language, forceRefresh]);
 
   useEffect(() => {
     if (user) {
-      setEmail(user.primaryEmailAddress?.emailAddress || "")
-      setAvatar(user.imageUrl || null)
+      setEmail(user.primaryEmailAddress?.emailAddress || "");
+      setAvatar(user.imageUrl || null);
     }
-  }, [user])
+  }, [user]);
 
   const handlePasswordReset = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (newPassword !== confirmPassword) {
       toast({
         variant: "destructive",
-        title: "Passwords don't match",
-        description: "Please make sure your passwords match."
-      })
-      return
+        title: translations.passwordsDontMatch,
+        description: translations.passwordsDontMatchDesc,
+      });
+      return;
     }
 
-    setIsLoading(true)
+    setIsLoading(true);
 
     try {
       // Add actual password reset logic here using Clerk
       await user?.updatePassword({
         currentPassword,
         newPassword,
-      })
+      });
 
       toast({
-        title: "Password updated",
-        description: "Your password has been updated successfully."
-      })
+        title: translations.passwordUpdated,
+        description: translations.passwordUpdatedDesc,
+      });
 
-      setCurrentPassword("")
-      setNewPassword("")
-      setConfirmPassword("")
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
     } catch (error) {
       toast({
         variant: "destructive",
-        title: "Failed to update password",
-        description: "Please check your current password and try again."
-      })
+        title: translations.failedToUpdatePassword,
+        description: translations.checkCurrentPassword,
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleEmailChange = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
+    e.preventDefault();
+    setIsLoading(true);
 
     try {
       // Add actual email change logic here using Clerk
       await user?.createEmailAddress({
         email: email,
-      })
+      });
 
       toast({
-        title: "Email updated",
-        description: "Your email has been updated successfully."
-      })
+        title: translations.emailUpdated,
+        description: translations.emailUpdatedDesc,
+      });
     } catch (error) {
       toast({
         variant: "destructive",
-        title: "Failed to update email",
-        description: "Please try again later."
-      })
+        title: translations.failedToUpdateEmail,
+        description: translations.tryAgainLater,
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleAvatarUploaded = async (url: string) => {
     try {
@@ -116,35 +244,35 @@ export default function SettingsPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ avatar: url }),
-      })
+      });
 
       if (!response.ok) {
-        throw new Error("Failed to update avatar")
+        throw new Error("Failed to update avatar");
       }
 
       // Then update the avatar in Clerk
       await user?.setProfileImage({
         file: await (await fetch(url)).blob(),
-      })
+      });
 
-      setAvatar(url)
+      setAvatar(url);
 
       toast({
-        title: "Avatar updated",
-        description: "Your profile picture has been updated successfully."
-      })
+        title: translations.avatarUpdated,
+        description: translations.avatarUpdatedDesc,
+      });
 
-      return Promise.resolve()
+      return Promise.resolve();
     } catch (error) {
       toast({
         variant: "destructive",
-        title: "Failed to update avatar",
-        description: "Please try again later."
-      })
+        title: translations.failedToUpdateAvatar,
+        description: translations.tryAgainLater,
+      });
 
-      return Promise.reject(error)
+      return Promise.reject(error);
     }
-  }
+  };
 
   const handleNotificationChange = async () => {
     try {
@@ -159,24 +287,24 @@ export default function SettingsPage() {
           projectUpdates,
           forumReplies,
         }),
-      })
+      });
 
       if (!response.ok) {
-        throw new Error("Failed to update notifications")
+        throw new Error("Failed to update notifications");
       }
 
       toast({
-        title: "Notification settings updated",
-        description: "Your notification preferences have been saved."
-      })
+        title: translations.notificationSettingsUpdated,
+        description: translations.notificationPreferencesSaved,
+      });
     } catch (error) {
       toast({
         variant: "destructive",
-        title: "Failed to update notifications",
-        description: "Please try again later."
-      })
+        title: translations.failedToUpdateNotifications,
+        description: translations.tryAgainLater,
+      });
     }
-  }
+  };
 
   const container = {
     hidden: { opacity: 0 },
@@ -186,7 +314,7 @@ export default function SettingsPage() {
         staggerChildren: 0.1,
       },
     },
-  }
+  };
 
   const item = {
     hidden: { opacity: 0, y: 20 },
@@ -199,13 +327,22 @@ export default function SettingsPage() {
         damping: 24,
       },
     },
-  }
+  };
 
   return (
-    <motion.div className="container max-w-6xl py-10 space-y-8" variants={container} initial="hidden" animate="show">
+    <motion.div
+      className="container max-w-6xl py-10 space-y-8"
+      variants={container}
+      initial="hidden"
+      animate="show"
+    >
       <motion.div variants={item}>
-        <h1 className="text-4xl font-bold text-purple-600 dark:text-purple-400">Account Settings</h1>
-        <p className="text-muted-foreground mt-2">Manage your account settings and preferences</p>
+        <h1 className="text-4xl font-bold text-purple-600 dark:text-purple-400">
+          {translations.accountSettings}
+        </h1>
+        <p className="text-muted-foreground mt-2">
+          {translations.accountDescription}
+        </p>
       </motion.div>
 
       <Tabs defaultValue="profile" className="w-full">
@@ -213,15 +350,24 @@ export default function SettingsPage() {
           <TabsList className="grid grid-cols-3 w-full max-w-md mb-8">
             <TabsTrigger value="profile" className="flex items-center gap-2">
               <User className="h-4 w-4" />
-              <span className="hidden sm:inline">Profile</span>
+              <span className="hidden sm:inline">
+                {translations.profileInformation}
+              </span>
             </TabsTrigger>
             <TabsTrigger value="security" className="flex items-center gap-2">
               <Shield className="h-4 w-4" />
-              <span className="hidden sm:inline">Security</span>
+              <span className="hidden sm:inline">
+                {translations.securitySettings}
+              </span>
             </TabsTrigger>
-            <TabsTrigger value="notifications" className="flex items-center gap-2">
+            <TabsTrigger
+              value="notifications"
+              className="flex items-center gap-2"
+            >
               <Bell className="h-4 w-4" />
-              <span className="hidden sm:inline">Notifications</span>
+              <span className="hidden sm:inline">
+                {translations.notificationSettings}
+              </span>
             </TabsTrigger>
           </TabsList>
         </motion.div>
@@ -231,8 +377,8 @@ export default function SettingsPage() {
             <motion.div variants={item}>
               <Card>
                 <CardHeader>
-                  <CardTitle>Profile Picture</CardTitle>
-                  <CardDescription>Update your profile picture</CardDescription>
+                  <CardTitle>{translations.profileInformation}</CardTitle>
+                  <CardDescription>{translations.updateAvatar}</CardDescription>
                 </CardHeader>
                 <CardContent className="flex justify-center">
                   <AvatarUpload
@@ -248,8 +394,8 @@ export default function SettingsPage() {
             <motion.div variants={item}>
               <Card>
                 <CardHeader>
-                  <CardTitle>Email Address</CardTitle>
-                  <CardDescription>Update your email address</CardDescription>
+                  <CardTitle>{translations.emailAddress}</CardTitle>
+                  <CardDescription>{translations.updateEmail}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <form onSubmit={handleEmailChange} className="space-y-4">
@@ -264,7 +410,7 @@ export default function SettingsPage() {
                       />
                     </div>
                     <Button type="submit" disabled={isLoading}>
-                      {isLoading ? "Updating..." : "Update Email"}
+                      {isLoading ? "Updating..." : translations.updateEmail}
                     </Button>
                   </form>
                 </CardContent>
@@ -277,13 +423,17 @@ export default function SettingsPage() {
           <motion.div variants={item}>
             <Card>
               <CardHeader>
-                <CardTitle>Password</CardTitle>
-                <CardDescription>Change your password</CardDescription>
+                <CardTitle>{translations.securitySettings}</CardTitle>
+                <CardDescription>
+                  {translations.securityDescription}
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handlePasswordReset} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="currentPassword">Current Password</Label>
+                    <Label htmlFor="currentPassword">
+                      {translations.currentPassword}
+                    </Label>
                     <div className="relative">
                       <Input
                         id="currentPassword"
@@ -311,7 +461,9 @@ export default function SettingsPage() {
                   <Separator />
 
                   <div className="space-y-2">
-                    <Label htmlFor="newPassword">New Password</Label>
+                    <Label htmlFor="newPassword">
+                      {translations.newPassword}
+                    </Label>
                     <div className="relative">
                       <Input
                         id="newPassword"
@@ -324,7 +476,9 @@ export default function SettingsPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                    <Label htmlFor="confirmPassword">
+                      {translations.confirmPassword}
+                    </Label>
                     <div className="relative">
                       <Input
                         id="confirmPassword"
@@ -337,7 +491,7 @@ export default function SettingsPage() {
                   </div>
 
                   <Button type="submit" disabled={isLoading}>
-                    {isLoading ? "Updating..." : "Change Password"}
+                    {isLoading ? "Updating..." : translations.updatePassword}
                   </Button>
                 </form>
               </CardContent>
@@ -349,21 +503,27 @@ export default function SettingsPage() {
           <motion.div variants={item}>
             <Card>
               <CardHeader>
-                <CardTitle>Notification Preferences</CardTitle>
-                <CardDescription>Manage how you receive notifications</CardDescription>
+                <CardTitle>{translations.notificationSettings}</CardTitle>
+                <CardDescription>
+                  {translations.notificationDescription}
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label htmlFor="email-notifications">Email Notifications</Label>
-                    <p className="text-sm text-muted-foreground">Receive email notifications about important updates</p>
+                    <Label htmlFor="email-notifications">
+                      {translations.emailNotifications}
+                    </Label>
+                    <p className="text-sm text-muted-foreground">
+                      {translations.emailNotificationsDescription}
+                    </p>
                   </div>
                   <Switch
                     id="email-notifications"
                     checked={emailNotifications}
                     onCheckedChange={(checked: boolean) => {
-                      setEmailNotifications(checked)
-                      handleNotificationChange()
+                      setEmailNotifications(checked);
+                      handleNotificationChange();
                     }}
                   />
                 </div>
@@ -372,17 +532,19 @@ export default function SettingsPage() {
 
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label htmlFor="project-updates">Project Updates</Label>
+                    <Label htmlFor="project-updates">
+                      {translations.projectUpdates}
+                    </Label>
                     <p className="text-sm text-muted-foreground">
-                      Get notified when projects you're part of are updated
+                      {translations.projectUpdatesDescription}
                     </p>
                   </div>
                   <Switch
                     id="project-updates"
                     checked={projectUpdates}
                     onCheckedChange={(checked: boolean) => {
-                      setProjectUpdates(checked)
-                      handleNotificationChange()
+                      setProjectUpdates(checked);
+                      handleNotificationChange();
                     }}
                   />
                 </div>
@@ -391,29 +553,32 @@ export default function SettingsPage() {
 
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label htmlFor="forum-replies">Forum Replies</Label>
+                    <Label htmlFor="forum-replies">
+                      {translations.forumReplies}
+                    </Label>
                     <p className="text-sm text-muted-foreground">
-                      Receive notifications when someone replies to your forum posts
+                      {translations.forumRepliesDescription}
                     </p>
                   </div>
                   <Switch
                     id="forum-replies"
                     checked={forumReplies}
                     onCheckedChange={(checked: boolean) => {
-                      setForumReplies(checked)
-                      handleNotificationChange()
+                      setForumReplies(checked);
+                      handleNotificationChange();
                     }}
                   />
                 </div>
               </CardContent>
               <CardFooter>
-                <p className="text-xs text-muted-foreground">You can change these settings at any time</p>
+                <Button onClick={handleNotificationChange}>
+                  {translations.saveChanges}
+                </Button>
               </CardFooter>
             </Card>
           </motion.div>
         </TabsContent>
       </Tabs>
     </motion.div>
-  )
+  );
 }
-

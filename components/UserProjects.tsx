@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
+import { useLanguage } from "@/components/LanguageToggle";
 
 interface ProjectWithRating {
   id: string;
@@ -33,6 +34,30 @@ export default function UserProjects() {
   const [loading, setLoading] = useState(true);
   const [showAll, setShowAll] = useState(false);
   const router = useRouter();
+  const { language, forceRefresh } = useLanguage();
+
+  // Traduceri pentru componenta
+  const translations = useMemo(() => {
+    return {
+      myProjects: language === "ro" ? "Proiectele mele" : "My Projects",
+      addProject: language === "ro" ? "Adaugă proiect" : "Add Project",
+      noProjects:
+        language === "ro"
+          ? "Nu ai creat niciun proiect încă."
+          : "You haven't created any projects yet.",
+      createFirst:
+        language === "ro"
+          ? "Creează primul tău proiect"
+          : "Create your first project",
+      deleteConfirm:
+        language === "ro"
+          ? "Ești sigur că vrei să ștergi acest proiect?"
+          : "Are you sure you want to delete this project?",
+      showLess: language === "ro" ? "Arată mai puține" : "Show Less",
+      viewAll:
+        language === "ro" ? "Vezi toate proiectele" : "View All Projects",
+    };
+  }, [language, forceRefresh]);
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -82,7 +107,7 @@ export default function UserProjects() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>My Projects</CardTitle>
+          <CardTitle>{translations.myProjects}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="animate-pulse space-y-4">
@@ -98,22 +123,22 @@ export default function UserProjects() {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>My Projects</CardTitle>
+        <CardTitle>{translations.myProjects}</CardTitle>
         <Button onClick={() => router.push("/projects/new")} size="sm">
           <Plus className="h-4 w-4 mr-2" />
-          Add Project
+          {translations.addProject}
         </Button>
       </CardHeader>
       <CardContent>
         {projects.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
-            <p>You haven&apos;t created any projects yet.</p>
+            <p>{translations.noProjects}</p>
             <Button
               variant="link"
               className="mt-2"
               onClick={() => router.push("/projects/new")}
             >
-              Create your first project
+              {translations.createFirst}
             </Button>
           </div>
         ) : (
@@ -166,9 +191,7 @@ export default function UserProjects() {
                     variant="destructive"
                     size="icon"
                     onClick={async () => {
-                      if (
-                        confirm("Are you sure you want to delete this project?")
-                      ) {
+                      if (confirm(translations.deleteConfirm)) {
                         try {
                           const response = await fetch(
                             `/api/projects/${project.id}`,
@@ -202,11 +225,13 @@ export default function UserProjects() {
                 >
                   {showAll ? (
                     <>
-                      Show Less <ChevronUp className="h-4 w-4 ml-2" />
+                      {translations.showLess}{" "}
+                      <ChevronUp className="h-4 w-4 ml-2" />
                     </>
                   ) : (
                     <>
-                      View All Projects <ChevronDown className="h-4 w-4 ml-2" />
+                      {translations.viewAll}{" "}
+                      <ChevronDown className="h-4 w-4 ml-2" />
                     </>
                   )}
                 </Button>

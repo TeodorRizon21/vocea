@@ -3,10 +3,11 @@
 import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useUser } from "@clerk/nextjs";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { generateAcronym } from "@/lib/acronym";
 import { useUniversities } from "@/hooks/useUniversities";
+import { useLanguage } from "@/components/LanguageToggle";
 
 interface UserProfileProps {
   className?: string;
@@ -28,6 +29,28 @@ export default function UserProfile({ className }: UserProfileProps) {
   const [error, setError] = useState(false);
   const router = useRouter();
   const { getUniversityName, getFacultyName } = useUniversities();
+  const { language, forceRefresh } = useLanguage();
+
+  // Traduceri pentru texte statice
+  const translations = {
+    ro: {
+      universityNotSet: "Universitate nesetată",
+      facultyNotSet: "Facultate nesetată",
+      profileIncomplete: "Profil incomplet",
+      plan: "abonament",
+    },
+    en: {
+      universityNotSet: "University not set",
+      facultyNotSet: "Faculty not set",
+      profileIncomplete: "Profile Incomplete",
+      plan: "plan",
+    },
+  };
+
+  // Selectează traducerile în funcție de limba curentă folosind useMemo
+  const t = useMemo(() => {
+    return translations[language as keyof typeof translations];
+  }, [language, forceRefresh]);
 
   // Set up useEffect to fetch user data from the API
   useEffect(() => {
@@ -47,8 +70,8 @@ export default function UserProfile({ className }: UserProfileProps) {
               firstName: user.firstName || undefined,
               lastName: user.lastName || undefined,
               avatar: user.imageUrl || undefined,
-              university: "University not set",
-              faculty: "Faculty not set",
+              university: t.universityNotSet,
+              faculty: t.facultyNotSet,
             });
           }
           setError(true);
@@ -62,8 +85,8 @@ export default function UserProfile({ className }: UserProfileProps) {
             firstName: user.firstName || undefined,
             lastName: user.lastName || undefined,
             avatar: user.imageUrl || undefined,
-            university: "University not set",
-            faculty: "Faculty not set",
+            university: t.universityNotSet,
+            faculty: t.facultyNotSet,
           });
         }
       }
@@ -84,7 +107,7 @@ export default function UserProfile({ className }: UserProfileProps) {
 
     fetchUserData();
     fetchSubscription();
-  }, [user]);
+  }, [user, t]);
 
   // Don't render anything until the component is mounted and Clerk is loaded
   if (!mounted || !isLoaded) {
@@ -96,24 +119,24 @@ export default function UserProfile({ className }: UserProfileProps) {
     firstName: user?.firstName,
     lastName: user?.lastName,
     avatar: user?.imageUrl,
-    university: "University not set",
-    faculty: "Faculty not set",
+    university: t.universityNotSet,
+    faculty: t.facultyNotSet,
   };
 
   // Convert IDs to actual names
   const universityName =
     displayUserData.university &&
-    displayUserData.university !== "University not set"
+    displayUserData.university !== t.universityNotSet
       ? getUniversityName(displayUserData.university)
-      : "University not set";
+      : t.universityNotSet;
 
   const facultyName =
-    displayUserData.faculty && displayUserData.faculty !== "Faculty not set"
+    displayUserData.faculty && displayUserData.faculty !== t.facultyNotSet
       ? getFacultyName(
           displayUserData.university || "",
           displayUserData.faculty
         )
-      : "Faculty not set";
+      : t.facultyNotSet;
 
   const initials =
     displayUserData.firstName && displayUserData.lastName
@@ -122,7 +145,7 @@ export default function UserProfile({ className }: UserProfileProps) {
   const displayName =
     displayUserData.firstName && displayUserData.lastName
       ? `${displayUserData.firstName} ${displayUserData.lastName}`
-      : "Profile Incomplete";
+      : t.profileIncomplete;
 
   return (
     <div
@@ -148,14 +171,14 @@ export default function UserProfile({ className }: UserProfileProps) {
           title={
             facultyName && universityName
               ? `${facultyName}, ${universityName}`
-              : "University not set"
+              : t.universityNotSet
           }
         >
           {facultyName && universityName
             ? `${generateAcronym(facultyName)}, ${generateAcronym(
                 universityName
               )}`
-            : "University not set"}
+            : t.universityNotSet}
         </p>
         <Badge
           variant="secondary"
@@ -169,7 +192,7 @@ export default function UserProfile({ className }: UserProfileProps) {
               : ""
           }`}
         >
-          {subscription} plan
+          {subscription} {t.plan}
         </Badge>
       </div>
     </div>

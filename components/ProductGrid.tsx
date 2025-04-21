@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import ProductCard from "./ProductCard";
 import type { Project } from "@prisma/client";
 import { useUniversities } from "@/hooks/useUniversities";
 import AccessDeniedDialog from "@/components/AccessDeniedDialog";
+import { useLanguage } from "@/components/LanguageToggle";
 
 interface ExtendedProject extends Project {
   user: {
@@ -31,11 +32,27 @@ export default function ProductGrid({
   const { getUniversityName, getFacultyName } = useUniversities();
   const [showAccessDenied, setShowAccessDenied] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState("");
+  const { language, forceRefresh } = useLanguage();
+
+  const translations = useMemo(() => {
+    return {
+      noProjects:
+        language === "ro" ? "Niciun proiect găsit." : "No projects found.",
+      noUniversity:
+        language === "ro"
+          ? "Nicio universitate specificată"
+          : "No university specified",
+      noFaculty:
+        language === "ro"
+          ? "Nicio facultate specificată"
+          : "No faculty specified",
+    };
+  }, [language, forceRefresh]);
 
   if (projects.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500">No projects found.</p>
+        <p className="text-gray-500">{translations.noProjects}</p>
       </div>
     );
   }
@@ -72,10 +89,8 @@ export default function ProductGrid({
               authorFirstName={project.user.firstName}
               authorLastName={project.user.lastName}
               authorAvatar={project.user.avatar}
-              university={
-                project.university || "Nicio universitate specificată"
-              }
-              faculty={project.faculty || "Nicio facultate specificată"}
+              university={project.university || translations.noUniversity}
+              faculty={project.faculty || translations.noFaculty}
               reviews={project.reviews}
               userId={project.userId}
             />

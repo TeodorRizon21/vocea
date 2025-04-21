@@ -6,10 +6,11 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { MessageSquare, Users, Star, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import UserTooltip from "./UserTooltip";
 import ReportButton from "@/components/ReportButton";
 import { useUser } from "@clerk/nextjs";
+import { useLanguage } from "@/components/LanguageToggle";
 
 interface TopicCardProps {
   id: string;
@@ -56,6 +57,20 @@ export default function TopicCard({
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useUser();
   const [isAdmin, setIsAdmin] = useState(false);
+  const { language, forceRefresh } = useLanguage();
+
+  // Traduceri pentru componenta cu useMemo
+  const translations = useMemo(() => {
+    return {
+      comments: language === "ro" ? "comentarii" : "comments",
+      people: language === "ro" ? "persoane au comentat" : "people commented",
+      at: language === "ro" ? "la" : "at",
+      deleteConfirm:
+        language === "ro"
+          ? "Ești sigur că vrei să ștergi acest subiect?"
+          : "Are you sure you want to delete this topic?",
+    };
+  }, [language, forceRefresh]);
 
   useEffect(() => {
     if (user) {
@@ -79,11 +94,7 @@ export default function TopicCard({
 
   const handleDelete = async (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent navigation
-    if (
-      !onDelete ||
-      !window.confirm("Are you sure you want to delete this topic?")
-    )
-      return;
+    if (!onDelete || !window.confirm(translations.deleteConfirm)) return;
 
     setIsLoading(true);
     try {
@@ -96,6 +107,18 @@ export default function TopicCard({
   // Folosim numele universității și facultății dacă sunt disponibile, altfel folosim ID-urile
   const displayUniversity = universityName || university;
   const displayFaculty = facultyName || faculty;
+
+  // Formatare dată în funcție de limbă
+  const formattedDate = useMemo(() => {
+    // Pentru română: "15 mai 2023 la 13:45"
+    if (language === "ro") {
+      const date = format(new Date(createdAt), "PPP");
+      const time = format(new Date(createdAt), "HH:mm");
+      return `${date} ${translations.at} ${time}`;
+    }
+    // Pentru engleză: "May 15, 2023 at 13:45"
+    return format(new Date(createdAt), `PPP '${translations.at}' HH:mm`);
+  }, [createdAt, language, translations]);
 
   return (
     <Card className="mb-4 shadow-md hover:shadow-lg transition-shadow relative group">
@@ -119,7 +142,7 @@ export default function TopicCard({
                 </span>
               </UserTooltip>
               <span>•</span>
-              <span>{format(new Date(createdAt), "PPP 'at' HH:mm")}</span>
+              <span>{formattedDate}</span>
             </div>
             <p className="text-sm text-muted-foreground">{displayUniversity}</p>
             <p className="text-sm text-muted-foreground">{displayFaculty}</p>
@@ -157,11 +180,15 @@ export default function TopicCard({
         <div className="flex items-center space-x-4 text-sm text-muted-foreground">
           <div className="flex items-center">
             <MessageSquare className="mr-1 h-4 w-4" />
-            <span>{comments} comments</span>
+            <span>
+              {comments} {translations.comments}
+            </span>
           </div>
           <div className="flex items-center">
             <Users className="mr-1 h-4 w-4" />
-            <span>{commenters} people commented</span>
+            <span>
+              {commenters} {translations.people}
+            </span>
           </div>
         </div>
       </CardContent>

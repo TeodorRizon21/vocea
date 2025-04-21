@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import UserProfile from "@/components/UserProfile";
@@ -15,36 +15,35 @@ import FilterButton from "@/components/FilterButton";
 import ForumFilterDialog from "@/components/ForumFilterDialog";
 import { useUniversities } from "@/hooks/useUniversities";
 import type { ForumTopic } from "@prisma/client";
-
-const tabsData = [
-  { id: "toate", label: "Toate subiectele" },
-  { id: "favorite", label: "Subiecte favorite" },
-  { id: "mele", label: "Subiectele mele" },
-];
-
-type OmitDate = Omit<ForumTopic, "createdAt" | "updatedAt">;
-interface ExtendedForumTopic extends OmitDate {
-  user: {
-    firstName: string | null;
-    lastName: string | null;
-    university: string | null;
-    faculty: string | null;
-    avatar?: string | null;
-  };
-  comments: any[];
-  isFavorited: boolean;
-  isOwner: boolean;
-  favorites: string[];
-  createdAt: string;
-  updatedAt: Date;
-  universityName?: string;
-  facultyName?: string;
-}
+import { useLanguage } from "@/components/LanguageToggle";
 
 export default function ForumPage() {
   const router = useRouter();
   const { user } = useUser();
   const { getUniversityName, getFacultyName } = useUniversities();
+  const { language, forceRefresh } = useLanguage();
+
+  // Traduceri pentru pagina cu useMemo
+  const translations = useMemo(() => {
+    return {
+      forumTitle: language === "ro" ? "Forum" : "Forum",
+      allTopics: language === "ro" ? "Toate subiectele" : "All topics",
+      favoriteTopics:
+        language === "ro" ? "Subiecte favorite" : "Favorite topics",
+      myTopics: language === "ro" ? "Subiectele mele" : "My topics",
+    };
+  }, [language, forceRefresh]);
+
+  // Actualizarea taburilor cu traducerile corespunzătoare
+  const tabsData = useMemo(
+    () => [
+      { id: "toate", label: translations.allTopics },
+      { id: "favorite", label: translations.favoriteTopics },
+      { id: "mele", label: translations.myTopics },
+    ],
+    [translations]
+  );
+
   const [activeTab, setActiveTab] = useState("toate");
   const [searchQuery, setSearchQuery] = useState("");
   const [topics, setTopics] = useState<ExtendedForumTopic[]>([]);
@@ -53,12 +52,34 @@ export default function ForumPage() {
   );
   const [loading, setLoading] = useState(true);
   const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false);
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [filters, setFilters] = useState({
     university: "",
     faculty: "",
     category: "",
   });
   const [userPlan, setUserPlan] = useState("Basic");
+
+  type OmitDate = Omit<ForumTopic, "createdAt" | "updatedAt">;
+  interface ExtendedForumTopic extends OmitDate {
+    user: {
+      firstName: string | null;
+      lastName: string | null;
+      university: string | null;
+      faculty: string | null;
+      avatar?: string | null;
+      universityName?: string | null;
+      facultyName?: string | null;
+    };
+    comments: any[];
+    isFavorited: boolean;
+    isOwner: boolean;
+    favorites: string[];
+    createdAt: string;
+    updatedAt: Date;
+    universityName?: string;
+    facultyName?: string;
+  }
 
   useEffect(() => {
     fetchTopics();
@@ -79,6 +100,20 @@ export default function ForumPage() {
     }
   };
 
+  // Adăugăm funcții pentru debug
+  const logTopicDetails = (topic: ExtendedForumTopic) => {
+    console.log("Topic filtering details:", {
+      id: topic.id,
+      title: topic.title,
+      university: topic.university,
+      faculty: topic.faculty,
+      universityName: topic.universityName,
+      facultyName: topic.facultyName,
+      filter_university: filters.university,
+      filter_faculty: filters.faculty,
+    });
+  };
+
   const filterTopics = useCallback(() => {
     let filtered = [...topics];
 
@@ -96,30 +131,79 @@ export default function ForumPage() {
         (topic) =>
           topic.title.toLowerCase().includes(query) ||
           topic.content.toLowerCase().includes(query) ||
-          (topic.university &&
-            topic.university.toLowerCase().includes(query)) ||
-          (topic.faculty && topic.faculty.toLowerCase().includes(query))
+          (topic.universityName &&
+            topic.universityName.toLowerCase().includes(query)) ||
+          (topic.facultyName && topic.facultyName.toLowerCase().includes(query))
       );
+    }
+
+    // Logăm primele 3 topicuri pentru debug
+    if (filtered.length > 0 && filters.university) {
+      console.log("Primele topicuri înainte de filtrare:");
+      for (let i = 0; i < Math.min(3, filtered.length); i++) {
+        logTopicDetails(filtered[i]);
+      }
     }
 
     // Filter by university
     if (filters.university && filters.university !== "") {
+      console.log("Filtering by university ID:", filters.university);
       filtered = filtered.filter((topic) => {
-        return (
-          topic.university === filters.university ||
-          (topic.user && topic.user.university === filters.university)
-        );
+        // Încercăm mai multe posibilități de potrivire
+        const matchesId = topic.university === filters.university;
+        const matchesName =
+          topic.universityName === getUniversityName(filters.university);
+
+        // Log pentru depanare
+        if (matchesId || matchesName) {
+          console.log("Found match for university:", {
+            topicUniversity: topic.university,
+            filterUniversity: filters.university,
+            topicUniversityName: topic.universityName,
+            filterUniversityName: getUniversityName(filters.university),
+          });
+        }
+
+        return matchesId || matchesName;
       });
     }
 
     // Filter by faculty
     if (filters.faculty && filters.faculty !== "") {
+      console.log("Filtering by faculty ID:", filters.faculty);
       filtered = filtered.filter((topic) => {
-        return (
-          topic.faculty === filters.faculty ||
-          (topic.user && topic.user.faculty === filters.faculty)
-        );
+        // Încercăm mai multe posibilități de potrivire
+        const matchesId = topic.faculty === filters.faculty;
+        const matchesName =
+          topic.facultyName ===
+          getFacultyName(
+            filters.university || topic.university,
+            filters.faculty
+          );
+
+        // Log pentru depanare
+        if (matchesId || matchesName) {
+          console.log("Found match for faculty:", {
+            topicFaculty: topic.faculty,
+            filterFaculty: filters.faculty,
+            topicFacultyName: topic.facultyName,
+            filterFacultyName: getFacultyName(
+              filters.university || topic.university,
+              filters.faculty
+            ),
+          });
+        }
+
+        return matchesId || matchesName;
       });
+    }
+
+    // Logăm rezultatele filtrării pentru debug
+    if (filtered.length > 0 && (filters.university || filters.faculty)) {
+      console.log("Rezultate după filtrare:", filtered.length);
+      if (filtered.length > 0) {
+        logTopicDetails(filtered[0]);
+      }
     }
 
     // Filter by category
@@ -129,6 +213,7 @@ export default function ForumPage() {
       );
     }
 
+    console.log("Filtered topics:", filtered.length);
     setFilteredTopics(filtered);
   }, [activeTab, searchQuery, topics, user?.id, filters]);
 
@@ -136,13 +221,61 @@ export default function ForumPage() {
     filterTopics();
   }, [filterTopics]);
 
+  // Funcție pentru verificarea tuturor topicurilor și valorilor lor
+  const checkAllTopics = (topics: ExtendedForumTopic[]) => {
+    console.log("Verificare completă a topicurilor:");
+    console.log("Număr total de topicuri:", topics.length);
+
+    // Extragem toate valorile unice de universități și facultăți
+    const universities = new Set<string>();
+    const faculties = new Set<string>();
+
+    topics.forEach((topic) => {
+      universities.add(topic.university);
+      faculties.add(topic.faculty);
+    });
+
+    console.log("Universități unice:", Array.from(universities));
+    console.log("Facultăți unice:", Array.from(faculties));
+
+    // Verificăm topicurile cu universități ID-uri
+    const topicsWithUniversityIds = topics.filter((t) =>
+      t.university.startsWith("uni_")
+    );
+    console.log(
+      "Topicuri cu universități ID-uri:",
+      topicsWithUniversityIds.length
+    );
+
+    // Verificăm topicurile cu facultăți ID-uri
+    const topicsWithFacultyIds = topics.filter((t) =>
+      t.faculty.startsWith("fac_")
+    );
+    console.log("Topicuri cu facultăți ID-uri:", topicsWithFacultyIds.length);
+  };
+
   const fetchTopics = async () => {
     try {
       const response = await fetch("/api/forum");
       if (response.ok) {
         const data = await response.json();
         console.log("Fetched topics:", data.length);
-        console.log("Sample topic:", data[0]);
+
+        // Detalii despre primul topic pentru a verifica structura
+        if (data.length > 0) {
+          console.log("Sample topic details:", {
+            id: data[0].id,
+            title: data[0].title,
+            university: data[0].university,
+            faculty: data[0].faculty,
+            universityName: data[0].universityName,
+            facultyName: data[0].facultyName,
+          });
+        }
+
+        // Verificare completă a datelor
+        checkAllTopics(data);
+
         setTopics(data);
         setFilteredTopics(data);
       }
@@ -193,12 +326,63 @@ export default function ForumPage() {
   };
 
   const handleSort = () => {
-    const sorted = [...filteredTopics].sort((a, b) => {
-      const dateA = new Date(a.createdAt);
-      const dateB = new Date(b.createdAt);
-      return dateB.getTime() - dateA.getTime();
-    });
-    setFilteredTopics(sorted);
+    console.log("handleSort called, sorting topics");
+    console.log("Current filtered topics:", filteredTopics.length);
+    console.log("Current sort direction:", sortDirection);
+
+    try {
+      // Creează o copie a array-ului pentru a evita mutații directe
+      const topicsToSort = [...filteredTopics];
+
+      // Verifică dacă avem date valide
+      if (
+        !topicsToSort ||
+        !Array.isArray(topicsToSort) ||
+        topicsToSort.length === 0
+      ) {
+        console.warn("No topics to sort or invalid data", topicsToSort);
+        return;
+      }
+
+      // Inversăm direcția sortării la fiecare apel
+      const newDirection = sortDirection === "desc" ? "asc" : "desc";
+      console.log("New sort direction:", newDirection);
+
+      // Creează o funcție care verifică datele înainte de sortare pentru a evita erorile
+      const sorted = topicsToSort.sort((a, b) => {
+        try {
+          if (!a.createdAt || !b.createdAt) {
+            console.warn("Missing createdAt on topics", { a, b });
+            return 0;
+          }
+
+          const dateA = new Date(a.createdAt);
+          const dateB = new Date(b.createdAt);
+
+          // Verifică dacă datele sunt valide
+          if (isNaN(dateA.getTime()) || isNaN(dateB.getTime())) {
+            console.warn("Invalid dates for sorting", { dateA, dateB });
+            return 0;
+          }
+
+          // Sortare în funcție de direcție
+          return newDirection === "desc"
+            ? dateB.getTime() - dateA.getTime() // Descendent (cele mai noi primele)
+            : dateA.getTime() - dateB.getTime(); // Ascendent (cele mai vechi primele)
+        } catch (err) {
+          console.error("Error during sort comparison:", err);
+          return 0;
+        }
+      });
+
+      console.log("Sorted topics:", sorted.length);
+
+      // Actualizează starea cu topicurile sortate și noua direcție
+      setFilteredTopics(sorted);
+      setSortDirection(newDirection);
+    } catch (error) {
+      console.error("Error in handleSort:", error);
+    }
   };
 
   const handleFilter = () => {
@@ -229,7 +413,9 @@ export default function ForumPage() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-4xl font-bold text-purple-600">Forum</h1>
+        <h1 className="text-4xl font-bold text-purple-600">
+          {translations.forumTitle}
+        </h1>
         <UserProfile />
       </div>
       <div className="flex justify-between items-center">
@@ -247,7 +433,7 @@ export default function ForumPage() {
         <div className="flex-grow">
           <SearchBar onSearch={handleSearch} />
         </div>
-        <SortButton onSort={handleSort} />
+        <SortButton onSort={handleSort} direction={sortDirection} />
         <FilterButton
           onFilter={handleFilter}
           activeFiltersCount={activeFiltersCount}
@@ -263,7 +449,11 @@ export default function ForumPage() {
           />
         ) : (
           <div className="flex flex-col items-center justify-center h-64 text-gray-500">
-            <p className="text-lg">No topics found matching your filters</p>
+            <p className="text-lg">
+              {language === "ro"
+                ? "Nu au fost găsite subiecte care să corespundă criteriilor de căutare"
+                : "No topics found matching your search criteria"}
+            </p>
             <Button
               variant="link"
               onClick={() => {
@@ -271,7 +461,9 @@ export default function ForumPage() {
                 setSearchQuery("");
               }}
             >
-              Clear all filters
+              {language === "ro"
+                ? "Șterge toate filtrele"
+                : "Clear all filters"}
             </Button>
           </div>
         )}
