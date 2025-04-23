@@ -10,7 +10,7 @@ import Footer from "@/components/Footer"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata = {
-  title: "VOC - Virtual Office for Collaboration",
+  title: "VOC - Vocea campusului",
   description: "A platform for students to collaborate on projects and share resources.",
 }
 
