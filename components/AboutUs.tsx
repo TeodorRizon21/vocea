@@ -1,99 +1,186 @@
-"use client"
+"use client";
 
-import { useEffect, useRef } from "react"
-import { motion, useInView, useAnimation, AnimatePresence } from "framer-motion"
-import { Users, Newspaper, Share2, MessageSquare, Lightbulb, GraduationCap, Building2, Trophy } from "lucide-react"
-import { Card, CardContent } from "@/components/ui/card"
-
-const features = [
-  {
-    icon: Users,
-    title: "Student Community",
-    description: "Connect with fellow students across different universities and departments.",
-    color: "bg-blue-500",
-  },
-  {
-    icon: Share2,
-    title: "Project Sharing",
-    description: "Share your academic projects, research work, and creative endeavors with peers.",
-    color: "bg-purple-500",
-  },
-  {
-    icon: MessageSquare,
-    title: "Open Discussions",
-    description: "Engage in meaningful discussions about academic and campus life topics.",
-    color: "bg-green-500",
-  },
-  {
-    icon: Newspaper,
-    title: "Campus News",
-    description: "Stay updated with the latest news and events from your university.",
-    color: "bg-red-500",
-  },
-]
-
-const stats = [
-  {
-    icon: Building2,
-    value: "15+",
-    label: "Universities",
-    color: "bg-indigo-500",
-  },
-  {
-    icon: GraduationCap,
-    value: "10k+",
-    label: "Students",
-    color: "bg-pink-500",
-  },
-  {
-    icon: Lightbulb,
-    value: "5k+",
-    label: "Projects",
-    color: "bg-yellow-500",
-  },
-  {
-    icon: Trophy,
-    value: "500+",
-    label: "Success Stories",
-    color: "bg-emerald-500",
-  },
-]
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.2,
-      delayChildren: 0.3,
-    },
-  },
-}
-
-const itemVariants = {
-  hidden: { y: 20, opacity: 0, scale: 0.9 },
-  visible: {
-    y: 0,
-    opacity: 1,
-    scale: 1,
-    transition: {
-      type: "spring",
-      stiffness: 100,
-      damping: 10,
-    },
-  },
-}
+import { useEffect, useRef, useMemo } from "react";
+import {
+  motion,
+  useInView,
+  useAnimation,
+  AnimatePresence,
+} from "framer-motion";
+import {
+  Users,
+  Newspaper,
+  Share2,
+  MessageSquare,
+  Lightbulb,
+  GraduationCap,
+  Building2,
+  Trophy,
+} from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { useLanguage } from "@/components/LanguageToggle";
 
 export default function AboutUs() {
-  const controls = useAnimation()
-  const ref = useRef(null)
-  const isInView = useInView(ref, { once: true, margin: "-100px" })
+  const controls = useAnimation();
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const { language, forceRefresh } = useLanguage();
+
+  // Traduceri pentru caracteristici și statistici
+  const translations = {
+    ro: {
+      features: [
+        {
+          icon: Users,
+          title: "Comunitate Studențească",
+          description:
+            "Conectează-te cu alți studenți din diferite universități și departamente.",
+          color: "bg-blue-500",
+        },
+        {
+          icon: Share2,
+          title: "Partajare Proiecte",
+          description:
+            "Împărtășește proiecte academice, cercetări și creații cu colegii tăi.",
+          color: "bg-purple-500",
+        },
+        {
+          icon: MessageSquare,
+          title: "Discuții Deschise",
+          description:
+            "Implică-te în discuții semnificative despre teme academice și viața de campus.",
+          color: "bg-green-500",
+        },
+        {
+          icon: Newspaper,
+          title: "Știri din Campus",
+          description:
+            "Rămâi la curent cu cele mai recente știri și evenimente din universitatea ta.",
+          color: "bg-red-500",
+        },
+      ],
+      stats: [
+        {
+          icon: Building2,
+          value: "15+",
+          label: "Universități",
+          color: "bg-indigo-500",
+        },
+        {
+          icon: GraduationCap,
+          value: "10k+",
+          label: "Studenți",
+          color: "bg-pink-500",
+        },
+        {
+          icon: Lightbulb,
+          value: "5k+",
+          label: "Proiecte",
+          color: "bg-yellow-500",
+        },
+        {
+          icon: Trophy,
+          value: "500+",
+          label: "Povești de Succes",
+          color: "bg-emerald-500",
+        },
+      ],
+    },
+    en: {
+      features: [
+        {
+          icon: Users,
+          title: "Student Community",
+          description:
+            "Connect with fellow students across different universities and departments.",
+          color: "bg-blue-500",
+        },
+        {
+          icon: Share2,
+          title: "Project Sharing",
+          description:
+            "Share your academic projects, research work, and creative endeavors with peers.",
+          color: "bg-purple-500",
+        },
+        {
+          icon: MessageSquare,
+          title: "Open Discussions",
+          description:
+            "Engage in meaningful discussions about academic and campus life topics.",
+          color: "bg-green-500",
+        },
+        {
+          icon: Newspaper,
+          title: "Campus News",
+          description:
+            "Stay updated with the latest news and events from your university.",
+          color: "bg-red-500",
+        },
+      ],
+      stats: [
+        {
+          icon: Building2,
+          value: "15+",
+          label: "Universities",
+          color: "bg-indigo-500",
+        },
+        {
+          icon: GraduationCap,
+          value: "10k+",
+          label: "Students",
+          color: "bg-pink-500",
+        },
+        {
+          icon: Lightbulb,
+          value: "5k+",
+          label: "Projects",
+          color: "bg-yellow-500",
+        },
+        {
+          icon: Trophy,
+          value: "500+",
+          label: "Success Stories",
+          color: "bg-emerald-500",
+        },
+      ],
+    },
+  };
+
+  // Selectează traducerile în funcție de limba curentă folosind useMemo
+  const content = useMemo(() => {
+    return translations[language as keyof typeof translations];
+  }, [language, forceRefresh]);
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2,
+        delayChildren: 0.3,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0, scale: 0.9 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      scale: 1,
+      transition: {
+        type: "spring",
+        stiffness: 100,
+        damping: 10,
+      },
+    },
+  };
 
   useEffect(() => {
     if (isInView) {
-      controls.start("visible")
+      controls.start("visible");
     }
-  }, [controls, isInView])
+  }, [controls, isInView]);
 
   return (
     <div className="space-y-16 px-4" ref={ref}>
@@ -103,7 +190,7 @@ export default function AboutUs() {
         variants={containerVariants}
         className="grid grid-cols-1 md:grid-cols-2 gap-8"
       >
-        {features.map((feature, index) => (
+        {content.features.map((feature, index) => (
           <motion.div
             key={index}
             variants={itemVariants}
@@ -147,7 +234,7 @@ export default function AboutUs() {
         className="grid grid-cols-2 md:grid-cols-4 gap-6"
       >
         <AnimatePresence>
-          {stats.map((stat, index) => (
+          {content.stats.map((stat, index) => (
             <motion.div
               key={index}
               variants={itemVariants}
@@ -174,7 +261,9 @@ export default function AboutUs() {
                     >
                       {stat.value}
                     </motion.h3>
-                    <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300">{stat.label}</p>
+                    <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300">
+                      {stat.label}
+                    </p>
                   </motion.div>
                 </CardContent>
                 <motion.div
@@ -216,11 +305,17 @@ export default function AboutUs() {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
         >
-          Vocea Campusului is more than just a platform - it&apos;s a vibrant community of students, researchers, and
-          innovators. Whether you&apos;re looking to showcase your work, collaborate on projects, or stay informed about
-          campus life, we&apos;re here to amplify your voice and connect you with like-minded peers.
+          Vocea Campusului is more than just a platform - it&apos;s a vibrant
+          community of students, researchers, and innovators. Whether
+          you&apos;re looking to showcase your work, collaborate on projects, or
+          stay informed about campus life, we&apos;re here to amplify your voice
+          and connect you with like-minded peers.
         </motion.p>
-        <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="inline-block relative">
+        <motion.div
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
+          className="inline-block relative"
+        >
           <div className="relative inline-flex group">
             <div className="absolute -inset-px bg-gradient-to-r from-purple-600 to-blue-500 rounded-lg blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-pulse" />
             <button className="relative px-6 sm:px-8 py-3 sm:py-4 bg-white dark:bg-gray-800 rounded-lg leading-none flex items-center">
@@ -232,6 +327,5 @@ export default function AboutUs() {
         </motion.div>
       </motion.div>
     </div>
-  )
+  );
 }
-

@@ -194,17 +194,19 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     });
 
     return NextResponse.json({
-      ...topic,
-      universityName: topicUniversityName,
-      facultyName: topicFacultyName,
-      user: {
-        ...topic.user,
-        universityName: authorUniversityName,
-        facultyName: authorFacultyName
-      },
-      comments: commentsWithNames,
-      isOwner: userId === topic.userId,
-      isFavorited: topic.favorites.includes(userId || ""),
+      topic: {
+        ...topic,
+        universityName: topicUniversityName,
+        facultyName: topicFacultyName,
+        user: {
+          ...topic.user,
+          universityName: authorUniversityName,
+          facultyName: authorFacultyName
+        },
+        comments: commentsWithNames,
+        isOwner: userId === topic.userId,
+        isFavorited: topic.favorites.includes(userId || ""),
+      }
     })
   } catch (error) {
     console.error("Error fetching forum topic:", error)

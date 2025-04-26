@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import ProjectDetails from "@/components/ProjectDetails";
 import AccessDeniedDialog from "@/components/AccessDeniedDialog";
+import { useLanguage } from "@/components/LanguageToggle";
 
 export default function ProjectPage() {
   const params = useParams();
@@ -13,6 +14,22 @@ export default function ProjectPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showAccessDenied, setShowAccessDenied] = useState(false);
+  const { language, forceRefresh } = useLanguage();
+
+  // Traduceri pentru pagina
+  const translations = useMemo(() => {
+    return {
+      loading: language === "ro" ? "Se încarcă..." : "Loading...",
+      error: language === "ro" ? "Eroare" : "Error",
+      projectNotFound:
+        language === "ro" ? "Proiectul nu a fost găsit" : "Project not found",
+      back: language === "ro" ? "Înapoi" : "Back",
+      fetchError:
+        language === "ro"
+          ? "A apărut o eroare la încărcarea proiectului"
+          : "Failed to fetch project",
+    };
+  }, [language, forceRefresh]);
 
   useEffect(() => {
     const fetchProject = async () => {
@@ -34,9 +51,7 @@ export default function ProjectPage() {
         setProject(data);
       } catch (error: any) {
         console.error("Error fetching project:", error);
-        setError(
-          error.message || "A apărut o eroare la încărcarea proiectului"
-        );
+        setError(error.message || translations.fetchError);
       } finally {
         setLoading(false);
       }
@@ -73,12 +88,13 @@ export default function ProjectPage() {
     };
 
     initPage();
-  }, [params?.id]);
+  }, [params?.id, translations.fetchError]);
 
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
         <Loader2 className="h-8 w-8 animate-spin" />
+        <span className="ml-2">{translations.loading}</span>
       </div>
     );
   }
@@ -86,13 +102,15 @@ export default function ProjectPage() {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px]">
-        <h2 className="text-2xl font-bold text-red-600 mb-4">Eroare</h2>
+        <h2 className="text-2xl font-bold text-red-600 mb-4">
+          {translations.error}
+        </h2>
         <p className="text-gray-700 dark:text-gray-300">{error}</p>
         <button
           onClick={() => router.back()}
           className="mt-6 px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition-colors"
         >
-          Înapoi
+          {translations.back}
         </button>
       </div>
     );
@@ -105,13 +123,13 @@ export default function ProjectPage() {
       ) : (
         <div className="flex flex-col items-center justify-center min-h-[400px]">
           <h2 className="text-2xl font-bold text-red-600 mb-4">
-            Proiectul nu a fost găsit
+            {translations.projectNotFound}
           </h2>
           <button
             onClick={() => router.back()}
             className="mt-6 px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition-colors"
           >
-            Înapoi
+            {translations.back}
           </button>
         </div>
       )}

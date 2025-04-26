@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import TabsSection from "@/components/TabsSection";
 import SearchBar from "@/components/SearchBar";
@@ -13,6 +13,7 @@ import FilterDialog from "@/components/FilterDialog";
 import { useUniversities } from "@/hooks/useUniversities";
 import AccessDeniedDialog from "@/components/AccessDeniedDialog";
 import { useUser } from "@clerk/nextjs";
+import { useLanguage } from "@/components/LanguageToggle";
 
 // Import the ExtendedProject type from ProductGrid
 interface ExtendedProject {
@@ -75,6 +76,38 @@ export default function BrowsePageClient({
   const router = useRouter();
   const { getUniversityName, getFacultyName } = useUniversities();
   const { isLoaded, user } = useUser();
+  const { language, forceRefresh } = useLanguage();
+
+  // Traduceri pentru pagina cu useMemo
+  const translations = useMemo(() => {
+    return {
+      addNewProject:
+        language === "ro" ? "Adaugă un proiect nou" : "Add a new project",
+      all: language === "ro" ? "Toate" : "All",
+      jobOffers: language === "ro" ? "Oferte muncă" : "Job offers",
+      objects: language === "ro" ? "Obiecte" : "Objects",
+      services: language === "ro" ? "Servicii" : "Services",
+      noResults:
+        language === "ro"
+          ? "Nu au fost găsite proiecte care să corespundă criteriilor tale de căutare. Încearcă să schimbi criteriile de căutare sau filtrare."
+          : "No projects found matching your search criteria. Try changing your search or filter criteria.",
+      loadingMore:
+        language === "ro"
+          ? "Se încarcă mai multe proiecte..."
+          : "Loading more projects...",
+    };
+  }, [language, forceRefresh]);
+
+  // Traducerea subcategoriilor diverse
+  const translatedSubcategories = useMemo(
+    () => [
+      { id: "all", label: translations.all },
+      { id: "oferte-munca", label: translations.jobOffers },
+      { id: "obiecte", label: translations.objects },
+      { id: "servicii", label: translations.services },
+    ],
+    [translations]
+  );
 
   // State
   const [activeTab, setActiveTab] = useState(initialTab);
@@ -192,7 +225,6 @@ export default function BrowsePageClient({
     router.push(`/browse?tab=${value}`);
   };
 
-
   const handleSearch = (query: string) => {
     setSearchQuery(query);
   };
@@ -200,7 +232,6 @@ export default function BrowsePageClient({
   const handleSort = () => {
     setSortOrder((prev) => (prev === "desc" ? "asc" : "desc"));
   };
-
 
   const handleFilter = () => {
     setIsFilterDialogOpen(true);
@@ -228,11 +259,9 @@ export default function BrowsePageClient({
     router.push("/projects/new");
   };
 
-
   return (
     <>
       <div className="flex justify-between items-center">
-
         <TabsSection
           tabs={tabsData}
           activeTab={activeTab}
@@ -242,8 +271,7 @@ export default function BrowsePageClient({
           className="bg-purple-600 hover:bg-purple-700 text-white"
           onClick={handleNewProjectClick}
         >
-          Add a new project
-
+          {translations.addNewProject}
         </Button>
       </div>
 
@@ -257,7 +285,7 @@ export default function BrowsePageClient({
       {/* Show subcategories only for diverse tab */}
       {activeTab === "diverse" && (
         <div className="flex flex-wrap gap-2 my-4">
-          {diverseSubcategories.map((subcategory) => (
+          {translatedSubcategories.map((subcategory) => (
             <Button
               key={subcategory.id}
               variant={
@@ -286,7 +314,6 @@ export default function BrowsePageClient({
           onFilter={handleFilter}
           activeFiltersCount={activeFiltersCount}
         />
-
       </div>
 
       <div className="mt-6">
@@ -294,13 +321,10 @@ export default function BrowsePageClient({
           <ProductGrid projects={filteredProjects} userPlan={userPlan} />
         ) : (
           <div className="text-center py-10">
-            <p className="text-gray-500">
-              No projects found matching your criteria.
-            </p>
+            <p className="text-gray-500">{translations.noResults}</p>
           </div>
         )}
       </div>
-
 
       <FilterDialog
         isOpen={isFilterDialogOpen}
@@ -315,7 +339,6 @@ export default function BrowsePageClient({
         onClose={() => setShowAccessDenied(false)}
         originalPath="/projects/new"
       />
-
     </>
   );
 }

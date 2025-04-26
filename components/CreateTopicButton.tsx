@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import AccessDeniedDialog from "@/components/AccessDeniedDialog";
+import { useLanguage } from "@/components/LanguageToggle";
 
 interface CreateTopicButtonProps {
   onClick: () => void;
@@ -15,6 +16,11 @@ export default function CreateTopicButton({
   userPlan = "Basic",
 }: CreateTopicButtonProps) {
   const [showAccessDenied, setShowAccessDenied] = useState(false);
+  const { language, forceRefresh } = useLanguage();
+
+  const buttonText = useMemo(() => {
+    return language === "ro" ? "Crează subiect nou" : "Create New Topic";
+  }, [language, forceRefresh]);
 
   const handleClick = () => {
     if (userPlan === "Basic") {
@@ -30,7 +36,7 @@ export default function CreateTopicButton({
         onClick={handleClick}
         className="bg-purple-600 hover:bg-purple-700"
       >
-        <Plus className="mr-2 h-4 w-4" /> Create New Topic
+        <Plus className="mr-2 h-4 w-4" /> {buttonText}
       </Button>
 
       <AccessDeniedDialog
