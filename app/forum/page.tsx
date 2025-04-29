@@ -62,6 +62,7 @@ export default function ForumPage() {
           : "No topics found matching your search criteria",
       clearFilters:
         language === "ro" ? "Șterge toate filtrele" : "Clear all filters",
+      createNewTopic: language === "ro" ? "Creează un subiect nou" : "Create a new topic",
     };
   }, [language, forceRefresh]);
 
@@ -259,10 +260,39 @@ export default function ForumPage() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-4xl font-bold text-purple-600">{translations.forumTitle}</h1>
-        <UserProfile />
+        <h1 className="text-4xl font-bold text-purple-600">
+          {translations.forumTitle}
+        </h1>
       </div>
-      <div className="flex justify-between items-center">
+
+      {/* Mobile Layout */}
+      <div className="md:hidden flex flex-col space-y-4">
+        <div className="flex flex-col space-y-2">
+          {tabsDataWithTranslations.map((tab) => (
+            <Button
+              key={tab.id}
+              variant={activeTab === tab.id ? "default" : "outline"}
+              className={`w-full ${
+                activeTab === tab.id
+                  ? "bg-purple-600 hover:bg-purple-700"
+                  : ""
+              }`}
+              onClick={() => setActiveTab(tab.id)}
+            >
+              {tab.label}
+            </Button>
+          ))}
+        </div>
+        <Button
+          className="bg-purple-600 hover:bg-purple-700 text-white w-full"
+          onClick={() => router.push("/forum/new")}
+        >
+          {translations.createNewTopic}
+        </Button>
+      </div>
+
+      {/* Desktop Layout */}
+      <div className="hidden md:flex justify-between items-center">
         <ForumTabs
           tabs={tabsDataWithTranslations}
           activeTab={activeTab}
@@ -273,16 +303,20 @@ export default function ForumPage() {
           userPlan={userPlan}
         />
       </div>
-      <div className="flex items-center space-x-4">
+
+      <div className="flex flex-col md:flex-row items-stretch md:items-center space-y-4 md:space-y-0 md:space-x-4">
         <div className="flex-grow">
           <SearchBar onSearch={handleSearch} />
         </div>
-        <SortButton onSort={handleSort} />
-        <FilterButton
-          onFilter={handleFilter}
-          activeFiltersCount={activeFiltersCount}
-        />
+        <div className="flex space-x-4">
+          <SortButton onSort={handleSort} />
+          <FilterButton
+            onFilter={handleFilter}
+            activeFiltersCount={activeFiltersCount}
+          />
+        </div>
       </div>
+
       <div className="h-[calc(100vh-24rem)] overflow-y-auto pr-4">
         {filteredTopics.length > 0 ? (
           <TopicList
@@ -293,7 +327,7 @@ export default function ForumPage() {
           />
         ) : (
           <div className="flex flex-col items-center justify-center h-64 text-gray-500">
-            <p className="text-lg">{translations.noTopicsFound}</p>
+            <p className="text-lg text-center px-4">{translations.noTopicsFound}</p>
             <Button
               variant="link"
               onClick={() => {

@@ -116,12 +116,11 @@ export default function BrowsePage() {
   }, [activeTab]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 sm:px-4 md:px-6">
       <div className="flex justify-between items-center">
         <h1 className="text-4xl font-bold text-purple-600">
           {translations.browseTitle}
         </h1>
-        <UserProfile />
       </div>
 
       {loading ? (

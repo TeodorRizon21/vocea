@@ -49,6 +49,12 @@ export default function TopicList({
   const [selectedTopicId, setSelectedTopicId] = useState("");
 
   const handleTopicClick = (e: React.MouseEvent, topicId: string) => {
+    // Check if the click was on an action button
+    const target = e.target as HTMLElement;
+    if (target.closest('button') || target.closest('.action-button')) {
+      return;
+    }
+
     if (userPlan === "Basic") {
       e.preventDefault();
       setSelectedTopicId(topicId);

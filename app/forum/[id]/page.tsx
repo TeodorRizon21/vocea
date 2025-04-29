@@ -717,33 +717,6 @@ export default function TopicPage({ params }: { params: { id: string } }) {
             <Button variant="outline" onClick={() => router.back()}>
               Back to Forum
             </Button>
-            <div className="flex gap-2">
-              <ReportButton contentType="forum_topic" contentId={topic.id} />
-              <Button
-                variant="ghost"
-                size="icon"
-                className={`${
-                  topic.isFavorited ? "text-yellow-500" : "text-gray-400"
-                } hover:text-yellow-500`}
-                onClick={handleFavoriteToggle}
-              >
-                <Star
-                  className={`h-5 w-5 ${
-                    topic.isFavorited ? "fill-current" : ""
-                  }`}
-                />
-              </Button>
-              {(topic.isOwner || isAdmin) && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleDeleteTopic}
-                  className="text-red-500 hover:text-red-700"
-                >
-                  <Trash2 className="h-5 w-5" />
-                </Button>
-              )}
-            </div>
           </div>
 
           <Card>
@@ -796,6 +769,33 @@ export default function TopicPage({ params }: { params: { id: string } }) {
               <p className="whitespace-pre-line">
                 {topic.content || translations.noContent}
               </p>
+              <div className="flex gap-2 mt-4">
+                <ReportButton contentType="forum_topic" contentId={topic.id} />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={`${
+                    topic.isFavorited ? "text-yellow-500" : "text-gray-400"
+                  } hover:text-yellow-500`}
+                  onClick={handleFavoriteToggle}
+                >
+                  <Star
+                    className={`h-5 w-5 ${
+                      topic.isFavorited ? "fill-current" : ""
+                    }`}
+                  />
+                </Button>
+                {(topic.isOwner || isAdmin) && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleDeleteTopic}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    <Trash2 className="h-5 w-5" />
+                  </Button>
+                )}
+              </div>
             </CardContent>
           </Card>
 

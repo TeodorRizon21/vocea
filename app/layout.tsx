@@ -23,13 +23,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
             <LanguageProvider>
             <div className="flex min-h-screen flex-col">
-              <div className="flex-1 flex">
-              <Navbar />
-              <main className="flex-1 ml-[calc(2rem+16rem)] mr-8 mt-6 mb-6 bg-card rounded-3xl shadow-lg overflow-auto p-6">
+              <div className="flex-1 flex flex-col md:flex-row">
+                <Navbar />
+                <main className="flex-1 md:ml-[calc(2rem+16rem)] mx-4 md:mr-8 mt-6 mb-6 bg-card rounded-3xl shadow-lg overflow-auto p-4 md:p-6 pt-16 md:pt-6">
                   <RootLayout>{children}</RootLayout>
                 </main>
-            </div>
-            <Footer />
+              </div>
+              <Footer />
             </div>
             </LanguageProvider>
           </ThemeProvider>

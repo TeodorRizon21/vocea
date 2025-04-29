@@ -291,7 +291,6 @@ export default function DashboardPage() {
         <h1 className="text-4xl font-bold text-purple-600">
           {translations.dashboard}
         </h1>
-        <UserProfile />
       </div>
       <DashboardHero name={userData?.firstName || "User"} />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

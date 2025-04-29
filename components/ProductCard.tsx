@@ -57,98 +57,54 @@ export default function ProductCard({
     };
   }, [language, forceRefresh]);
 
-  const averageScore =
-    reviews.length > 0
-      ? reviews.reduce((acc, review) => acc + review.score, 0) / reviews.length
-      : null;
-
-  const displayName =
-    authorFirstName && authorLastName
-      ? `${authorFirstName} ${authorLastName}`
-      : "Anonymous";
-
-  const initials =
-    authorFirstName && authorLastName
-      ? `${authorFirstName[0]}${authorLastName[0]}`
-      : "?";
+  const averageRating = reviews.reduce((acc, review) => acc + review.score, 0) / reviews.length || 0;
+  const displayName = `${authorFirstName || ""} ${authorLastName || ""}`.trim() || "Anonymous";
 
   return (
-    <Card className="h-full flex flex-col shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-      <div className="relative w-full h-48">
+    <Card className="h-full overflow-hidden hover:shadow-lg transition-shadow duration-200">
+      <div className="relative h-48">
         <Image
-          src={thumbnailUrl || "/placeholder.svg"}
+          src={thumbnailUrl}
           alt={title}
           fill
-          style={{ objectFit: "contain" }}
+          className="object-cover"
         />
+      </div>
+      <CardContent className="p-4">
+        <div className="space-y-2">
+          <h3 className="font-semibold text-lg line-clamp-2">{title}</h3>
+          <p className="text-sm text-muted-foreground line-clamp-1">{subject}</p>
+          
+          <div className="flex items-center space-x-2">
+            <Avatar className="h-6 w-6">
+              <AvatarImage src={authorAvatar || undefined} />
+              <AvatarFallback>{displayName.charAt(0)}</AvatarFallback>
+            </Avatar>
+            <span className="text-sm text-muted-foreground line-clamp-1">{displayName}</span>
+          </div>
 
-        {/* Rating badge in top-right corner */}
-        {averageScore !== null && (
-          <div className="absolute top-2 right-2">
-            <Badge className="bg-yellow-50 text-yellow-700 border-yellow-200">
-              <Star className="h-3 w-3 fill-yellow-500 text-yellow-500 mr-1" />
-              {averageScore.toFixed(1)} ({reviews.length})
+          <div className="space-y-1">
+            <div className="flex items-center text-xs text-muted-foreground">
+              <GraduationCap className="h-3 w-3 mr-1" />
+              <span className="line-clamp-1">{university}</span>
+            </div>
+            <div className="flex items-center text-xs text-muted-foreground">
+              <BookOpen className="h-3 w-3 mr-1" />
+              <span className="line-clamp-1">{faculty}</span>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center space-x-1">
+              <Star className="h-4 w-4 text-yellow-400" />
+              <span>{averageRating.toFixed(1)}</span>
+            </div>
+            <Badge variant="secondary" className="text-xs">
+              {category}
             </Badge>
           </div>
-        )}
-      </div>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg line-clamp-2 min-h-[2rem]">
-          {title}
-        </CardTitle>
-        <p className="text-sm text-muted-foreground pb-2">{subject}</p>
-      </CardHeader>
-      <CardContent className="pb-2 space-y-2">
-        {category && (
-          <div className="flex items-center">
-            <Tag className="h-4 w-4 mr-1 text-purple-600" />
-            <p className="text-xs text-muted-foreground line-clamp-1">
-              {category}
-            </p>
-          </div>
-        )}
-        {studyLevel && (
-          <div className="flex items-center">
-            <Scroll className="h-4 w-4 mr-1 text-purple-600" />
-            <p className="text-xs text-muted-foreground line-clamp-1">
-              {translations.studyLevels[studyLevel as keyof typeof translations.studyLevels] || studyLevel}
-            </p>
-          </div>
-        )}
-        <div className="flex items-center">
-          <GraduationCap className="h-4 w-4 mr-1 text-purple-600" />
-          <p className="text-xs text-muted-foreground line-clamp-2">
-          {university}
-          </p>
-        </div>
-        <div className="flex items-center">
-          <BookOpen className="h-4 w-4 mr-1 text-purple-600" />
-          <p className="text-xs text-muted-foreground line-clamp-2">
-             {faculty}
-          </p>
         </div>
       </CardContent>
-      <CardFooter className="pt-1 mt-auto">
-        {/* Make the avatar and name clickable */}
-        <Link
-          href={`/profile/${userId}`}
-          className="flex items-center group w-full"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <Avatar className="h-9 w-9 mr-2 group-hover:ring-2 group-hover:ring-purple-400 transition-all">
-            <AvatarImage src={authorAvatar || undefined} />
-            <AvatarFallback className="bg-gray-200 text-gray-600 text-xs">
-              {initials}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate group-hover:text-purple-600 transition-colors">
-              {displayName}
-            </p>
-            <p className="text-xs text-muted-foreground truncate">Author</p>
-          </div>
-        </Link>
-      </CardFooter>
     </Card>
   );
 }

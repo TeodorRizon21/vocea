@@ -98,6 +98,7 @@ export default function TopicCard({
 
   const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent navigation
+    e.stopPropagation(); // Stop event propagation
     if (isLoading) return;
 
     setIsLoading(true);
@@ -110,6 +111,7 @@ export default function TopicCard({
 
   const handleDelete = async (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent navigation
+    e.stopPropagation(); // Stop event propagation
     if (!onDelete || !window.confirm(translations.deleteConfirm)) return;
 
     setIsLoading(true);
@@ -139,10 +141,10 @@ export default function TopicCard({
   return (
     <Card className="mb-4 shadow-md hover:shadow-lg transition-shadow relative group">
       <CardHeader>
-        <div className="flex justify-between items-start">
-          <div className="space-y-2">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-start gap-4">
+          <div className="space-y-2 flex-1">
             <CardTitle className="text-lg">{title}</CardTitle>
-            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+            <div className="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-2 text-sm text-muted-foreground">
               <UserTooltip
                 userId={author.id}
                 firstName={author.firstName}
@@ -157,9 +159,9 @@ export default function TopicCard({
                   {author.firstName} {author.lastName}
                 </span>
               </UserTooltip>
-              <span>•</span>
+              <span className="hidden md:inline">•</span>
               <span>{formattedDate}</span>
-              <span>•</span>
+              <span className="hidden md:inline">•</span>
               <span className="text-black dark:text-white">{getCategoryTranslation}</span>
             </div>
             <div className="flex flex-wrap gap-2">

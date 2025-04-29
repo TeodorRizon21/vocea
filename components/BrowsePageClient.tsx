@@ -14,6 +14,8 @@ import { useUniversities } from "@/hooks/useUniversities";
 import AccessDeniedDialog from "@/components/AccessDeniedDialog";
 import { useUser } from "@clerk/nextjs";
 import { useLanguage } from "@/components/LanguageToggle";
+import ProductCard from "@/components/ProductCard";
+import UserProfile from "@/components/UserProfile";
 
 // Import the ExtendedProject type from ProductGrid
 interface ExtendedProject {
@@ -259,19 +261,34 @@ export default function BrowsePageClient({
     router.push("/projects/new");
   };
 
+  const handleProjectClick = (e: React.MouseEvent, projectId: string) => {
+    e.preventDefault();
+
+    // Verifică dacă utilizatorul are un plan Basic
+    if (userPlan === "Basic") {
+      setShowAccessDenied(true);
+      return;
+    }
+
+    // Altfel, redirectează către pagina proiectului
+    router.push(`/project/${projectId}`);
+  };
+
   return (
     <>
-      <div className="flex justify-between items-center">
-        <TabsSection
-          tabs={tabsData}
-          activeTab={activeTab}
-          setActiveTab={handleTabChange}
-        />
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="w-full md:w-auto">
+          <TabsSection
+            tabs={tabsData}
+            activeTab={activeTab}
+            setActiveTab={handleTabChange}
+          />
+        </div>
         <Button
-          className="bg-purple-600 hover:bg-purple-700 text-white"
+          className="bg-purple-600 hover:bg-purple-700 text-white w-full md:w-auto"
           onClick={handleNewProjectClick}
         >
-          {translations.addNewProject}
+          Add a new project
         </Button>
       </div>
 
@@ -284,18 +301,18 @@ export default function BrowsePageClient({
 
       {/* Show subcategories only for diverse tab */}
       {activeTab === "diverse" && (
-        <div className="flex flex-wrap gap-2 my-4">
-          {translatedSubcategories.map((subcategory) => (
+        <div className="flex flex-wrap gap-2 my-4 overflow-x-auto pb-2">
+          {diverseSubcategories.map((subcategory) => (
             <Button
               key={subcategory.id}
               variant={
                 diverseSubcategory === subcategory.id ? "default" : "outline"
               }
-              className={
+              className={`whitespace-nowrap ${
                 diverseSubcategory === subcategory.id
                   ? "bg-purple-600 hover:bg-purple-700"
                   : ""
-              }
+              }`}
               onClick={() => setDiverseSubcategory(subcategory.id)}
             >
               {subcategory.label}
@@ -304,24 +321,55 @@ export default function BrowsePageClient({
         </div>
       )}
 
-      <div className="flex items-center space-x-4">
+      <div className="flex flex-col md:flex-row items-stretch md:items-center space-y-4 md:space-y-0 md:space-x-4">
         <div className="flex-grow">
           <SearchBar onSearch={handleSearch} />
         </div>
-        <SortButton onSort={handleSort} />
-
-        <FilterButton
-          onFilter={handleFilter}
-          activeFiltersCount={activeFiltersCount}
-        />
+        <div className="flex space-x-4">
+          <SortButton onSort={handleSort} />
+          <FilterButton
+            onFilter={handleFilter}
+            activeFiltersCount={activeFiltersCount}
+          />
+        </div>
       </div>
 
       <div className="mt-6">
         {filteredProjects.length > 0 ? (
-          <ProductGrid projects={filteredProjects} userPlan={userPlan} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {filteredProjects.map((project) => (
+              <a
+                key={project.id}
+                href={`/project/${project.id}`}
+                onClick={(e) => handleProjectClick(e, project.id)}
+                className="block cursor-pointer"
+              >
+                <ProductCard
+                  title={project.title}
+                  subject={project.subject}
+                  thumbnailUrl={
+                    project.images[0] || "/placeholder.svg?height=192&width=192"
+                  }
+                  authorFirstName={project.user.firstName}
+                  authorLastName={project.user.lastName}
+                  authorAvatar={project.user.avatar}
+                  university={
+                    project.university || "Nicio universitate specificată"
+                  }
+                  faculty={project.faculty || "Nicio facultate specificată"}
+                  category={project.category || project.subject}
+                  reviews={project.reviews}
+                  userId={project.userId}
+                  studyLevel={project.studyLevel || undefined}
+                />
+              </a>
+            ))}
+          </div>
         ) : (
           <div className="text-center py-10">
-            <p className="text-gray-500">{translations.noResults}</p>
+            <p className="text-gray-500">
+              No projects found matching your criteria.
+            </p>
           </div>
         )}
       </div>

@@ -1,6 +1,7 @@
 "use client"
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Button } from "@/components/ui/button"
 
 interface Tab {
   id: string
@@ -13,21 +14,30 @@ interface TabsSectionProps {
   setActiveTab: (id: string) => void
 }
 
-export default function TabsSection({ tabs, activeTab, setActiveTab }: TabsSectionProps) {
+export default function TabsSection({
+  tabs,
+  activeTab,
+  setActiveTab,
+}: TabsSectionProps) {
   return (
-    <Tabs value={activeTab} onValueChange={setActiveTab}>
-      <TabsList className="grid w-full grid-cols-3 rounded-full">
+    <div className="flex flex-col space-y-2">
+      <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
         {tabs.map((tab) => (
-          <TabsTrigger
+          <Button
             key={tab.id}
-            value={tab.id}
-            className="data-[state=active]:bg-purple-600 data-[state=active]:text-white rounded-full"
+            variant={activeTab === tab.id ? "default" : "outline"}
+            className={`w-full sm:w-auto ${
+              activeTab === tab.id
+                ? "bg-purple-600 hover:bg-purple-700"
+                : ""
+            }`}
+            onClick={() => setActiveTab(tab.id)}
           >
             {tab.label}
-          </TabsTrigger>
+          </Button>
         ))}
-      </TabsList>
-    </Tabs>
+      </div>
+    </div>
   )
 }
 
