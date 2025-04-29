@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { MessageSquare, FolderPlus, FileText } from "lucide-react";
+import { Star, MessageSquare, FolderPlus, FileText } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import AccessDeniedDialog from "@/components/AccessDeniedDialog";
+import { useLanguage } from "@/components/LanguageToggle";
 
 interface UserActivityProps {
   activity: {
@@ -29,6 +30,26 @@ export default function UserActivity({
   const [showAccessDenied, setShowAccessDenied] = useState(false);
   const [selectedTopicId, setSelectedTopicId] = useState("");
   const [selectedCommentId, setSelectedCommentId] = useState("");
+  const { language, forceRefresh } = useLanguage();
+
+  // Traduceri pentru componenta
+  const translations = useMemo(() => {
+    return {
+      yourActivity: language === "ro" ? "Activitatea ta" : "Your Activity",
+      projectsCreated:
+        language === "ro" ? "Proiecte create" : "Projects Created",
+      commentsPosted:
+        language === "ro" ? "Comentarii postate" : "Comments Posted",
+      forumTopicsCreated:
+        language === "ro" ? "Subiecte create în forum" : "Forum Topics Created",
+      recentComments:
+        language === "ro" ? "Comentarii recente" : "Recent Comments",
+      noRecentComments:
+        language === "ro" ? "Niciun comentariu recent" : "No recent comments",
+      topicUnavailable:
+        language === "ro" ? "(Subiect indisponibil)" : "(Topic unavailable)",
+    };
+  }, [language, forceRefresh]);
 
   const handleTopicClick = (
     e: React.MouseEvent,
@@ -64,28 +85,30 @@ export default function UserActivity({
     <>
       <Card className="shadow-md">
         <CardHeader>
-          <CardTitle>Your Activity</CardTitle>
+          <CardTitle>{translations.yourActivity}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex justify-between mb-6">
             <ActivityItem
               icon={FolderPlus}
-              label="Projects Created"
+              label={translations.projectsCreated}
               value={activity.projectsCreated}
             />
             <ActivityItem
               icon={MessageSquare}
-              label="Comments Posted"
+              label={translations.commentsPosted}
               value={activity.commentsPosted}
             />
             <ActivityItem
               icon={FileText}
-              label="Forum Topics Created"
+              label={translations.forumTopicsCreated}
               value={activity.forumTopicsCreated}
             />
           </div>
           <div>
-            <h4 className="font-semibold mb-3 text-lg">Recent Comments</h4>
+            <h4 className="font-semibold mb-3 text-lg">
+              {translations.recentComments}
+            </h4>
             {activity.recentComments.length > 0 ? (
               <ul className="space-y-3">
                 {activity.recentComments.map((comment) => {
@@ -129,7 +152,7 @@ export default function UserActivity({
                             {comment.content}
                           </p>
                           <p className="text-xs text-gray-400 mt-1 italic">
-                            (Topic indisponibil)
+                            {translations.topicUnavailable}
                           </p>
                         </div>
                       )}
@@ -139,7 +162,7 @@ export default function UserActivity({
               </ul>
             ) : (
               <p className="text-sm text-muted-foreground">
-                No recent comments
+                {translations.noRecentComments}
               </p>
             )}
           </div>

@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import type React from "react"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { useClerk, useUser } from "@clerk/nextjs"
+import type React from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useClerk, useUser } from "@clerk/nextjs";
 import {
   SchoolIcon as Student,
   Home,
@@ -16,20 +16,26 @@ import {
   Settings,
   Shield,
   ShieldAlert,
-} from "lucide-react"
-import { ThemeToggle } from "@/components/ThemeToggle"
-import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Card } from "@/components/ui/card"
-import { useEffect, useState } from "react"
-import Image from "next/image"
+} from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { LanguageToggle, useLanguage } from "@/components/LanguageToggle";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Card } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import Image from "next/image";
 
 interface NavItemProps {
-  href: string
-  icon: React.ReactNode
-  label: string
-  isActive: boolean
+  href: string;
+  icon: React.ReactNode;
+  label: string;
+  isActive: boolean;
 }
 
 const NavItem = ({ href, icon, label, isActive }: NavItemProps) => (
@@ -47,45 +53,70 @@ const NavItem = ({ href, icon, label, isActive }: NavItemProps) => (
       <span>{label}</span>
     </Link>
   </li>
-)
+);
 
 const Navbar = () => {
-  const pathname = usePathname()
-  const { signOut } = useClerk()
-  const { isLoaded, isSignedIn, user } = useUser()
-  const [isAdmin, setIsAdmin] = useState(false)
-  const [isModerator, setIsModerator] = useState(false)
+  const pathname = usePathname();
+  const { signOut } = useClerk();
+  const { isLoaded, isSignedIn, user } = useUser();
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isModerator, setIsModerator] = useState(false);
+  const { language, translations } = useLanguage();
+  const t = translations[language as keyof typeof translations];
 
   useEffect(() => {
     if (isLoaded && isSignedIn && user) {
       // Check for admin and moderator roles in public metadata
-      const publicMetadata = user.publicMetadata
-      setIsAdmin(publicMetadata.isAdmin === true)
-      setIsModerator(publicMetadata.isModerator === true || publicMetadata.isAdmin === true) // Admins are also moderators
+      const publicMetadata = user.publicMetadata;
+      setIsAdmin(publicMetadata.isAdmin === true);
+      setIsModerator(
+        publicMetadata.isModerator === true || publicMetadata.isAdmin === true
+      ); // Admins are also moderators
     }
-  }, [isLoaded, isSignedIn, user])
+  }, [isLoaded, isSignedIn, user]);
 
   const handleSignOut = async () => {
-    await signOut()
-  }
+    await signOut();
+  };
 
   return (
     <div className="fixed left-[2rem] top-[1.5rem] bottom-[1.5rem] w-64 bg-white dark:bg-gray-800 rounded-3xl flex flex-col justify-between py-6 px-4 shadow-lg text-gray-800 dark:text-gray-200">
       <div className="space-y-8">
         {/* Logo */}
         <div className="flex justify-center bg-white dark:bg-white w-24 h-24 rounded-full items-center mx-auto shadow-md p-2">
-          <Image src="/logo.png" alt="VOC Logo" width={160} height={160} className="object-contain" />
+          <Image
+            src="/logo.png"
+            alt="VOC Logo"
+            width={160}
+            height={160}
+            className="object-contain"
+          />
         </div>
 
         {/* Menu Section */}
         <ul className="space-y-2">
-          <NavItem href="/" icon={<Home size={20} />} label="Home" isActive={pathname === "/"} />
-          <NavItem href="/browse" icon={<Search size={20} />} label="Browse" isActive={pathname === "/browse"} />
-          <NavItem href="/forum" icon={<MessageSquare size={20} />} label="Forum" isActive={pathname === "/forum"} />
+          <NavItem
+            href="/"
+            icon={<Home size={20} />}
+            label={t.home}
+            isActive={pathname === "/"}
+          />
+          <NavItem
+            href="/browse"
+            icon={<Search size={20} />}
+            label={t.browse}
+            isActive={pathname === "/browse"}
+          />
+          <NavItem
+            href="/forum"
+            icon={<MessageSquare size={20} />}
+            label={t.forum}
+            isActive={pathname === "/forum"}
+          />
           <NavItem
             href="/dashboard"
             icon={<LayoutDashboard size={20} />}
-            label="Dashboard"
+            label={t.dashboard}
             isActive={pathname === "/dashboard"}
           />
         </ul>
@@ -94,31 +125,43 @@ const Navbar = () => {
       {/* Bottom Section */}
       <div className="space-y-2">
         <Separator />
+        <LanguageToggle />
         <ThemeToggle />
 
         {/* Admin Panel - Only visible to admins */}
         {isAdmin && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="w-full justify-start px-4 py-2 h-10 font-normal">
+              <Button
+                variant="ghost"
+                className="w-full justify-start px-4 py-2 h-10 font-normal"
+              >
                 <ShieldAlert className="mr-2 h-4 w-4" />
-                Admin Panel
+                {t.adminPanel}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <Link href="/admin/projects">
                 <DropdownMenuItem className="cursor-pointer">
                   <Card className="w-full p-4">
-                    <h3 className="font-semibold">Projects Management</h3>
-                    <p className="text-sm text-muted-foreground">Manage all projects</p>
+                    <h3 className="font-semibold">{t.projectsManagement}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {language === "ro"
+                        ? "Gestionează toate proiectele"
+                        : "Manage all projects"}
+                    </p>
                   </Card>
                 </DropdownMenuItem>
               </Link>
               <Link href="/admin/reports">
                 <DropdownMenuItem className="cursor-pointer">
                   <Card className="w-full p-4">
-                    <h3 className="font-semibold">Raportari</h3>
-                    <p className="text-sm text-muted-foreground">View reported content</p>
+                    <h3 className="font-semibold">{t.reports}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {language === "ro"
+                        ? "Vizualizează conținutul raportat"
+                        : "View reported content"}
+                    </p>
                   </Card>
                 </DropdownMenuItem>
               </Link>
@@ -130,17 +173,24 @@ const Navbar = () => {
         {isModerator && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="w-full justify-start px-4 py-2 h-10 font-normal">
+              <Button
+                variant="ghost"
+                className="w-full justify-start px-4 py-2 h-10 font-normal"
+              >
                 <Shield className="mr-2 h-4 w-4" />
-                Moderator Panel
+                {t.moderatorPanel}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <Link href="/moderator/news">
                 <DropdownMenuItem className="cursor-pointer">
                   <Card className="w-full p-4">
-                    <h3 className="font-semibold">News Management</h3>
-                    <p className="text-sm text-muted-foreground">Manage latest news</p>
+                    <h3 className="font-semibold">{t.newsManagement}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {language === "ro"
+                        ? "Gestionează ultimele știri"
+                        : "Manage latest news"}
+                    </p>
                   </Card>
                 </DropdownMenuItem>
               </Link>
@@ -148,16 +198,24 @@ const Navbar = () => {
           </DropdownMenu>
         )}
 
-        <Button variant="ghost" className="w-full justify-start px-4 py-2 h-10 font-normal" asChild>
+        <Button
+          variant="ghost"
+          className="w-full justify-start px-4 py-2 h-10 font-normal"
+          asChild
+        >
           <Link href="/contact">
             <MessageSquare className="mr-2 h-4 w-4" />
-            Contact Us
+            {t.contactUs}
           </Link>
         </Button>
-        <Button variant="ghost" className="w-full justify-start px-4 py-2 h-10 font-normal" asChild>
+        <Button
+          variant="ghost"
+          className="w-full justify-start px-4 py-2 h-10 font-normal"
+          asChild
+        >
           <Link href="/settings">
             <Settings className="mr-2 h-4 w-4" />
-            Settings
+            {t.settings}
           </Link>
         </Button>
         <Separator />
@@ -169,7 +227,7 @@ const Navbar = () => {
               onClick={handleSignOut}
             >
               <LogOut className="mr-2 h-4 w-4" />
-              Sign Out
+              {t.signOut}
             </Button>
           ) : (
             <>
@@ -179,7 +237,7 @@ const Navbar = () => {
                 onClick={() => (window.location.href = "/sign-in")}
               >
                 <LogIn className="mr-2 h-4 w-4" />
-                Sign In
+                {t.signIn}
               </Button>
               <Button
                 variant="ghost"
@@ -187,14 +245,13 @@ const Navbar = () => {
                 onClick={() => (window.location.href = "/sign-up")}
               >
                 <UserPlus className="mr-2 h-4 w-4" />
-                Sign Up
+                {t.signUp}
               </Button>
             </>
           ))}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Navbar
-
+export default Navbar;

@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import UserProfile from "@/components/UserProfile";
@@ -15,6 +15,7 @@ import FilterButton from "@/components/FilterButton";
 import ForumFilterDialog from "@/components/ForumFilterDialog";
 import { useUniversities } from "@/hooks/useUniversities";
 import type { ForumTopic } from "@prisma/client";
+import { useLanguage } from "@/components/LanguageToggle";
 
 const tabsData = [
   { id: "toate", label: "Toate subiectele" },
@@ -44,7 +45,35 @@ interface ExtendedForumTopic extends OmitDate {
 export default function ForumPage() {
   const router = useRouter();
   const { user } = useUser();
-  const { getUniversityName, getFacultyName, universities } = useUniversities();
+  const { getUniversityName, getFacultyName, universities, faculties } = useUniversities();
+  const { language, forceRefresh } = useLanguage();
+
+  // Translations for the page with useMemo
+  const translations = useMemo(() => {
+    return {
+      forumTitle: language === "ro" ? "Forum" : "Forum",
+      allTopics: language === "ro" ? "Toate subiectele" : "All topics",
+      favoriteTopics:
+        language === "ro" ? "Subiecte favorite" : "Favorite topics",
+      myTopics: language === "ro" ? "Subiectele mele" : "My topics",
+      noTopicsFound:
+        language === "ro"
+          ? "Nu au fost găsite subiecte care să corespundă criteriilor de căutare"
+          : "No topics found matching your search criteria",
+      clearFilters:
+        language === "ro" ? "Șterge toate filtrele" : "Clear all filters",
+    };
+  }, [language, forceRefresh]);
+
+  const tabsDataWithTranslations = useMemo(
+    () => [
+      { id: "toate", label: translations.allTopics },
+      { id: "favorite", label: translations.favoriteTopics },
+      { id: "mele", label: translations.myTopics },
+    ],
+    [translations]
+  );
+
   const [activeTab, setActiveTab] = useState("toate");
   const [searchQuery, setSearchQuery] = useState("");
   const [topics, setTopics] = useState<ExtendedForumTopic[]>([]);
@@ -97,19 +126,26 @@ export default function ForumPage() {
         (topic) =>
           topic.title.toLowerCase().includes(query) ||
           topic.content.toLowerCase().includes(query) ||
-          (topic.universityName && topic.universityName.toLowerCase().includes(query)) ||
+          (topic.universityName &&
+            topic.universityName.toLowerCase().includes(query)) ||
           (topic.facultyName && topic.facultyName.toLowerCase().includes(query))
       );
     }
 
     // Filter by university
     if (filters.university && filters.university !== "") {
-      filtered = filtered.filter((topic) => topic.university === filters.university);
+      filtered = filtered.filter((topic) => {
+        const university = universities.find(u => u.id === filters.university);
+        return university && topic.university === university.name;
+      });
     }
 
     // Filter by faculty
     if (filters.faculty && filters.faculty !== "") {
-      filtered = filtered.filter((topic) => topic.faculty === filters.faculty);
+      filtered = filtered.filter((topic) => {
+        const faculty = faculties.find(f => f.id === filters.faculty);
+        return faculty && topic.faculty === faculty.name;
+      });
     }
 
     // Filter by city - using the university's city
@@ -126,7 +162,7 @@ export default function ForumPage() {
     }
 
     setFilteredTopics(filtered);
-  }, [activeTab, searchQuery, topics, user?.id, filters, universities]);
+  }, [activeTab, searchQuery, topics, user?.id, filters, universities, faculties]);
 
   useEffect(() => {
     filterTopics();
@@ -137,8 +173,6 @@ export default function ForumPage() {
       const response = await fetch("/api/forum");
       if (response.ok) {
         const data = await response.json();
-        console.log("Fetched topics:", data.length);
-        console.log("Sample topic:", data[0]);
         setTopics(data);
         setFilteredTopics(data);
       }
@@ -225,12 +259,12 @@ export default function ForumPage() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-4xl font-bold text-purple-600">Forum</h1>
+        <h1 className="text-4xl font-bold text-purple-600">{translations.forumTitle}</h1>
         <UserProfile />
       </div>
       <div className="flex justify-between items-center">
         <ForumTabs
-          tabs={tabsData}
+          tabs={tabsDataWithTranslations}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
         />
@@ -259,7 +293,7 @@ export default function ForumPage() {
           />
         ) : (
           <div className="flex flex-col items-center justify-center h-64 text-gray-500">
-            <p className="text-lg">No topics found matching your filters</p>
+            <p className="text-lg">{translations.noTopicsFound}</p>
             <Button
               variant="link"
               onClick={() => {
@@ -267,7 +301,7 @@ export default function ForumPage() {
                 setSearchQuery("");
               }}
             >
-              Clear all filters
+              {translations.clearFilters}
             </Button>
           </div>
         )}

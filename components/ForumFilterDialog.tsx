@@ -1,136 +1,227 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useMemo } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useUniversities } from "@/hooks/useUniversities"
-import { FORUM_CATEGORIES } from "@/lib/constants"
+import { useState, useEffect, useMemo } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useUniversities } from "@/hooks/useUniversities";
+import { useLanguage } from "@/components/LanguageToggle";
 
 interface ForumFilterDialogProps {
-  isOpen: boolean
-  onClose: () => void
-  onApplyFilters: (filters: { 
-    university: string; 
-    faculty: string; 
-    category: string;
+  isOpen: boolean;
+  onClose: () => void;
+  onApplyFilters: (filters: {
+    university: string;
+    faculty: string;
     city: string;
-  }) => void
-  currentFilters: { 
-    university: string; 
-    faculty: string; 
     category: string;
-    city: string;
-  }
+  }) => void;
+  currentFilters: { university: string; faculty: string; city: string; category: string };
 }
 
-export default function ForumFilterDialog({ isOpen, onClose, onApplyFilters, currentFilters }: ForumFilterDialogProps) {
-  const { universities, getFacultiesForUniversity } = useUniversities()
+export default function ForumFilterDialog({
+  isOpen,
+  onClose,
+  onApplyFilters,
+  currentFilters,
+}: ForumFilterDialogProps) {
+  const {
+    universities,
+    faculties,
+    getUniversityName,
+    getFacultyName,
+  } = useUniversities();
+  const { language, forceRefresh } = useLanguage();
+
+  // Translations for dialog with useMemo
+  const translations = useMemo(() => {
+    return {
+      filterTopics:
+        language === "ro" ? "Filtrează subiecte" : "Filter Forum Topics",
+      university: language === "ro" ? "Universitate" : "University",
+      faculty: language === "ro" ? "Facultate" : "Faculty",
+      city: language === "ro" ? "Oraș" : "City",
+      category: language === "ro" ? "Categorie" : "Category",
+      selectUniversity:
+        language === "ro" ? "Selectează o universitate" : "Select a university",
+      selectFaculty:
+        language === "ro" ? "Selectează o facultate" : "Select a faculty",
+      selectCity:
+        language === "ro" ? "Selectează un oraș" : "Select a city",
+      selectUniversityFirst:
+        language === "ro"
+          ? "Selectează mai întâi universitatea"
+          : "Select university first",
+      selectCategory:
+        language === "ro" ? "Selectează o categorie" : "Select a category",
+      allUniversities:
+        language === "ro" ? "Toate universitățile" : "All Universities",
+      allFaculties: language === "ro" ? "Toate facultățile" : "All Faculties",
+      allCities: language === "ro" ? "Toate orașele" : "All Cities",
+      allCategories: language === "ro" ? "Toate categoriile" : "All Categories",
+      reset: language === "ro" ? "Resetează" : "Reset",
+      apply: language === "ro" ? "Aplică" : "Apply Filters",
+      general: language === "ro" ? "General" : "General",
+      academic: language === "ro" ? "Academic" : "Academic",
+      events: language === "ro" ? "Evenimente" : "Events",
+      housing: language === "ro" ? "Cazare" : "Housing",
+      jobs: language === "ro" ? "Joburi & Stagii" : "Jobs & Internships",
+      social: language === "ro" ? "Social" : "Social",
+      gaming: language === "ro" ? "Gaming" : "Gaming",
+    };
+  }, [language, forceRefresh]);
+
+  // Forum categories with translations
+  const categories = useMemo(
+    () => [
+      { id: "general", name: translations.general },
+      { id: "academic", name: translations.academic },
+      { id: "events", name: translations.events },
+      { id: "housing", name: translations.housing },
+      { id: "jobs", name: translations.jobs },
+      { id: "social", name: translations.social },
+      { id: "gaming", name: translations.gaming },
+    ],
+    [translations]
+  );
 
   // Initialize state with current filters or defaults
-  const [selectedUniversity, setSelectedUniversity] = useState<string>(currentFilters.university || "all")
-  const [selectedFaculty, setSelectedFaculty] = useState<string>(currentFilters.faculty || "all")
-  const [selectedCategory, setSelectedCategory] = useState<string>(currentFilters.category || "all")
-  const [selectedCity, setSelectedCity] = useState<string>(currentFilters.city || "all")
-
-  // Get unique cities from universities
-  const cities = useMemo(() => {
-    const uniqueCities = new Set(universities.map(u => u.city))
-    return Array.from(uniqueCities).sort()
-  }, [universities])
+  const [selectedUniversity, setSelectedUniversity] = useState<string>(
+    currentFilters.university || ""
+  );
+  const [selectedFaculty, setSelectedFaculty] = useState<string>(
+    currentFilters.faculty || ""
+  );
+  const [selectedCity, setSelectedCity] = useState<string>(
+    currentFilters.city || ""
+  );
+  const [selectedCategory, setSelectedCategory] = useState<string>(
+    currentFilters.category || ""
+  );
 
   // Reset internal state when dialog opens
   useEffect(() => {
     if (isOpen) {
-      setSelectedUniversity(currentFilters.university || "all")
-      setSelectedFaculty(currentFilters.faculty || "all")
-      setSelectedCategory(currentFilters.category || "all")
-      setSelectedCity(currentFilters.city || "all")
+      setSelectedUniversity(currentFilters.university || "");
+      setSelectedFaculty(currentFilters.faculty || "");
+      setSelectedCity(currentFilters.city || "");
+      setSelectedCategory(currentFilters.category || "");
     }
-  }, [isOpen, currentFilters])
+  }, [isOpen, currentFilters]);
 
-  // Memoize available faculties
+  // Memoize available faculties and cities
   const availableFaculties = useMemo(() => {
     if (selectedUniversity && selectedUniversity !== "all") {
-      return getFacultiesForUniversity(selectedUniversity)
+      return faculties.filter(
+        (faculty) => faculty.universityId === selectedUniversity
+      );
     }
-    return []
-  }, [selectedUniversity, getFacultiesForUniversity])
+    return faculties;
+  }, [selectedUniversity, faculties]);
+
+  const availableCities = useMemo(() => {
+    const uniqueCities = new Set<string>();
+    universities.forEach((university) => {
+      if (university.city) {
+        uniqueCities.add(university.city);
+      }
+    });
+    return Array.from(uniqueCities).sort();
+  }, [universities]);
 
   const handleUniversityChange = (value: string) => {
-    setSelectedUniversity(value)
-    setSelectedFaculty("all") // Reset faculty when university changes
-    
-    // If a university is selected, update the city to match the university's city
-    if (value !== "all") {
-      const university = universities.find(u => u.id === value)
-      if (university) {
-        setSelectedCity(university.city)
-      }
-    } else {
-      setSelectedCity("all") // Reset city when no university is selected
+    setSelectedUniversity(value);
+    setSelectedFaculty(""); // Reset faculty when university changes
+    if (value === "all") {
+      setSelectedFaculty("all");
     }
-  }
+  };
 
   const handleFacultyChange = (value: string) => {
-    setSelectedFaculty(value)
-  }
-
-  const handleCategoryChange = (value: string) => {
-    setSelectedCategory(value)
-  }
+    setSelectedFaculty(value);
+  };
 
   const handleCityChange = (value: string) => {
-    setSelectedCity(value)
-    // If a city is selected, clear the university selection since we're filtering by city
-    if (value !== "all") {
-      setSelectedUniversity("all")
-      setSelectedFaculty("all")
+    setSelectedCity(value);
+    if (value === "all") {
+      setSelectedUniversity("all");
+      setSelectedFaculty("all");
     }
-  }
+  };
+
+  const handleCategoryChange = (value: string) => {
+    setSelectedCategory(value);
+  };
 
   const handleApply = () => {
-    onApplyFilters({
+    const filters = {
       university: selectedUniversity === "all" ? "" : selectedUniversity,
       faculty: selectedFaculty === "all" ? "" : selectedFaculty,
-      category: selectedCategory === "all" ? "" : selectedCategory,
       city: selectedCity === "all" ? "" : selectedCity,
-    })
-    onClose()
-  }
+      category: selectedCategory === "all" ? "" : selectedCategory,
+    };
+
+    console.log("Applying filters:", {
+      selectedUniversity,
+      selectedFaculty,
+      selectedCity,
+      selectedCategory,
+      appliedFilters: filters,
+    });
+
+    onApplyFilters(filters);
+    onClose();
+  };
 
   const handleReset = () => {
-    setSelectedUniversity("all")
-    setSelectedFaculty("all")
-    setSelectedCategory("all")
-    setSelectedCity("all")
+    setSelectedUniversity("");
+    setSelectedFaculty("");
+    setSelectedCity("");
+    setSelectedCategory("");
     onApplyFilters({
       university: "",
       faculty: "",
-      category: "",
       city: "",
-    })
-    onClose()
-  }
+      category: "",
+    });
+    onClose();
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Filter Forum Topics</DialogTitle>
+          <DialogTitle>{translations.filterTopics}</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="university" className="text-right">
-              University
+              {translations.university}
             </Label>
-            <Select value={selectedUniversity} onValueChange={handleUniversityChange}>
+            <Select
+              value={selectedUniversity}
+              onValueChange={handleUniversityChange}
+            >
               <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="Select a university" />
+                <SelectValue placeholder={translations.selectUniversity} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Universities</SelectItem>
+                <SelectItem value="all">
+                  {translations.allUniversities}
+                </SelectItem>
                 {universities.map((university) => (
                   <SelectItem key={university.id} value={university.id}>
                     {university.name}
@@ -139,21 +230,26 @@ export default function ForumFilterDialog({ isOpen, onClose, onApplyFilters, cur
               </SelectContent>
             </Select>
           </div>
-
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="faculty" className="text-right">
-              Faculty
+              {translations.faculty}
             </Label>
             <Select
               value={selectedFaculty}
               onValueChange={handleFacultyChange}
-              disabled={!selectedUniversity || selectedUniversity === "all"}
+              disabled={!selectedUniversity || selectedUniversity === ""}
             >
               <SelectTrigger className="col-span-3">
-                <SelectValue placeholder={selectedUniversity === "all" ? "Select university first" : "Select a faculty"} />
+                <SelectValue
+                  placeholder={
+                    selectedUniversity
+                      ? translations.selectFaculty
+                      : translations.selectUniversityFirst
+                  }
+                />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Faculties</SelectItem>
+                <SelectItem value="all">{translations.allFaculties}</SelectItem>
                 {availableFaculties.map((faculty) => (
                   <SelectItem key={faculty.id} value={faculty.id}>
                     {faculty.name}
@@ -162,45 +258,45 @@ export default function ForumFilterDialog({ isOpen, onClose, onApplyFilters, cur
               </SelectContent>
             </Select>
           </div>
-
-          {(!selectedUniversity || selectedUniversity === "all") && (
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="city" className="text-right">
-                City
-              </Label>
-              <Select 
-                value={selectedCity} 
-                onValueChange={handleCityChange}
-                disabled={selectedUniversity !== "all"}
-              >
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Select a city" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Cities</SelectItem>
-                  {cities.map((city) => (
-                    <SelectItem key={city} value={city}>
-                      {city}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="category" className="text-right">
-              Category
+            <Label htmlFor="city" className="text-right">
+              {translations.city}
             </Label>
-            <Select value={selectedCategory} onValueChange={handleCategoryChange}>
+            <Select
+              value={selectedCity}
+              onValueChange={handleCityChange}
+            >
               <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="Select a category" />
+                <SelectValue placeholder={translations.selectCity} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                {FORUM_CATEGORIES.map((category) => (
+                <SelectItem value="all">{translations.allCities}</SelectItem>
+                {availableCities.map((city) => (
+                  <SelectItem key={city} value={city}>
+                    {city}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="category" className="text-right">
+              {translations.category}
+            </Label>
+            <Select
+              value={selectedCategory}
+              onValueChange={handleCategoryChange}
+            >
+              <SelectTrigger className="col-span-3">
+                <SelectValue placeholder={translations.selectCategory} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">
+                  {translations.allCategories}
+                </SelectItem>
+                {categories.map((category) => (
                   <SelectItem key={category.id} value={category.id}>
-                    {category.label}
+                    {category.name}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -209,12 +305,11 @@ export default function ForumFilterDialog({ isOpen, onClose, onApplyFilters, cur
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={handleReset}>
-            Reset
+            {translations.reset}
           </Button>
-          <Button onClick={handleApply}>Apply Filters</Button>
+          <Button onClick={handleApply}>{translations.apply}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
-

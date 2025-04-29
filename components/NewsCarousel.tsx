@@ -1,96 +1,129 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import Image from "next/image"
-import { ChevronLeft, ChevronRight } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import FilterButton from "@/components/FilterButton"
-import NewsFilterDialog from "@/components/NewsFilterDialog"
-import { useUniversities } from "@/hooks/useUniversities"
+import { useState, useEffect, useMemo } from "react";
+import Image from "next/image";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import FilterButton from "@/components/FilterButton";
+import NewsFilterDialog from "@/components/NewsFilterDialog";
+import { useUniversities } from "@/hooks/useUniversities";
+import { useLanguage } from "@/components/LanguageToggle";
 
 interface News {
-  id: string
-  title: string
-  description: string
-  image: string
-  university?: string
-  city?: string
-  createdAt: Date
+  id: string;
+  title: string;
+  description: string;
+  image: string;
+  university?: string;
+  city?: string;
+  createdAt: Date;
 }
 
 interface NewsCarouselProps {
-  news: News[]
+  news: News[];
 }
 
 export default function NewsCarousel({ news }: NewsCarouselProps) {
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [allNews, setAllNews] = useState<News[]>(news)
-  const [filteredNews, setFilteredNews] = useState<News[]>(news)
-  const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false)
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [allNews, setAllNews] = useState<News[]>(news);
+  const [filteredNews, setFilteredNews] = useState<News[]>(news);
+  const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false);
   const [filters, setFilters] = useState({
     university: "",
     city: "",
-  })
-  const { getUniversityName } = useUniversities()
+  });
+  const { getUniversityName } = useUniversities();
+  const { language, forceRefresh } = useLanguage();
+
+  // Traduceri pentru interfață
+  const translations = {
+    ro: {
+      noNews: "Nu s-au găsit știri care să corespundă filtrelor tale.",
+      clearFilters: "Șterge Filtrele",
+    },
+    en: {
+      noNews: "No news found matching your filters.",
+      clearFilters: "Clear Filters",
+    },
+  };
+
+  // Selectează traducerile în funcție de limba curentă folosind useMemo
+  const t = useMemo(() => {
+    return translations[language as keyof typeof translations];
+  }, [language, forceRefresh]);
 
   useEffect(() => {
     // Apply filters
-    let filtered = [...allNews]
+    let filtered = [...allNews];
 
     if (filters.university && filters.university !== "all") {
-      filtered = filtered.filter((item) => item.university === filters.university)
+      filtered = filtered.filter(
+        (item) => item.university === filters.university
+      );
     }
 
     if (filters.city && filters.city !== "all") {
-      filtered = filtered.filter((item) => item.city === filters.city)
+      filtered = filtered.filter((item) => item.city === filters.city);
     }
 
-    setFilteredNews(filtered)
+    setFilteredNews(filtered);
 
     // Reset current index if we filtered out the current news item
     if (filtered.length > 0 && currentIndex >= filtered.length) {
-      setCurrentIndex(0)
+      setCurrentIndex(0);
     }
-  }, [filters, allNews])
+  }, [filters, allNews]);
 
   const handlePrevious = () => {
-    setCurrentIndex((prevIndex) => (prevIndex === 0 ? filteredNews.length - 1 : prevIndex - 1))
-  }
+    setCurrentIndex((prevIndex) =>
+      prevIndex === 0 ? filteredNews.length - 1 : prevIndex - 1
+    );
+  };
 
   const handleNext = () => {
-    setCurrentIndex((prevIndex) => (prevIndex === filteredNews.length - 1 ? 0 : prevIndex + 1))
-  }
+    setCurrentIndex((prevIndex) =>
+      prevIndex === filteredNews.length - 1 ? 0 : prevIndex + 1
+    );
+  };
 
-  const handleApplyFilters = (newFilters: { university: string; city: string }) => {
-    setFilters(newFilters)
-  }
+  const handleApplyFilters = (newFilters: {
+    university: string;
+    city: string;
+  }) => {
+    setFilters(newFilters);
+  };
 
   // Count active filters
-  const activeFiltersCount = Object.values(filters).filter((value) => value && value !== "all").length
+  const activeFiltersCount = Object.values(filters).filter(
+    (value) => value && value !== "all"
+  ).length;
 
   if (filteredNews.length === 0) {
     return (
       <div className="bg-gray-100 rounded-lg p-8 text-center">
-        <p className="text-gray-500">No news found matching your filters.</p>
+        <p className="text-gray-500">{t.noNews}</p>
         <Button
           variant="outline"
           className="mt-4"
           onClick={() => {
-            setFilters({ university: "", city: "" })
+            setFilters({ university: "", city: "" });
           }}
         >
-          Clear Filters
+          {t.clearFilters}
         </Button>
       </div>
-    )
+    );
   }
 
-  const currentNews = filteredNews[currentIndex]
+  const currentNews = filteredNews[currentIndex];
 
   return (
     <div className="relative">
       <div className="absolute top-0 right-0 z-10">
-        <FilterButton onFilter={() => setIsFilterDialogOpen(true)} activeFiltersCount={activeFiltersCount} />
+        <FilterButton
+          onFilter={() => setIsFilterDialogOpen(true)}
+          activeFiltersCount={activeFiltersCount}
+        />
       </div>
 
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
@@ -99,7 +132,9 @@ export default function NewsCarousel({ news }: NewsCarouselProps) {
           {currentNews.image && (
             <div className="relative w-full md:w-2/5 h-80 md:h-[400px] flex items-center justify-center">
               <Image
-                src={currentNews.image || "/placeholder.svg?height=600&width=600"}
+                src={
+                  currentNews.image || "/placeholder.svg?height=600&width=600"
+                }
                 alt={currentNews.title}
                 fill
                 style={{ objectFit: "contain" }}
@@ -115,12 +150,15 @@ export default function NewsCarousel({ news }: NewsCarouselProps) {
               {currentNews.city && currentNews.city !== "oricare" && (
                 <span className="font-medium">{currentNews.city}</span>
               )}
-              {currentNews.university && currentNews.university !== "oricare" && (
-                <>
-                  {currentNews.city && currentNews.city !== "oricare" && <span className="mx-1">•</span>}
-                  <span>{getUniversityName(currentNews.university)}</span>
-                </>
-              )}
+              {currentNews.university &&
+                currentNews.university !== "oricare" && (
+                  <>
+                    {currentNews.city && currentNews.city !== "oricare" && (
+                      <span className="mx-1">•</span>
+                    )}
+                    <span>{getUniversityName(currentNews.university)}</span>
+                  </>
+                )}
             </div>
             <div className="max-h-[300px] overflow-y-auto pr-2">
               <p className="text-muted-foreground">{currentNews.description}</p>
@@ -148,5 +186,5 @@ export default function NewsCarousel({ news }: NewsCarouselProps) {
         currentFilters={filters}
       />
     </div>
-  )
+  );
 }

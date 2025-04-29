@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useUser } from "@clerk/nextjs";
 import UserProfile from "@/components/UserProfile";
 import DashboardHero from "@/components/DashboardHero";
@@ -24,6 +24,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Check, Crown, Shield, Star } from "lucide-react";
+import { useLanguage } from "@/components/LanguageToggle";
 
 interface UserData extends User {
   firstName?: string;
@@ -71,6 +72,66 @@ export default function DashboardPage() {
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
+  const { language, forceRefresh } = useLanguage();
+
+  // Traduceri pentru pagina cu useMemo
+  const translations = useMemo(() => {
+    return {
+      dashboard: language === "ro" ? "Panou Principal" : "Dashboard",
+      changeSubscription:
+        language === "ro" ? "Schimbare Abonament" : "Change Subscription",
+      changeSubscriptionMessage:
+        language === "ro"
+          ? `Ești sigur că vrei să schimbi abonamentul la ${pendingSubscription}?`
+          : `Are you sure you want to change your subscription to ${pendingSubscription}?`,
+      currentPlan:
+        language === "ro" ? "Planul tău curent" : "Your current plan",
+      viewAllPlans:
+        language === "ro" ? "Vezi toate planurile" : "View all plans",
+      // Traduceri pentru planuri
+      premium: language === "ro" ? "Premium" : "Premium",
+      premiumDesc:
+        language === "ro"
+          ? "Acces la funcționalități premium"
+          : "Access to premium features",
+      gold: language === "ro" ? "Gold" : "Gold",
+      goldDesc:
+        language === "ro"
+          ? "Acces complet, fără limite"
+          : "Full access, no limits",
+      basic: language === "ro" ? "Basic" : "Basic",
+      basicDesc:
+        language === "ro"
+          ? "Acces la funcționalități de bază"
+          : "Access to basic features",
+      // Traduceri pentru caracteristici
+      accessAll:
+        language === "ro"
+          ? "Acces la toate proiectele"
+          : "Access to all projects",
+      accessAllTopics:
+        language === "ro"
+          ? "Acces la toate topicurile"
+          : "Access to all topics",
+      createProjects:
+        language === "ro"
+          ? "Creare proiecte (max 4)"
+          : "Create projects (max 4)",
+      createUnlimited:
+        language === "ro"
+          ? "Creare proiecte nelimitate"
+          : "Create unlimited projects",
+      limitedAccess: language === "ro" ? "Acces limitat" : "Limited access",
+      viewOnly: language === "ro" ? "Doar vizualizare listă" : "View list only",
+      noIndividual:
+        language === "ro"
+          ? "Fără acces la conținut individual"
+          : "No access to individual content",
+      // Traduceri pentru badge-uri
+      popular: language === "ro" ? "Popular" : "Popular",
+      unlimited: language === "ro" ? "Nelimitat" : "Unlimited",
+    };
+  }, [language, forceRefresh, pendingSubscription]);
 
   const checkRequiredInformation = useCallback((data: UserData | null) => {
     return (
@@ -173,45 +234,45 @@ export default function DashboardPage() {
     switch (selectedSubscription) {
       case "Premium":
         return {
-          name: "Premium",
+          name: translations.premium,
           icon: <Shield className="h-6 w-6 text-purple-500" />,
-          description: "Acces la funcționalități premium",
+          description: translations.premiumDesc,
           features: [
-            "Acces la toate proiectele",
-            "Acces la toate topicurile",
-            "Creare proiecte (max 4)",
+            translations.accessAll,
+            translations.accessAllTopics,
+            translations.createProjects,
           ],
           color:
             "bg-gradient-to-r from-purple-100 to-indigo-100 dark:from-purple-900/30 dark:to-indigo-900/30",
           borderColor: "border-purple-200 dark:border-purple-800",
           iconBg: "bg-purple-100 dark:bg-purple-900/50",
-          badge: "Popular",
+          badge: translations.popular,
         };
       case "Gold":
         return {
-          name: "Gold",
+          name: translations.gold,
           icon: <Crown className="h-6 w-6 text-amber-500" />,
-          description: "Acces complet, fără limite",
+          description: translations.goldDesc,
           features: [
-            "Acces la toate proiectele",
-            "Acces la toate topicurile",
-            "Creare proiecte nelimitate",
+            translations.accessAll,
+            translations.accessAllTopics,
+            translations.createUnlimited,
           ],
           color:
             "bg-gradient-to-r from-amber-50 to-yellow-100 dark:from-amber-900/30 dark:to-yellow-900/30",
           borderColor: "border-amber-200 dark:border-amber-800",
           iconBg: "bg-amber-100 dark:bg-amber-900/50",
-          badge: "Nelimitat",
+          badge: translations.unlimited,
         };
       default:
         return {
-          name: "Basic",
+          name: translations.basic,
           icon: <Star className="h-6 w-6 text-gray-500" />,
-          description: "Acces la funcționalități de bază",
+          description: translations.basicDesc,
           features: [
-            "Acces limitat",
-            "Doar vizualizare listă",
-            "Fără acces la conținut individual",
+            translations.limitedAccess,
+            translations.viewOnly,
+            translations.noIndividual,
           ],
           color:
             "bg-gradient-to-r from-gray-50 to-white dark:from-gray-900 dark:to-black",
@@ -227,7 +288,9 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-4xl font-bold text-purple-600">Dashboard</h1>
+        <h1 className="text-4xl font-bold text-purple-600">
+          {translations.dashboard}
+        </h1>
         <UserProfile />
       </div>
       <DashboardHero name={userData?.firstName || "User"} />
@@ -262,7 +325,7 @@ export default function DashboardPage() {
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-2xl font-bold text-purple-600">
-                Planul tău curent
+                {translations.currentPlan}
               </h2>
               {subscriptionData.badge && (
                 <Badge
@@ -309,7 +372,7 @@ export default function DashboardPage() {
                   onClick={() => router.push("/subscriptions")}
                   className="w-full bg-purple-600 hover:bg-purple-700 text-white flex items-center justify-center group"
                 >
-                  <span>Vezi toate planurile</span>
+                  <span>{translations.viewAllPlans}</span>
                   <ArrowRight className="h-4 w-4 ml-2 transition-transform group-hover:translate-x-1" />
                 </Button>
               </CardFooter>
@@ -321,8 +384,8 @@ export default function DashboardPage() {
         isOpen={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}
         onConfirm={confirmSubscriptionChange}
-        title="Change Subscription"
-        message={`Are you sure you want to change your subscription to ${pendingSubscription}?`}
+        title={translations.changeSubscription}
+        message={translations.changeSubscriptionMessage}
       />
       <OnboardingDialog
         isOpen={showOnboarding}

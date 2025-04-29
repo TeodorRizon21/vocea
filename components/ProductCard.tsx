@@ -12,6 +12,8 @@ import { Star, GraduationCap, BookOpen, Tag, Scroll } from "lucide-react";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
+import { useLanguage } from "@/components/LanguageToggle";
+import { useMemo } from "react";
 
 interface ProductCardProps {
   title: string;
@@ -42,6 +44,19 @@ export default function ProductCard({
   reviews,
   userId, // Added userId parameter
 }: ProductCardProps) {
+  const { language, forceRefresh } = useLanguage();
+
+  // Translations for the card
+  const translations = useMemo(() => {
+    return {
+      studyLevels: {
+        bachelors: language === "ro" ? "Licență" : "Bachelor's",
+        masters: language === "ro" ? "Master" : "Master's",
+        phd: language === "ro" ? "Doctorat" : "PhD",
+      },
+    };
+  }, [language, forceRefresh]);
+
   const averageScore =
     reviews.length > 0
       ? reviews.reduce((acc, review) => acc + review.score, 0) / reviews.length
@@ -96,7 +111,7 @@ export default function ProductCard({
           <div className="flex items-center">
             <Scroll className="h-4 w-4 mr-1 text-purple-600" />
             <p className="text-xs text-muted-foreground line-clamp-1">
-              {studyLevel}
+              {translations.studyLevels[studyLevel as keyof typeof translations.studyLevels] || studyLevel}
             </p>
           </div>
         )}

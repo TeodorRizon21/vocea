@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
   Star,
@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { useLanguage } from "@/components/LanguageToggle";
 
 interface Review {
   id: string;
@@ -39,6 +40,20 @@ export default function RatingCard({
   reviews = [],
 }: RatingCardProps) {
   const [showReviews, setShowReviews] = useState(false);
+  const { language, forceRefresh } = useLanguage();
+
+  // Traduceri pentru componenta
+  const translations = useMemo(() => {
+    return {
+      userRating: language === "ro" ? "Evaluare utilizator" : "User Rating",
+      reviews: language === "ro" ? "recenzii" : "reviews",
+      noRatings: language === "ro" ? "Nicio evaluare încă" : "No ratings yet",
+      hideComments:
+        language === "ro" ? "Ascunde comentariile" : "Hide Comments",
+      showComments: language === "ro" ? "Arată comentariile" : "Show Comments",
+      for: language === "ro" ? "Pentru" : "For",
+    };
+  }, [language, forceRefresh]);
 
   // Ensure averageRating is a valid number before using toFixed
   const formattedRating =
@@ -55,7 +70,7 @@ export default function RatingCard({
   return (
     <Card className="shadow-md">
       <CardHeader>
-        <CardTitle>User Rating</CardTitle>
+        <CardTitle>{translations.userRating}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="flex items-center justify-center mb-4">
@@ -64,11 +79,13 @@ export default function RatingCard({
               <Star className="h-5 w-5 text-yellow-500 mr-1" />
               <span className="text-2xl font-semibold">{formattedRating}</span>
               <span className="text-muted-foreground ml-2">
-                ({reviewCount} reviews)
+                ({reviewCount} {translations.reviews})
               </span>
             </div>
           ) : (
-            <span className="text-muted-foreground">No ratings yet</span>
+            <span className="text-muted-foreground">
+              {translations.noRatings}
+            </span>
           )}
         </div>
 
@@ -80,7 +97,9 @@ export default function RatingCard({
               className="w-full flex items-center justify-center"
             >
               <MessageSquare className="h-4 w-4 mr-2" />
-              {showReviews ? "Hide Comments" : "Show Comments"}
+              {showReviews
+                ? translations.hideComments
+                : translations.showComments}
               {showReviews ? (
                 <ChevronUp className="h-4 w-4 ml-2" />
               ) : (
@@ -107,7 +126,9 @@ export default function RatingCard({
 
                     {review.project && (
                       <div className="mb-2 text-sm">
-                        <span className="text-muted-foreground">Pentru: </span>
+                        <span className="text-muted-foreground">
+                          {translations.for}:{" "}
+                        </span>
                         <Link
                           href={`/project/${review.project.id}`}
                           className="text-purple-600 hover:underline items-center gap-1 inline-flex"
@@ -121,7 +142,9 @@ export default function RatingCard({
                     <p className="text-sm">{review.comment}</p>
                     {review.createdAt && (
                       <p className="text-xs text-muted-foreground mt-2">
-                        {new Date(review.createdAt).toLocaleDateString()}
+                        {new Date(review.createdAt).toLocaleDateString(
+                          language === "ro" ? "ro-RO" : "en-US"
+                        )}
                       </p>
                     )}
                   </div>

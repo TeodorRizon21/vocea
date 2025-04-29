@@ -1,33 +1,13 @@
-
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 
 import UserProfile from "@/components/UserProfile";
 import BrowsePageClient from "@/components/BrowsePageClient";
 import AccessDeniedDialog from "@/components/AccessDeniedDialog";
 import { useUser } from "@clerk/nextjs";
-
-const tabsData = [
-  {
-    id: "proiect",
-    label: "Proiecte",
-    description:
-      "Explore ongoing projects and opportunities for collaboration.",
-  },
-  {
-    id: "cerere",
-    label: "Cereri de proiecte",
-    description:
-      "Browse project requests and find ways to contribute your skills.",
-  },
-  {
-    id: "diverse",
-    label: "Diverse",
-    description: "Discover a variety of other opportunities and resources.",
-  },
-];
+import { useLanguage } from "@/components/LanguageToggle";
 
 export default function BrowsePage() {
   const searchParams = useSearchParams();
@@ -38,6 +18,52 @@ export default function BrowsePage() {
   const [originalPath, setOriginalPath] = useState("");
   const [userPlan, setUserPlan] = useState("Basic");
   const { user, isLoaded } = useUser();
+  const { language, forceRefresh } = useLanguage();
+
+  // Traduceri pentru pagina cu useMemo
+  const translations = useMemo(() => {
+    return {
+      browseTitle:
+        language === "ro" ? "Explorează proiecte" : "Browse projects",
+      projects: language === "ro" ? "Proiecte" : "Projects",
+      projectRequests:
+        language === "ro" ? "Cereri de proiecte" : "Project requests",
+      diverse: language === "ro" ? "Diverse" : "Diverse",
+      projectsDescription:
+        language === "ro"
+          ? "Explorează proiecte în curs și oportunități de colaborare."
+          : "Explore ongoing projects and opportunities for collaboration.",
+      projectRequestsDescription:
+        language === "ro"
+          ? "Răsfoiește cereri de proiecte și găsește modalități de a contribui cu aptitudinile tale."
+          : "Browse project requests and find ways to contribute your skills.",
+      diverseDescription:
+        language === "ro"
+          ? "Descoperă o varietate de alte oportunități și resurse."
+          : "Discover a variety of other opportunities and resources.",
+    };
+  }, [language, forceRefresh]);
+
+  const tabsData = useMemo(
+    () => [
+      {
+        id: "proiect",
+        label: translations.projects,
+        description: translations.projectsDescription,
+      },
+      {
+        id: "cerere",
+        label: translations.projectRequests,
+        description: translations.projectRequestsDescription,
+      },
+      {
+        id: "diverse",
+        label: translations.diverse,
+        description: translations.diverseDescription,
+      },
+    ],
+    [translations]
+  );
 
   useEffect(() => {
     const fetchUserPlan = async () => {
@@ -89,15 +115,14 @@ export default function BrowsePage() {
     fetchProjects();
   }, [activeTab]);
 
-
-
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-4xl font-bold text-purple-600">Browse projects</h1>
+        <h1 className="text-4xl font-bold text-purple-600">
+          {translations.browseTitle}
+        </h1>
         <UserProfile />
       </div>
-
 
       {loading ? (
         <div className="flex items-center justify-center h-64">
@@ -116,9 +141,7 @@ export default function BrowsePage() {
         isOpen={showAccessDenied}
         onClose={() => setShowAccessDenied(false)}
         originalPath={originalPath}
-
       />
-
     </div>
   );
 }

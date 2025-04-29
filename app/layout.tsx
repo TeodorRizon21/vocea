@@ -4,39 +4,37 @@ import { Inter } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
 import Navbar from "../components/Navbar"
 import RootLayout from "@/components/RootLayout"
+import { LanguageProvider } from "@/components/LanguageToggle";
 import "./globals.css"
 import Footer from "@/components/Footer"
 
-const inter = Inter({ subsets: ["latin"] })
 
+const inter = Inter({ subsets: ["latin"] })
 export const metadata = {
   title: "VOC - Vocea campusului",
   description: "A platform for students to collaborate on projects and share resources.",
 }
 
-export default function Layout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
         <body className={`${inter.className} min-h-screen bg-background antialiased`}>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+            <LanguageProvider>
             <div className="flex min-h-screen flex-col">
               <div className="flex-1 flex">
-                <Navbar />
-                <main className="flex-1 ml-[calc(2rem+16rem)] mr-8 mt-6 mb-6 bg-card rounded-3xl shadow-lg overflow-auto p-6">
+              <Navbar />
+              <main className="flex-1 ml-[calc(2rem+16rem)] mr-8 mt-6 mb-6 bg-card rounded-3xl shadow-lg overflow-auto p-6">
                   <RootLayout>{children}</RootLayout>
                 </main>
-              </div>
-              <Footer />
             </div>
+            <Footer />
+            </div>
+            </LanguageProvider>
           </ThemeProvider>
         </body>
       </html>
     </ClerkProvider>
-  )
+  );
 }
-

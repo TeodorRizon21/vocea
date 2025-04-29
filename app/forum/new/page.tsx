@@ -1,19 +1,20 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { useAuth } from "@clerk/nextjs"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
-import { Button } from "@/components/ui/button"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useUniversities } from "@/hooks/useUniversities"
-import { FORUM_CATEGORIES } from "@/lib/constants"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@clerk/nextjs";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useUniversities } from "@/hooks/useUniversities";
+import { FORUM_CATEGORIES } from "@/lib/constants";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useLanguage } from "@/components/LanguageToggle";
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -21,15 +22,15 @@ const formSchema = z.object({
   university: z.string().min(1, "University is required"),
   faculty: z.string().min(1, "Faculty is required"),
   category: z.string().min(1, "Category is required"),
-})
+});
 
 export default function NewForumTopic() {
-  const router = useRouter()
-  const { userId } = useAuth()
-  const { universities, getFacultiesForUniversity, getUniversityName, getFacultyName } = useUniversities()
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<string | null>(null)
+  const router = useRouter();
+  const { userId } = useAuth();
+  const { universities, getFacultiesForUniversity, getUniversityName, getFacultyName } = useUniversities();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -40,25 +41,49 @@ export default function NewForumTopic() {
       faculty: "",
       category: "",
     },
-  })
+  });
 
-  const selectedUniversity = form.watch("university")
-  const availableFaculties = selectedUniversity ? getFacultiesForUniversity(selectedUniversity) : []
+  const selectedUniversity = form.watch("university");
+  const availableFaculties = selectedUniversity ? getFacultiesForUniversity(selectedUniversity) : [];
+
+  const { language, forceRefresh } = useLanguage();
+
+  // Translations for the page
+  const translations = useMemo(() => {
+    return {
+      createNewTopic: language === "ro" ? "Crează subiect nou" : "Create New Topic",
+      title: language === "ro" ? "Titlu" : "Title",
+      enterTopicTitle: language === "ro" ? "Introdu titlul subiectului" : "Enter topic title",
+      content: language === "ro" ? "Conținut" : "Content",
+      minimumChars: language === "ro" ? "minim 200 caractere" : "minimum 200 characters",
+      enterTopicContent: language === "ro" ? "Introdu conținutul subiectului" : "Enter topic content",
+      charactersMinimum: language === "ro" ? "caractere minim" : "characters minimum",
+      university: language === "ro" ? "Universitate" : "University",
+      selectUniversity: language === "ro" ? "Selectează o universitate" : "Select a university",
+      faculty: language === "ro" ? "Facultate" : "Faculty",
+      selectFaculty: language === "ro" ? "Selectează o facultate" : "Select a faculty",
+      allFieldsRequired: language === "ro" ? "Toate câmpurile sunt obligatorii" : "All fields are required",
+      contentTooShort: language === "ro" ? "Conținutul subiectului trebuie să aibă cel puțin 200 de caractere" : "Topic content must be at least 200 characters long",
+      creating: language === "ro" ? "Se creează..." : "Creating...",
+      create: language === "ro" ? "Crează subiect" : "Create Topic",
+      cancel: language === "ro" ? "Anulează" : "Cancel",
+    };
+  }, [language, forceRefresh]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setError(null)
-    setSuccess(null)
+    setError(null);
+    setSuccess(null);
 
     if (!userId) {
-      setError("You must be logged in to create a topic")
-      return
+      setError("You must be logged in to create a topic");
+      return;
     }
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     try {
       // Get the university and faculty names
-      const universityName = getUniversityName(values.university)
-      const facultyName = getFacultyName(values.university, values.faculty)
+      const universityName = getUniversityName(values.university);
+      const facultyName = getFacultyName(values.university, values.faculty);
 
       const response = await fetch("/api/forum", {
         method: "POST",
@@ -72,20 +97,20 @@ export default function NewForumTopic() {
           faculty: facultyName,
           category: values.category,
         }),
-      })
+      });
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || "Failed to create topic")
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to create topic");
       }
 
-      setSuccess("Topic created successfully")
-      router.push("/forum")
-      router.refresh()
+      setSuccess("Topic created successfully");
+      router.push("/forum");
+      router.refresh();
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Failed to create topic")
+      setError(error instanceof Error ? error.message : "Failed to create topic");
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
   }
 
@@ -95,12 +120,12 @@ export default function NewForumTopic() {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           {error && (
             <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
+              <AlertDescription>{translations[error] || error}</AlertDescription>
             </Alert>
           )}
           {success && (
             <Alert>
-              <AlertDescription>{success}</AlertDescription>
+              <AlertDescription>{translations[success] || success}</AlertDescription>
             </Alert>
           )}
 
@@ -109,9 +134,9 @@ export default function NewForumTopic() {
             name="title"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Title</FormLabel>
+                <FormLabel>{translations.title}</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter topic title" {...field} />
+                  <Input placeholder={translations.enterTopicTitle} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -123,17 +148,17 @@ export default function NewForumTopic() {
             name="content"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Content</FormLabel>
+                <FormLabel>{translations.content}</FormLabel>
                 <FormControl>
                   <Textarea
-                    placeholder="Enter topic content (minimum 200 characters)"
+                    placeholder={translations.enterTopicContent}
                     className="min-h-[200px]"
                     {...field}
                   />
                 </FormControl>
                 <FormMessage />
                 <p className="text-sm text-muted-foreground">
-                  {field.value.length} / 200 characters minimum
+                  {field.value.length} / 200 {translations.charactersMinimum}
                 </p>
               </FormItem>
             )}
@@ -144,11 +169,11 @@ export default function NewForumTopic() {
             name="category"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Category</FormLabel>
+                <FormLabel>{translations.category}</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a category" />
+                      <SelectValue placeholder={translations.selectCategory} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -169,11 +194,11 @@ export default function NewForumTopic() {
             name="university"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>University</FormLabel>
+                <FormLabel>{translations.university}</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a university" />
+                      <SelectValue placeholder={translations.selectUniversity} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -194,7 +219,7 @@ export default function NewForumTopic() {
             name="faculty"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Faculty</FormLabel>
+                <FormLabel>{translations.faculty}</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
@@ -205,8 +230,8 @@ export default function NewForumTopic() {
                       <SelectValue
                         placeholder={
                           selectedUniversity
-                            ? "Select a faculty"
-                            : "Select university first"
+                            ? translations.selectFaculty
+                            : translations.selectUniversityFirst
                         }
                       />
                     </SelectTrigger>
@@ -225,11 +250,10 @@ export default function NewForumTopic() {
           />
 
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Creating..." : "Create Topic"}
+            {isSubmitting ? translations.creating : translations.create}
           </Button>
         </form>
       </Form>
     </div>
-  )
+  );
 }
-
