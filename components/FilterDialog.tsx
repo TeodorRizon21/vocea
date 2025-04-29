@@ -59,10 +59,15 @@ export default function FilterDialog({
       university: language === "ro" ? "Universitate" : "University",
       faculty: language === "ro" ? "Facultate" : "Faculty",
       category: language === "ro" ? "Categorie" : "Category",
+      studyLevel: language === "ro" ? "Nivel de studii" : "Study Level",
       allUniversities:
         language === "ro" ? "Toate universitățile" : "All Universities",
       allFaculties: language === "ro" ? "Toate facultățile" : "All Faculties",
       allCategories: language === "ro" ? "Toate categoriile" : "All Categories",
+      allStudyLevels: language === "ro" ? "Toate nivelele" : "All Levels",
+      bachelors: language === "ro" ? "Licență" : "Bachelor's",
+      masters: language === "ro" ? "Master" : "Master's",
+      phd: language === "ro" ? "Doctorat" : "PhD",
       reset: language === "ro" ? "Resetează" : "Reset",
       cancel: language === "ro" ? "Anulează" : "Cancel",
       apply: language === "ro" ? "Aplică" : "Apply Filters",
@@ -215,6 +220,34 @@ export default function FilterDialog({
               </Select>
             </div>
           )}
+
+          <div className="space-y-2">
+            <Label htmlFor="studyLevel">{translations.studyLevel}</Label>
+            <Select
+              value={filters.studyLevel}
+              onValueChange={(value) =>
+                setFilters((prev) => ({ ...prev, studyLevel: value }))
+              }
+            >
+              <SelectTrigger id="studyLevel">
+                <SelectValue placeholder={translations.allStudyLevels} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="_all">
+                  {translations.allStudyLevels}
+                </SelectItem>
+                <SelectItem value="bachelors">
+                  {translations.bachelors}
+                </SelectItem>
+                <SelectItem value="masters">
+                  {translations.masters}
+                </SelectItem>
+                <SelectItem value="phd">
+                  {translations.phd}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
         <DialogFooter className="flex justify-between sm:justify-between">
           <Button

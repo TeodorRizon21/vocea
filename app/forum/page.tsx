@@ -45,7 +45,7 @@ interface ExtendedForumTopic extends OmitDate {
 export default function ForumPage() {
   const router = useRouter();
   const { user } = useUser();
-  const { getUniversityName, getFacultyName, universities } = useUniversities();
+  const { getUniversityName, getFacultyName, universities, faculties } = useUniversities();
   const { language, forceRefresh } = useLanguage();
 
   // Translations for the page with useMemo
@@ -134,12 +134,18 @@ export default function ForumPage() {
 
     // Filter by university
     if (filters.university && filters.university !== "") {
-      filtered = filtered.filter((topic) => topic.university === filters.university);
+      filtered = filtered.filter((topic) => {
+        const university = universities.find(u => u.id === filters.university);
+        return university && topic.university === university.name;
+      });
     }
 
     // Filter by faculty
     if (filters.faculty && filters.faculty !== "") {
-      filtered = filtered.filter((topic) => topic.faculty === filters.faculty);
+      filtered = filtered.filter((topic) => {
+        const faculty = faculties.find(f => f.id === filters.faculty);
+        return faculty && topic.faculty === faculty.name;
+      });
     }
 
     // Filter by city - using the university's city
@@ -156,7 +162,7 @@ export default function ForumPage() {
     }
 
     setFilteredTopics(filtered);
-  }, [activeTab, searchQuery, topics, user?.id, filters, universities]);
+  }, [activeTab, searchQuery, topics, user?.id, filters, universities, faculties]);
 
   useEffect(() => {
     filterTopics();

@@ -26,9 +26,10 @@ interface ForumFilterDialogProps {
   onApplyFilters: (filters: {
     university: string;
     faculty: string;
+    city: string;
     category: string;
   }) => void;
-  currentFilters: { university: string; faculty: string; category: string };
+  currentFilters: { university: string; faculty: string; city: string; category: string };
 }
 
 export default function ForumFilterDialog({
@@ -52,11 +53,14 @@ export default function ForumFilterDialog({
         language === "ro" ? "Filtrează subiecte" : "Filter Forum Topics",
       university: language === "ro" ? "Universitate" : "University",
       faculty: language === "ro" ? "Facultate" : "Faculty",
+      city: language === "ro" ? "Oraș" : "City",
       category: language === "ro" ? "Categorie" : "Category",
       selectUniversity:
         language === "ro" ? "Selectează o universitate" : "Select a university",
       selectFaculty:
         language === "ro" ? "Selectează o facultate" : "Select a faculty",
+      selectCity:
+        language === "ro" ? "Selectează un oraș" : "Select a city",
       selectUniversityFirst:
         language === "ro"
           ? "Selectează mai întâi universitatea"
@@ -66,6 +70,7 @@ export default function ForumFilterDialog({
       allUniversities:
         language === "ro" ? "Toate universitățile" : "All Universities",
       allFaculties: language === "ro" ? "Toate facultățile" : "All Faculties",
+      allCities: language === "ro" ? "Toate orașele" : "All Cities",
       allCategories: language === "ro" ? "Toate categoriile" : "All Categories",
       reset: language === "ro" ? "Resetează" : "Reset",
       apply: language === "ro" ? "Aplică" : "Apply Filters",
@@ -75,6 +80,7 @@ export default function ForumFilterDialog({
       housing: language === "ro" ? "Cazare" : "Housing",
       jobs: language === "ro" ? "Joburi & Stagii" : "Jobs & Internships",
       social: language === "ro" ? "Social" : "Social",
+      gaming: language === "ro" ? "Gaming" : "Gaming",
     };
   }, [language, forceRefresh]);
 
@@ -87,6 +93,7 @@ export default function ForumFilterDialog({
       { id: "housing", name: translations.housing },
       { id: "jobs", name: translations.jobs },
       { id: "social", name: translations.social },
+      { id: "gaming", name: translations.gaming },
     ],
     [translations]
   );
@@ -98,6 +105,9 @@ export default function ForumFilterDialog({
   const [selectedFaculty, setSelectedFaculty] = useState<string>(
     currentFilters.faculty || ""
   );
+  const [selectedCity, setSelectedCity] = useState<string>(
+    currentFilters.city || ""
+  );
   const [selectedCategory, setSelectedCategory] = useState<string>(
     currentFilters.category || ""
   );
@@ -107,27 +117,49 @@ export default function ForumFilterDialog({
     if (isOpen) {
       setSelectedUniversity(currentFilters.university || "");
       setSelectedFaculty(currentFilters.faculty || "");
+      setSelectedCity(currentFilters.city || "");
       setSelectedCategory(currentFilters.category || "");
     }
   }, [isOpen, currentFilters]);
 
-  // Memoize available faculties
+  // Memoize available faculties and cities
   const availableFaculties = useMemo(() => {
     if (selectedUniversity && selectedUniversity !== "all") {
       return faculties.filter(
         (faculty) => faculty.universityId === selectedUniversity
       );
     }
-    return [];
+    return faculties;
   }, [selectedUniversity, faculties]);
+
+  const availableCities = useMemo(() => {
+    const uniqueCities = new Set<string>();
+    universities.forEach((university) => {
+      if (university.city) {
+        uniqueCities.add(university.city);
+      }
+    });
+    return Array.from(uniqueCities).sort();
+  }, [universities]);
 
   const handleUniversityChange = (value: string) => {
     setSelectedUniversity(value);
     setSelectedFaculty(""); // Reset faculty when university changes
+    if (value === "all") {
+      setSelectedFaculty("all");
+    }
   };
 
   const handleFacultyChange = (value: string) => {
     setSelectedFaculty(value);
+  };
+
+  const handleCityChange = (value: string) => {
+    setSelectedCity(value);
+    if (value === "all") {
+      setSelectedUniversity("all");
+      setSelectedFaculty("all");
+    }
   };
 
   const handleCategoryChange = (value: string) => {
@@ -138,12 +170,14 @@ export default function ForumFilterDialog({
     const filters = {
       university: selectedUniversity === "all" ? "" : selectedUniversity,
       faculty: selectedFaculty === "all" ? "" : selectedFaculty,
+      city: selectedCity === "all" ? "" : selectedCity,
       category: selectedCategory === "all" ? "" : selectedCategory,
     };
 
     console.log("Applying filters:", {
       selectedUniversity,
       selectedFaculty,
+      selectedCity,
       selectedCategory,
       appliedFilters: filters,
     });
@@ -155,10 +189,12 @@ export default function ForumFilterDialog({
   const handleReset = () => {
     setSelectedUniversity("");
     setSelectedFaculty("");
+    setSelectedCity("");
     setSelectedCategory("");
     onApplyFilters({
       university: "",
       faculty: "",
+      city: "",
       category: "",
     });
     onClose();
@@ -217,6 +253,27 @@ export default function ForumFilterDialog({
                 {availableFaculties.map((faculty) => (
                   <SelectItem key={faculty.id} value={faculty.id}>
                     {faculty.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="city" className="text-right">
+              {translations.city}
+            </Label>
+            <Select
+              value={selectedCity}
+              onValueChange={handleCityChange}
+            >
+              <SelectTrigger className="col-span-3">
+                <SelectValue placeholder={translations.selectCity} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{translations.allCities}</SelectItem>
+                {availableCities.map((city) => (
+                  <SelectItem key={city} value={city}>
+                    {city}
                   </SelectItem>
                 ))}
               </SelectContent>

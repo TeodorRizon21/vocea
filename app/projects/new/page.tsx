@@ -42,6 +42,7 @@ export default function NewProjectPage() {
     facultyId: "",
     phoneNumber: "",
     city: "", // We'll keep this for display purposes only
+    studyLevel: "bachelors", // Default to bachelors
   });
 
   const { universities, loading, getFacultiesForUniversity } =
@@ -161,6 +162,45 @@ export default function NewProjectPage() {
         language === "ro"
           ? "Te rugăm să selectezi o categorie academică validă"
           : "Please select a valid academic category",
+      studyLevel: language === "ro" ? "Nivel de studii" : "Study Level",
+      bachelors: language === "ro" ? "Licență" : "Bachelor's",
+      masters: language === "ro" ? "Master" : "Master's",
+      phd: language === "ro" ? "Doctorat" : "PhD",
+      selectStudyLevel: language === "ro" ? "Selectează nivelul de studii" : "Select study level",
+      // Add translations for academic categories
+      academicCategories: {
+        "Computer Science": language === "ro" ? "Informatică" : "Computer Science",
+        "Mathematics": language === "ro" ? "Matematică" : "Mathematics",
+        "Physics": language === "ro" ? "Fizică" : "Physics",
+        "Chemistry": language === "ro" ? "Chimie" : "Chemistry",
+        "Biology": language === "ro" ? "Biologie" : "Biology",
+        "Engineering": language === "ro" ? "Inginerie" : "Engineering",
+        "Business": language === "ro" ? "Business" : "Business",
+        "Economics": language === "ro" ? "Economie" : "Economics",
+        "Law": language === "ro" ? "Drept" : "Law",
+        "Medicine": language === "ro" ? "Medicină" : "Medicine",
+        "Psychology": language === "ro" ? "Psihologie" : "Psychology",
+        "Sociology": language === "ro" ? "Sociologie" : "Sociology",
+        "History": language === "ro" ? "Istorie" : "History",
+        "Philosophy": language === "ro" ? "Filosofie" : "Philosophy",
+        "Literature": language === "ro" ? "Literatură" : "Literature",
+        "Languages": language === "ro" ? "Limbă și Literatură" : "Languages",
+        "Art": language === "ro" ? "Arte" : "Art",
+        "Music": language === "ro" ? "Muzică" : "Music",
+        "Architecture": language === "ro" ? "Arhitectură" : "Architecture",
+        "Other": language === "ro" ? "Altele" : "Other",
+      },
+      // Add translations for diverse categories
+      diverseCategories: {
+        "job-offers": language === "ro" ? "Oferte muncă" : "Job offers",
+        "services": language === "ro" ? "Servicii" : "Services",
+        "cars": language === "ro" ? "Autoturisme" : "Cars",
+        "sports": language === "ro" ? "Sport" : "Sports",
+        "electronics": language === "ro" ? "Electronice" : "Electronics",
+        "cosmetics": language === "ro" ? "Cosmetice" : "Cosmetics",
+        "appliances": language === "ro" ? "Electrocasnice" : "Appliances",
+        "other": language === "ro" ? "Altele" : "Other",
+      },
     };
   }, [language, forceRefresh]);
 
@@ -267,6 +307,7 @@ export default function NewProjectPage() {
         phoneNumber: formData.phoneNumber,
         type: projectType,
         images: uploadedImages,
+        studyLevel: formData.studyLevel,
       };
 
       console.log("Submitting project data:", projectData); // Debug log
@@ -368,7 +409,7 @@ export default function NewProjectPage() {
                     setFormData((prev) => ({ ...prev, category: category.id }))
                   }
                 >
-                  {category.label}
+                  {translations.diverseCategories[category.id as keyof typeof translations.diverseCategories] || category.label}
                 </Button>
               ))}
             </div>
@@ -460,9 +501,69 @@ export default function NewProjectPage() {
               <SelectContent>
                 {ACADEMIC_CATEGORIES.map((category) => (
                   <SelectItem key={category} value={category}>
-                    {category}
+                    {translations.academicCategories[category as keyof typeof translations.academicCategories] || category}
                   </SelectItem>
                 ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
+        {projectType === "diverse" && (
+          <div className="space-y-4">
+            <Label>{translations.diverseCategory}</Label>
+            <div className="flex flex-wrap gap-2">
+              {DIVERSE_CATEGORIES.map((category) => (
+                <Button
+                  key={category.id}
+                  type="button"
+                  variant={
+                    formData.category === category.id ? "default" : "outline"
+                  }
+                  className={
+                    formData.category === category.id
+                      ? "bg-purple-600 hover:bg-purple-700"
+                      : ""
+                  }
+                  onClick={() =>
+                    setFormData((prev) => ({ ...prev, category: category.id }))
+                  }
+                >
+                  {translations.diverseCategories[category.id as keyof typeof translations.diverseCategories] || category.label}
+                </Button>
+              ))}
+            </div>
+            {!formData.category && (
+              <p className="text-sm text-amber-600">
+                {translations.selectCategory}
+              </p>
+            )}
+          </div>
+        )}
+
+        {projectType !== "diverse" && (
+          <div>
+            <Label htmlFor="studyLevel">{translations.studyLevel}</Label>
+            <Select
+              value={formData.studyLevel}
+              onValueChange={(value) =>
+                setFormData((prev) => ({ ...prev, studyLevel: value }))
+              }
+              required
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={translations.selectStudyLevel} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="bachelors">
+                  {translations.bachelors}
+                </SelectItem>
+                <SelectItem value="masters">
+                  {translations.masters}
+                </SelectItem>
+                <SelectItem value="phd">
+                  {translations.phd}
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>

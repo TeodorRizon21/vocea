@@ -80,6 +80,7 @@ export default function TopicList({
               faculty={topic.faculty}
               universityName={topic.universityName}
               facultyName={topic.facultyName}
+              category={topic.category}
               comments={topic.comments.length}
               commenters={uniqueCommenters}
               createdAt={new Date(topic.createdAt)}

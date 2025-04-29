@@ -19,6 +19,7 @@ interface TopicCardProps {
   faculty: string;
   universityName?: string;
   facultyName?: string;
+  category: string;
   comments: number;
   commenters: number;
   createdAt: Date;
@@ -45,6 +46,7 @@ export default function TopicCard({
   faculty,
   universityName,
   facultyName,
+  category,
   comments,
   commenters,
   createdAt,
@@ -69,8 +71,22 @@ export default function TopicCard({
         language === "ro"
           ? "Ești sigur că vrei să ștergi acest subiect?"
           : "Are you sure you want to delete this topic?",
+      categories: {
+        general: language === "ro" ? "General" : "General",
+        academic: language === "ro" ? "Academic" : "Academic",
+        events: language === "ro" ? "Evenimente" : "Events",
+        housing: language === "ro" ? "Cazare" : "Housing",
+        jobs: language === "ro" ? "Joburi & Stagii" : "Jobs & Internships",
+        social: language === "ro" ? "Social" : "Social",
+        gaming: language === "ro" ? "Gaming" : "Gaming",
+      }
     };
   }, [language, forceRefresh]);
+
+  // Get category translation
+  const getCategoryTranslation = useMemo(() => {
+    return translations.categories[category as keyof typeof translations.categories] || category;
+  }, [category, translations]);
 
   useEffect(() => {
     if (user) {
@@ -143,9 +159,13 @@ export default function TopicCard({
               </UserTooltip>
               <span>•</span>
               <span>{formattedDate}</span>
+              <span>•</span>
+              <span className="text-black dark:text-white">{getCategoryTranslation}</span>
             </div>
-            <p className="text-sm text-muted-foreground">{displayUniversity}</p>
-            <p className="text-sm text-muted-foreground">{displayFaculty}</p>
+            <div className="flex flex-wrap gap-2">
+              <p className="text-sm text-muted-foreground">{displayUniversity}</p>
+              <p className="text-sm text-muted-foreground">{displayFaculty}</p>
+            </div>
           </div>
           <div className="flex gap-2">
             <ReportButton contentType="forum_topic" contentId={id} />
