@@ -119,14 +119,7 @@ export default function ProjectPage() {
   return (
     <div className="space-y-6">
       {showAccessDenied ? null : project ? (
-        <>
-          <div className="flex justify-between items-center">
-            <h1 className="text-4xl font-bold text-purple-600">
-              {project.title}
-            </h1>
-          </div>
-          <ProjectDetails project={project} />
-        </>
+        <ProjectDetails project={project} />
       ) : (
         <div className="text-center py-10">
           <p className="text-gray-500">Project not found</p>

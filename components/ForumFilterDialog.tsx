@@ -218,13 +218,16 @@ export default function ForumFilterDialog({
               <SelectTrigger className="col-span-3">
                 <SelectValue placeholder={translations.selectUniversity} />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="w-[var(--radix-select-trigger-width)] max-w-[300px]">
                 <SelectItem value="all">
                   {translations.allUniversities}
                 </SelectItem>
                 {universities.map((university) => (
-                  <SelectItem key={university.id} value={university.id}>
-                    {university.name}
+                  <SelectItem key={university.id} value={university.id} className="py-2">
+                    <div className="flex flex-col">
+                      <span className="whitespace-normal break-words leading-snug">{university.name}</span>
+                      <span className="text-xs text-muted-foreground">{university.city}</span>
+                    </div>
                   </SelectItem>
                 ))}
               </SelectContent>

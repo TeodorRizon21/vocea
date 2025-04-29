@@ -15,6 +15,8 @@ import { useUniversities } from "@/hooks/useUniversities";
 import { FORUM_CATEGORIES } from "@/lib/constants";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useLanguage } from "@/components/LanguageToggle";
+import { Search } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -31,6 +33,7 @@ export default function NewForumTopic() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [universitySearch, setUniversitySearch] = useState("");
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -62,13 +65,25 @@ export default function NewForumTopic() {
       selectUniversity: language === "ro" ? "Selectează o universitate" : "Select a university",
       faculty: language === "ro" ? "Facultate" : "Faculty",
       selectFaculty: language === "ro" ? "Selectează o facultate" : "Select a faculty",
+      selectUniversityFirst: language === "ro" ? "Selectează mai întâi universitatea" : "Select university first",
+      category: language === "ro" ? "Categorie" : "Category",
+      selectCategory: language === "ro" ? "Selectează o categorie" : "Select a category",
       allFieldsRequired: language === "ro" ? "Toate câmpurile sunt obligatorii" : "All fields are required",
       contentTooShort: language === "ro" ? "Conținutul subiectului trebuie să aibă cel puțin 200 de caractere" : "Topic content must be at least 200 characters long",
       creating: language === "ro" ? "Se creează..." : "Creating...",
       create: language === "ro" ? "Crează subiect" : "Create Topic",
       cancel: language === "ro" ? "Anulează" : "Cancel",
+      searchUniversity: language === "ro" ? "Caută universitate..." : "Search university...",
+      noUniversityFound: language === "ro" ? "Nu s-a găsit nicio universitate" : "No university found",
     };
   }, [language, forceRefresh]);
+
+  // Filter universities based on search term
+  const filteredUniversities = universities.filter(
+    (university) =>
+      university.name.toLowerCase().includes(universitySearch.toLowerCase()) ||
+      university.city.toLowerCase().includes(universitySearch.toLowerCase())
+  );
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setError(null);
@@ -201,12 +216,36 @@ export default function NewForumTopic() {
                       <SelectValue placeholder={translations.selectUniversity} />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent>
-                    {universities.map((university) => (
-                      <SelectItem key={university.id} value={university.id}>
-                        {university.name}
-                      </SelectItem>
-                    ))}
+                  <SelectContent className="p-0">
+                    <div className="flex items-center px-3 pb-2 pt-3 border-b">
+                      <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+                      <Input
+                        placeholder="Search university..."
+                        className="h-8 border-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                        value={universitySearch}
+                        onChange={(e) => setUniversitySearch(e.target.value)}
+                      />
+                    </div>
+                    <ScrollArea className="h-72">
+                      {filteredUniversities.length === 0 ? (
+                        <div className="py-6 text-center text-sm">
+                          {translations.noUniversityFound}
+                        </div>
+                      ) : (
+                        filteredUniversities.map((university) => (
+                          <SelectItem
+                            key={university.id}
+                            value={university.id}
+                            className="cursor-pointer py-2"
+                          >
+                            <div className="flex flex-col">
+                              <span className="whitespace-normal break-words leading-snug">{university.name}</span>
+                              <span className="text-xs text-muted-foreground">{university.city}</span>
+                            </div>
+                          </SelectItem>
+                        ))
+                      )}
+                    </ScrollArea>
                   </SelectContent>
                 </Select>
                 <FormMessage />
