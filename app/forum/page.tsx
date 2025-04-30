@@ -62,6 +62,7 @@ export default function ForumPage() {
           : "No topics found matching your search criteria",
       clearFilters:
         language === "ro" ? "Șterge toate filtrele" : "Clear all filters",
+      createNewTopic: language === "ro" ? "Creează un subiect nou" : "Create a new topic",
     };
   }, [language, forceRefresh]);
 
@@ -257,55 +258,48 @@ export default function ForumPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-4xl font-bold text-purple-600">{translations.forumTitle}</h1>
-        <UserProfile />
+    <div className="space-y-6 sm:px-4 md:px-6">
+      <div className="flex flex-col sm:flex-row justify-between items-center sm:items-center gap-4">
+        <div className="flex flex-col items-center sm:items-start w-full sm:w-auto order-2 sm:order-1">
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-purple-600 text-center sm:text-left">
+            {translations.forumTitle}
+          </h1>
+        </div>
+        <div className="w-full sm:w-auto order-1 sm:order-2">
+          <UserProfile />
+        </div>
       </div>
-      <div className="flex justify-between items-center">
-        <ForumTabs
-          tabs={tabsDataWithTranslations}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-        />
-        <CreateTopicButton
-          onClick={() => router.push("/forum/new")}
+
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div className="flex items-center gap-2">
+          <SearchBar onSearch={handleSearch} />
+          <SortButton onSort={handleSort} />
+          <FilterButton
+            onFilter={handleFilter}
+            activeFiltersCount={activeFiltersCount}
+          />
+        </div>
+        <CreateTopicButton onClick={() => router.push("/forum/new")} />
+      </div>
+
+      <ForumTabs
+        tabs={tabsDataWithTranslations}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+      />
+
+      {loading ? (
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+        </div>
+      ) : (
+        <TopicList
+          topics={filteredTopics}
+          onFavoriteToggle={handleFavoriteToggle}
+          onDelete={handleDelete}
           userPlan={userPlan}
         />
-      </div>
-      <div className="flex items-center space-x-4">
-        <div className="flex-grow">
-          <SearchBar onSearch={handleSearch} />
-        </div>
-        <SortButton onSort={handleSort} />
-        <FilterButton
-          onFilter={handleFilter}
-          activeFiltersCount={activeFiltersCount}
-        />
-      </div>
-      <div className="h-[calc(100vh-24rem)] overflow-y-auto pr-4">
-        {filteredTopics.length > 0 ? (
-          <TopicList
-            topics={filteredTopics}
-            onFavoriteToggle={handleFavoriteToggle}
-            onDelete={handleDelete}
-            userPlan={userPlan}
-          />
-        ) : (
-          <div className="flex flex-col items-center justify-center h-64 text-gray-500">
-            <p className="text-lg">{translations.noTopicsFound}</p>
-            <Button
-              variant="link"
-              onClick={() => {
-                setFilters({ university: "", faculty: "", category: "", city: "" });
-                setSearchQuery("");
-              }}
-            >
-              {translations.clearFilters}
-            </Button>
-          </div>
-        )}
-      </div>
+      )}
 
       <ForumFilterDialog
         isOpen={isFilterDialogOpen}

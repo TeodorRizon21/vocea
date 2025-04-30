@@ -114,7 +114,7 @@ export default function ProductGrid({
 
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {projects.map((project) => (
           <a
             key={project.id}
@@ -131,8 +131,11 @@ export default function ProductGrid({
               authorFirstName={project.user.firstName}
               authorLastName={project.user.lastName}
               authorAvatar={project.user.avatar}
-              university={project.university || translations.noUniversity}
-              faculty={project.faculty || translations.noFaculty}
+              university={
+                project.university || "Nicio universitate specificată"
+              }
+              faculty={project.faculty || "Nicio facultate specificată"}
+              category={project.category || project.subject}
               reviews={project.reviews}
               userId={project.userId}
               studyLevel={project.studyLevel || undefined}

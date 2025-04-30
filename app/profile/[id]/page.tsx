@@ -13,6 +13,7 @@ import type { Project } from "@prisma/client";
 import { Star } from "lucide-react";
 import { useUniversities } from "@/hooks/useUniversities";
 import AccessDeniedDialog from "@/components/AccessDeniedDialog";
+import { generateAcronym } from "@/lib/acronym";
 
 interface UserActivityType {
   projectsCreated: number;
@@ -184,31 +185,35 @@ export default function UserProfilePage({
                 {user.firstName} {user.lastName}
               </CardTitle>
               <p className="text-muted-foreground">
-                {universityName}
-                {facultyName && `, ${facultyName}`}
+                <span className="hidden xl:inline">{universityName}</span>
+                <span className="xl:hidden">{generateAcronym(universityName)}</span>
+                {facultyName && (
+                  <>
+                    <span className="hidden xl:inline">, {facultyName}</span>
+                    <span className="xl:hidden">, {generateAcronym(facultyName)}</span>
+                  </>
+                )}
               </p>
               {user.city && user.year && (
                 <p className="text-sm text-muted-foreground mt-1">
                   {user.city} • Year {user.year}
                 </p>
               )}
-            </div>
-
-            {/* Display user rating */}
-            {user.averageRating !== null && (
-              <div className="ml-auto flex items-center">
-                <div className="flex items-center space-x-1 bg-yellow-50 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 px-3 py-1.5 rounded-full">
-                  <Star className="h-5 w-5 fill-yellow-500 text-yellow-500" />
-                  <span className="font-medium">
-                    {user.averageRating.toFixed(1)}
-                  </span>
-                  <span className="text-sm whitespace-nowrap">
-                    ({user.reviewCount}{" "}
-                    {user.reviewCount === 1 ? "review" : "reviews"})
-                  </span>
+              {user.averageRating !== null && (
+                <div className="flex items-center mt-1">
+                  <div className="flex items-center space-x-1 bg-yellow-50 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 px-3 py-1.5 rounded-full">
+                    <Star className="h-5 w-5 fill-yellow-500 text-yellow-500" />
+                    <span className="font-medium">
+                      {user.averageRating.toFixed(1)}
+                    </span>
+                    <span className="text-sm whitespace-nowrap">
+                      ({user.reviewCount}{" "}
+                      {user.reviewCount === 1 ? "review" : "reviews"})
+                    </span>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </CardHeader>
       </Card>

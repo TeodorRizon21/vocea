@@ -182,10 +182,18 @@ export default function SettingsPage() {
       return;
     }
 
+    if (!currentPassword || !newPassword) {
+      toast({
+        variant: "destructive",
+        title: language === "ro" ? "Câmpuri incomplete" : "Incomplete fields",
+        description: language === "ro" ? "Te rugăm să completezi toate câmpurile." : "Please fill in all fields.",
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      // Add actual password reset logic here using Clerk
       await user?.updatePassword({
         currentPassword,
         newPassword,
@@ -200,6 +208,7 @@ export default function SettingsPage() {
       setNewPassword("");
       setConfirmPassword("");
     } catch (error) {
+      console.error("Password update error:", error);
       toast({
         variant: "destructive",
         title: translations.failedToUpdatePassword,
@@ -212,23 +221,59 @@ export default function SettingsPage() {
 
   const handleEmailChange = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!email) {
+      toast({
+        variant: "destructive",
+        title: language === "ro" ? "Email invalid" : "Invalid email",
+        description: language === "ro" ? "Te rugăm să introduci o adresă de email validă." : "Please enter a valid email address.",
+      });
+      return;
+    }
+
+    if (email === user?.primaryEmailAddress?.emailAddress) {
+      toast({
+        variant: "destructive",
+        title: language === "ro" ? "Email neschimbat" : "Email unchanged",
+        description: language === "ro" ? "Noua adresă de email este identică cu cea actuală." : "The new email address is the same as the current one.",
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      // Add actual email change logic here using Clerk
-      await user?.createEmailAddress({
-        email: email,
-      });
+      await user?.createEmailAddress({ email });
 
       toast({
-        title: translations.emailUpdated,
-        description: translations.emailUpdatedDesc,
+        title: language === "ro" ? "Email în așteptare" : "Email pending",
+        description: language === "ro" 
+          ? "Am trimis un email de verificare la noua adresă. Te rugăm să verifici căsuța de email și să confirmi schimbarea."
+          : "We've sent a verification email to the new address. Please check your inbox and confirm the change.",
       });
-    } catch (error) {
+
+    } catch (error: any) {
+      console.error("Email update error:", error);
+      
+      let errorMessage = translations.tryAgainLater;
+      
+      // Handle specific Clerk error cases
+      if (error.errors?.[0]?.message) {
+        if (error.errors[0].message.includes("already exists")) {
+          errorMessage = language === "ro" 
+            ? "Această adresă de email este deja folosită."
+            : "This email address is already in use.";
+        } else if (error.errors[0].message.includes("invalid")) {
+          errorMessage = language === "ro"
+            ? "Adresa de email este invalidă."
+            : "The email address is invalid.";
+        }
+      }
+
       toast({
         variant: "destructive",
         title: translations.failedToUpdateEmail,
-        description: translations.tryAgainLater,
+        description: errorMessage,
       });
     } finally {
       setIsLoading(false);
@@ -407,10 +452,13 @@ export default function SettingsPage() {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="your.email@example.com"
+                        disabled={isLoading}
                       />
                     </div>
                     <Button type="submit" disabled={isLoading}>
-                      {isLoading ? "Updating..." : translations.updateEmail}
+                      {isLoading 
+                        ? (language === "ro" ? "Se actualizează..." : "Updating...") 
+                        : translations.updateEmail}
                     </Button>
                   </form>
                 </CardContent>

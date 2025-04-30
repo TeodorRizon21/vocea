@@ -136,7 +136,7 @@ export default function FilterDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] px-4 sm:px-6">
         <DialogHeader>
           <DialogTitle>{translations.filterProjects}</DialogTitle>
         </DialogHeader>
@@ -152,13 +152,16 @@ export default function FilterDialog({
               <SelectTrigger id="university">
                 <SelectValue placeholder={translations.allUniversities} />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="w-[var(--radix-select-trigger-width)] max-w-[300px]">
                 <SelectItem value="_all">
                   {translations.allUniversities}
                 </SelectItem>
                 {universities.map((uni) => (
-                  <SelectItem key={uni.id} value={uni.id}>
-                    {uni.name}
+                  <SelectItem key={uni.id} value={uni.id} className="py-2">
+                    <div className="flex flex-col">
+                      <span className="whitespace-normal break-words leading-snug">{uni.name}</span>
+                      <span className="text-xs text-muted-foreground">{uni.city}</span>
+                    </div>
                   </SelectItem>
                 ))}
               </SelectContent>

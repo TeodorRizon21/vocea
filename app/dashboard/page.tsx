@@ -286,15 +286,19 @@ export default function DashboardPage() {
   const subscriptionData = getSubscriptionData();
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-4xl font-bold text-purple-600">
-          {translations.dashboard}
-        </h1>
-        <UserProfile />
+    <div className="space-y-6 sm:px-4 md:px-6">
+      <div className="flex flex-col sm:flex-row justify-between items-center sm:items-center gap-4">
+        <div className="flex flex-col items-center sm:items-start w-full sm:w-auto order-2 sm:order-1">
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-purple-600 text-center sm:text-left">
+            {translations.dashboard}
+          </h1>
+        </div>
+        <div className="w-full sm:w-auto order-1 sm:order-2">
+          <UserProfile />
+        </div>
       </div>
-      <DashboardHero name={userData?.firstName || "User"} />
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="space-y-6">
           <ProfileInfo
             firstName={userData?.firstName || "Not set"}

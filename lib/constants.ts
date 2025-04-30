@@ -33,13 +33,13 @@ export const DIVERSE_CATEGORIES = [
  * Forum categories
  */
 export const FORUM_CATEGORIES = [
-  { id: "general", label: "General" },
-  { id: "academic", label: "Academic" },
-  { id: "events", label: "Events" },
-  { id: "housing", label: "Housing" },
-  { id: "jobs", label: "Jobs & Internships" },
-  { id: "social", label: "Social" },
-  { id: "gaming", label: "Gaming" },
+  { id: "general", label: "General", labelRo: "General" },
+  { id: "academic", label: "Academic", labelRo: "Academic" },
+  { id: "events", label: "Events", labelRo: "Evenimente" },
+  { id: "housing", label: "Housing", labelRo: "Cazare" },
+  { id: "jobs", label: "Jobs & Internships", labelRo: "Joburi & Stagii" },
+  { id: "social", label: "Social", labelRo: "Social" },
+  { id: "gaming", label: "Gaming", labelRo: "Gaming" },
 ];
 
 /**

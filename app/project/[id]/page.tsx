@@ -117,31 +117,20 @@ export default function ProjectPage() {
   }
 
   return (
-    <>
-      {showAccessDenied ? null : project ? ( // Nu afișăm nimic în fundal când dialogul de acces respins este activ
+    <div className="space-y-6">
+      {showAccessDenied ? null : project ? (
         <ProjectDetails project={project} />
       ) : (
-        <div className="flex flex-col items-center justify-center min-h-[400px]">
-          <h2 className="text-2xl font-bold text-red-600 mb-4">
-            {translations.projectNotFound}
-          </h2>
-          <button
-            onClick={() => router.back()}
-            className="mt-6 px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition-colors"
-          >
-            {translations.back}
-          </button>
+        <div className="text-center py-10">
+          <p className="text-gray-500">Project not found</p>
         </div>
       )}
 
       <AccessDeniedDialog
         isOpen={showAccessDenied}
-        onClose={() => {
-          setShowAccessDenied(false);
-          router.back();
-        }}
+        onClose={() => setShowAccessDenied(false)}
         originalPath={`/project/${params.id}`}
       />
-    </>
+    </div>
   );
 }

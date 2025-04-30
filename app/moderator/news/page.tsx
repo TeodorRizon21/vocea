@@ -198,34 +198,36 @@ export default function NewsManagementPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-6 px-4 sm:px-6 lg:px-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h1 className="text-4xl font-bold text-purple-600">News Management</h1>
-        <Button onClick={() => setIsDialogOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Add News
-        </Button>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>All News</CardTitle>
+          <div className="flex justify-between items-center">
+            <CardTitle>All News</CardTitle>
+            <Button onClick={() => setIsDialogOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Add News
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             {news.map((item) => (
               <div
                 key={item.id}
-                className="flex items-start justify-between p-4 border rounded-lg hover:bg-accent transition-colors"
+                className="flex flex-col sm:flex-row items-start justify-between p-4 border rounded-lg hover:bg-accent transition-colors gap-4"
               >
-                <div className="space-y-2">
+                <div className="space-y-2 w-full sm:w-auto">
                   <div className="flex items-start gap-4">
                     {item.image && (
                       <div className="relative w-24 h-24 rounded-md overflow-hidden flex-shrink-0">
                         <Image src={item.image || "/placeholder.svg"} alt={item.title} fill className="object-cover" />
                       </div>
                     )}
-                    <div>
+                    <div className="flex-grow">
                       <h3 className="font-medium">{item.title}</h3>
                       <div className="flex items-center text-xs text-muted-foreground mt-1">
                         <span className="font-medium">{item.city}</span>
@@ -243,7 +245,7 @@ export default function NewsManagementPage() {
                     </div>
                   </div>
                 </div>
-                <div className="flex space-x-2">
+                <div className="flex space-x-2 sm:flex-shrink-0 w-full sm:w-auto justify-end">
                   <Button variant="outline" size="icon" onClick={() => handleEdit(item)}>
                     <Pencil className="h-4 w-4" />
                   </Button>

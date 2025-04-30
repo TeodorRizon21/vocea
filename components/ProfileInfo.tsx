@@ -80,7 +80,22 @@ export default function ProfileInfo({
   const lastNameDisplay =
     lastName === "Not set" ? translations.notSet : lastName;
   const cityDisplay = city === "Not set" ? translations.notSet : city;
-  const yearDisplay = year === "Not set" ? translations.notSet : year;
+  const yearDisplay = useMemo(() => {
+    if (year === "Not set") return translations.notSet;
+    
+    const yearNum = parseInt(year);
+    if (isNaN(yearNum)) return year;
+
+    if (language === "ro") {
+      if (yearNum <= 4) return `Licență anul ${year}`;
+      if (yearNum === 5) return `Masterat`;
+      return `Doctorat`;
+    } else {
+      if (yearNum <= 4) return `Bachelor's Year ${year}`;
+      if (yearNum === 5) return `Masters`;
+      return `PhD`;
+    }
+  }, [year, language, translations.notSet]);
 
   return (
     <Card className="shadow-md">
@@ -92,26 +107,26 @@ export default function ProfileInfo({
       </CardHeader>
       <CardContent className="space-y-2">
         <div className="flex items-center">
-          <School className="mr-2 h-4 w-4 text-purple-600" />
-          <span>
+          <School className="mr-2 h-4 w-4 text-purple-600 flex-shrink-0" />
+          <span className="break-words">
             {firstNameDisplay} {lastNameDisplay}
           </span>
         </div>
         <div className="flex items-center">
-          <School className="mr-2 h-4 w-4 text-purple-600" />
-          <span>{universityDisplay}</span>
+          <School className="mr-2 h-4 w-4 text-purple-600 flex-shrink-0" />
+          <span className="break-words">{universityDisplay}</span>
         </div>
         <div className="flex items-center">
-          <School className="mr-2 h-4 w-4 text-purple-600" />
-          <span>{facultyDisplay}</span>
+          <School className="mr-2 h-4 w-4 text-purple-600 flex-shrink-0" />
+          <span className="break-words">{facultyDisplay}</span>
         </div>
         <div className="flex items-center">
-          <MapPin className="mr-2 h-4 w-4 text-purple-600" />
-          <span>{cityDisplay}</span>
+          <MapPin className="mr-2 h-4 w-4 text-purple-600 flex-shrink-0" />
+          <span className="break-words">{cityDisplay}</span>
         </div>
         <div className="flex items-center">
-          <Calendar className="mr-2 h-4 w-4 text-purple-600" />
-          <span>{yearDisplay}</span>
+          <Calendar className="mr-2 h-4 w-4 text-purple-600 flex-shrink-0" />
+          <span className="break-words">{yearDisplay}</span>
         </div>
         {/*<div className="flex items-center">
           <Star className="mr-2 h-4 w-4 text-purple-600" />

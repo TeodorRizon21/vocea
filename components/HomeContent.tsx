@@ -48,7 +48,6 @@ export default function HomeContent({ news }: HomeContentProps) {
     <div className="space-y-12">
       <div className="flex justify-between items-center">
         <h1 className="text-4xl font-bold text-purple-600">{t.title}</h1>
-        <UserProfile />
       </div>
 
       <section>

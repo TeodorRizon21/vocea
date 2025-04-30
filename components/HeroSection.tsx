@@ -1,6 +1,8 @@
+import UserProfile from "@/components/UserProfile";
+
 interface HeroSectionProps {
-  title: string
-  description: string
+  title: string;
+  description: string;
 }
 
 export default function HeroSection({ title, description }: HeroSectionProps) {
@@ -9,6 +11,6 @@ export default function HeroSection({ title, description }: HeroSectionProps) {
       <h2 className="text-2xl font-bold mb-2">{title}</h2>
       <p>{description}</p>
     </div>
-  )
+  );
 }
 
