@@ -8,40 +8,90 @@ import ConfirmationDialog from "@/components/ConfirmationDialog";
 import { Badge } from "@/components/ui/badge";
 import { Check } from "lucide-react";
 import { motion } from "framer-motion";
+import { useLanguage } from "@/components/LanguageToggle";
 
 export default function SubscriptionsPage() {
   const { isLoaded } = useUser();
   const router = useRouter();
+  const { language, forceRefresh } = useLanguage();
   const [selectedSubscription, setSelectedSubscription] = useState("Basic");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [pendingSubscription, setPendingSubscription] = useState("");
   const [loading, setLoading] = useState(true);
 
+  const translations = {
+    ro: {
+      availablePlans: "Planuri disponibile",
+      choosePlan: "Alege planul potrivit pentru tine",
+      description: "Descoperă toate funcționalitățile platformei noastre cu unul din planurile premium. Alege planul care se potrivește cel mai bine nevoilor tale.",
+      popular: "Popular",
+      unlimited: "Nelimitat",
+      noCard: "Nu necesită card",
+      billedMonthly: "Facturat lunar",
+      currentPlan: "Planul tău curent",
+      select: "Selectează",
+      toDashboard: "Mergi la Dashboard",
+      changeSubscription: "Schimbare abonament",
+      confirmChange: "Ești sigur că vrei să schimbi abonamentul la",
+      features: [
+        "Acces la pagina de browse",
+        "Vizualizare listă completă de proiecte",
+        "Vizualizare listă completă de topicuri forum",
+        "Acces la proiecte individuale",
+        "Acces la topicuri de forum",
+        "Creare proiecte noi",
+        "Creare topicuri noi în forum"
+      ]
+    },
+    en: {
+      availablePlans: "Available Plans",
+      choosePlan: "Choose the Right Plan for You",
+      description: "Discover all the features of our platform with one of our premium plans. Choose the plan that best suits your needs.",
+      popular: "Popular",
+      unlimited: "Unlimited",
+      noCard: "No card required",
+      billedMonthly: "Billed monthly",
+      currentPlan: "Your current plan",
+      select: "Select",
+      toDashboard: "Go to Dashboard",
+      changeSubscription: "Change Subscription",
+      confirmChange: "Are you sure you want to change your subscription to",
+      features: [
+        "Access to browse page",
+        "View complete project list",
+        "View complete forum topics list",
+        "Access to individual projects",
+        "Access to forum topics",
+        "Create new projects",
+        "Create new forum topics"
+      ]
+    }
+  };
+
+  const content = translations[language as keyof typeof translations];
+
   const subscriptions = [
     {
       name: "Basic",
-      price: "Gratuit",
+      price: language === "ro" ? "Gratuit" : "Free",
       color: "bg-white dark:bg-black",
       textColor: "text-gray-900 dark:text-white",
       accentColor: "text-gray-700 dark:text-gray-300",
       buttonColor: "bg-gray-600 hover:bg-gray-700 text-white",
       borderColor: "border-gray-200 dark:border-gray-800",
       features: [
-        { text: "Acces la pagina de browse", available: true },
-        { text: "Vizualizare listă completă de proiecte", available: true },
-        {
-          text: "Vizualizare listă completă de topicuri forum",
-          available: true,
-        },
-        { text: "Acces la proiecte individuale", available: false },
-        { text: "Acces la topicuri de forum", available: false },
-        { text: "Creare proiecte noi", available: false },
-        { text: "Creare topicuri noi în forum", available: false },
+        { text: content.features[0], available: true },
+        { text: content.features[1], available: true },
+        { text: content.features[2], available: true },
+        { text: content.features[3], available: false },
+        { text: content.features[4], available: false },
+        { text: language === "ro" ? "Creare proiecte noi" : "Create new projects", available: false },
+        { text: content.features[6], available: false },
       ],
     },
     {
       name: "Premium",
-      price: "20 RON/lună",
+      price: language === "ro" ? "20 RON/lună" : "20 RON/month",
       color: "bg-gray-100 dark:bg-gray-100",
       textColor: "text-gray-900",
       accentColor: "text-purple-500",
@@ -49,39 +99,33 @@ export default function SubscriptionsPage() {
       borderColor: "border-purple-200 dark:border-purple-800",
       popular: true,
       features: [
-        { text: "Acces la pagina de browse", available: true },
-        { text: "Vizualizare listă completă de proiecte", available: true },
-        {
-          text: "Vizualizare listă completă de topicuri forum",
-          available: true,
-        },
-        { text: "Acces la proiecte individuale", available: true },
-        { text: "Acces la topicuri de forum", available: true },
-        { text: "Creare proiecte noi (max 4)", available: true },
-        { text: "Creare topicuri noi în forum", available: true },
+        { text: content.features[0], available: true },
+        { text: content.features[1], available: true },
+        { text: content.features[2], available: true },
+        { text: content.features[3], available: true },
+        { text: content.features[4], available: true },
+        { text: language === "ro" ? "Creare proiecte noi (max 4)" : "Create new projects (max 4)", available: true },
+        { text: content.features[6], available: true },
       ],
     },
     {
       name: "Gold",
-      price: "50 RON/lună",
+      price: language === "ro" ? "50 RON/lună" : "50 RON/month",
       color: "bg-yellow-50",
       textColor: "text-black",
       accentColor: "text-amber-500",
       buttonColor: "bg-amber-500 hover:bg-amber-600 text-white",
       borderColor: "border-amber-200 dark:border-amber-800",
       popular: false,
-      tag: "Nelimitat",
+      tag: content.unlimited,
       features: [
-        { text: "Acces la pagina de browse", available: true },
-        { text: "Vizualizare listă completă de proiecte", available: true },
-        {
-          text: "Vizualizare listă completă de topicuri forum",
-          available: true,
-        },
-        { text: "Acces la proiecte individuale", available: true },
-        { text: "Acces la topicuri de forum", available: true },
-        { text: "Creare proiecte nelimitate", available: true },
-        { text: "Creare topicuri nelimitate în forum", available: true },
+        { text: content.features[0], available: true },
+        { text: content.features[1], available: true },
+        { text: content.features[2], available: true },
+        { text: content.features[3], available: true },
+        { text: content.features[4], available: true },
+        { text: language === "ro" ? "Creare proiecte nelimitate" : "Create unlimited projects", available: true },
+        { text: language === "ro" ? "Creare topicuri nelimitate în forum" : "Create unlimited forum topics", available: true },
       ],
     },
   ];
@@ -146,19 +190,17 @@ export default function SubscriptionsPage() {
     <div className="pb-20">
       <div className="flex justify-between items-center mb-12">
         <h1 className="text-4xl font-bold text-purple-600">
-          Planuri disponibile
+          {content.availablePlans}
         </h1>
         <UserProfile />
       </div>
 
       <div className="text-center max-w-3xl mx-auto mb-16">
         <h2 className="text-3xl font-bold mb-4">
-          Alege planul potrivit pentru tine
+          {content.choosePlan}
         </h2>
         <p className="text-gray-600 dark:text-gray-400 text-lg">
-          Descoperă toate funcționalitățile platformei noastre cu unul din
-          planurile premium. Alege planul care se potrivește cel mai bine
-          nevoilor tale.
+          {content.description}
         </p>
       </div>
 
@@ -204,7 +246,7 @@ export default function SubscriptionsPage() {
             >
               {subscription.popular && (
                 <div className="absolute top-0 right-0 bg-purple-500 text-white px-4 py-1 rounded-bl-lg text-sm font-bold">
-                  Popular
+                  {content.popular}
                 </div>
               )}
               {subscription.tag && (
@@ -223,9 +265,7 @@ export default function SubscriptionsPage() {
                   {subscription.price}
                 </div>
                 <div className="text-sm text-gray-500 dark:text-gray-400">
-                  {subscription.name === "Basic"
-                    ? "Nu necesită card"
-                    : "Facturat lunar"}
+                  {subscription.name === "Basic" ? content.noCard : content.billedMonthly}
                 </div>
               </div>
 
@@ -265,8 +305,8 @@ export default function SubscriptionsPage() {
                   disabled={selectedSubscription === subscription.name}
                 >
                   {selectedSubscription === subscription.name
-                    ? "Planul tău curent"
-                    : "Selectează"}
+                    ? content.currentPlan
+                    : content.select}
                 </button>
               </div>
             </div>
@@ -279,7 +319,7 @@ export default function SubscriptionsPage() {
           onClick={() => router.push("/dashboard")}
           className="bg-gray-200 hover:bg-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 font-medium py-3 px-8 rounded-xl transition-all duration-200"
         >
-          Înapoi la Dashboard
+          {content.toDashboard}
         </button>
       </div>
 
@@ -287,8 +327,8 @@ export default function SubscriptionsPage() {
         isOpen={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}
         onConfirm={confirmSubscriptionChange}
-        title="Schimbare abonament"
-        message={`Ești sigur că vrei să schimbi abonamentul la ${pendingSubscription}?`}
+        title={content.changeSubscription}
+        message={`${content.confirmChange} ${pendingSubscription}?`}
       />
     </div>
   );

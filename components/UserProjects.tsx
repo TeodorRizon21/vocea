@@ -122,12 +122,14 @@ export default function UserProjects() {
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>{translations.myProjects}</CardTitle>
-        <Button onClick={() => router.push("/projects/new")} size="sm">
-          <Plus className="h-4 w-4 mr-2" />
-          {translations.addProject}
-        </Button>
+      <CardHeader>
+        <div className="flex flex-col xs:flex-row xs:justify-between xs:items-center gap-2">
+          <CardTitle>{translations.myProjects}</CardTitle>
+          <Button onClick={() => router.push("/projects/new")} size="sm">
+            <Plus className="h-4 w-4 mr-2" />
+            {translations.addProject}
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         {projects.length === 0 ? (
@@ -146,9 +148,9 @@ export default function UserProjects() {
             {displayedProjects.map((project) => (
               <div
                 key={project.id}
-                className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent transition-colors"
+                className="flex flex-col xs:flex-row xs:items-center justify-between p-4 border rounded-lg hover:bg-accent transition-colors"
               >
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-4 mb-2 xs:mb-0">
                   <div className="relative w-16 h-16 rounded-md overflow-hidden">
                     <Image
                       src={project.images[0] || "/placeholder.svg"}
@@ -179,17 +181,19 @@ export default function UserProjects() {
                     )}
                   </div>
                 </div>
-                <div className="flex space-x-2">
+                <div className="flex space-x-1 justify-end xs:justify-start">
                   <Button
                     variant="outline"
                     size="icon"
+                    className="h-8 w-8"
                     onClick={() => router.push(`/projects/edit/${project.id}`)}
                   >
-                    <Pencil className="h-4 w-4" />
+                    <Pencil className="h-3 w-3" />
                   </Button>
                   <Button
                     variant="destructive"
                     size="icon"
+                    className="h-8 w-8"
                     onClick={async () => {
                       if (confirm(translations.deleteConfirm)) {
                         try {
@@ -210,7 +214,7 @@ export default function UserProjects() {
                       }
                     }}
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="h-3 w-3" />
                   </Button>
                 </div>
               </div>

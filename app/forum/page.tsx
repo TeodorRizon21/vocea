@@ -258,88 +258,48 @@ export default function ForumPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-4xl font-bold text-purple-600">
-          {translations.forumTitle}
-        </h1>
-      </div>
-
-      {/* Mobile Layout */}
-      <div className="md:hidden flex flex-col space-y-4">
-        <div className="flex flex-col space-y-2">
-          {tabsDataWithTranslations.map((tab) => (
-            <Button
-              key={tab.id}
-              variant={activeTab === tab.id ? "default" : "outline"}
-              className={`w-full ${
-                activeTab === tab.id
-                  ? "bg-purple-600 hover:bg-purple-700"
-                  : ""
-              }`}
-              onClick={() => setActiveTab(tab.id)}
-            >
-              {tab.label}
-            </Button>
-          ))}
+    <div className="space-y-6 sm:px-4 md:px-6">
+      <div className="flex flex-col sm:flex-row justify-between items-center sm:items-center gap-4">
+        <div className="flex flex-col items-center sm:items-start w-full sm:w-auto order-2 sm:order-1">
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-purple-600 text-center sm:text-left">
+            {translations.forumTitle}
+          </h1>
         </div>
-        <Button
-          className="bg-purple-600 hover:bg-purple-700 text-white w-full"
-          onClick={() => router.push("/forum/new")}
-        >
-          {translations.createNewTopic}
-        </Button>
+        <div className="w-full sm:w-auto order-1 sm:order-2">
+          <UserProfile />
+        </div>
       </div>
 
-      {/* Desktop Layout */}
-      <div className="hidden md:flex justify-between items-center">
-        <ForumTabs
-          tabs={tabsDataWithTranslations}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-        />
-        <CreateTopicButton
-          onClick={() => router.push("/forum/new")}
-          userPlan={userPlan}
-        />
-      </div>
-
-      <div className="flex flex-col md:flex-row items-stretch md:items-center space-y-4 md:space-y-0 md:space-x-4">
-        <div className="flex-grow">
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div className="flex items-center gap-2">
           <SearchBar onSearch={handleSearch} />
-        </div>
-        <div className="flex space-x-4">
           <SortButton onSort={handleSort} />
           <FilterButton
             onFilter={handleFilter}
             activeFiltersCount={activeFiltersCount}
           />
         </div>
+        <CreateTopicButton onClick={() => router.push("/forum/new")} />
       </div>
 
-      <div className="h-[calc(100vh-24rem)] overflow-y-auto pr-4">
-        {filteredTopics.length > 0 ? (
-          <TopicList
-            topics={filteredTopics}
-            onFavoriteToggle={handleFavoriteToggle}
-            onDelete={handleDelete}
-            userPlan={userPlan}
-          />
-        ) : (
-          <div className="flex flex-col items-center justify-center h-64 text-gray-500">
-            <p className="text-lg text-center px-4">{translations.noTopicsFound}</p>
-            <Button
-              variant="link"
-              onClick={() => {
-                setFilters({ university: "", faculty: "", category: "", city: "" });
-                setSearchQuery("");
-              }}
-            >
-              {translations.clearFilters}
-            </Button>
-          </div>
-        )}
-      </div>
+      <ForumTabs
+        tabs={tabsDataWithTranslations}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+      />
+
+      {loading ? (
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+        </div>
+      ) : (
+        <TopicList
+          topics={filteredTopics}
+          onFavoriteToggle={handleFavoriteToggle}
+          onDelete={handleDelete}
+          userPlan={userPlan}
+        />
+      )}
 
       <ForumFilterDialog
         isOpen={isFilterDialogOpen}

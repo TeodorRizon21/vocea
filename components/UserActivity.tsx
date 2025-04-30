@@ -88,7 +88,7 @@ export default function UserActivity({
           <CardTitle>{translations.yourActivity}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex justify-between mb-6">
+          <div className="flex flex-col sm:flex-row sm:justify-between gap-4 mb-6">
             <ActivityItem
               icon={FolderPlus}
               label={translations.projectsCreated}

@@ -8,6 +8,9 @@ import { Badge } from "@/components/ui/badge";
 import { generateAcronym } from "@/lib/acronym";
 import { useUniversities } from "@/hooks/useUniversities";
 import { useLanguage } from "@/components/LanguageToggle";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+
 
 interface UserProfileProps {
   className?: string;
@@ -149,7 +152,7 @@ export default function UserProfile({ className }: UserProfileProps) {
 
   return (
     <div
-      className={`flex items-center space-x-4 ${className} cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg p-2 transition duration-200 ease-in-out`}
+      className={`flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-3 md:space-x-4 ${className} cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg p-1.5 md:p-2 transition duration-200 ease-in-out min-w-0`}
       onClick={() => router.push("/dashboard")}
       role="button"
       tabIndex={0}
@@ -160,14 +163,14 @@ export default function UserProfile({ className }: UserProfileProps) {
         }
       }}
     >
-      <Avatar className="w-12 h-12 border-2 border-purple-600 dark:border-purple-400">
+      <Avatar className="w-12 h-12 sm:w-8 sm:h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 border-2 border-purple-600 dark:border-purple-400 flex-shrink-0">
         <AvatarImage src={displayUserData.avatar} alt={displayName} />
         <AvatarFallback>{initials}</AvatarFallback>
       </Avatar>
-      <div>
-        <p className="font-semibold">{displayName}</p>
+      <div className="flex flex-col min-w-0 flex-1 items-center sm:items-start">
+        <p className="font-semibold text-sm md:text-base truncate w-full text-center sm:text-left">{displayName}</p>
         <p
-          className="text-sm text-gray-500 dark:text-gray-400"
+          className="text-xs md:text-sm text-gray-500 dark:text-gray-400 truncate w-full text-center sm:text-left"
           title={
             facultyName && universityName
               ? `${facultyName}, ${universityName}`
@@ -182,7 +185,7 @@ export default function UserProfile({ className }: UserProfileProps) {
         </p>
         <Badge
           variant="secondary"
-          className={`mt-1 ${
+          className={`mt-0.5 md:mt-1 text-xs ${
             subscription === "Basic"
               ? "bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200"
               : subscription === "Premium"

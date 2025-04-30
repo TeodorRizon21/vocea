@@ -72,15 +72,22 @@ export default function ProductCard({
       </div>
       <CardContent className="p-4">
         <div className="space-y-2">
-          <h3 className="font-semibold text-lg line-clamp-2">{title}</h3>
-          <p className="text-sm text-muted-foreground line-clamp-1">{subject}</p>
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold text-base md:text-lg line-clamp-2">{title}</h3>
+            {studyLevel && (
+              <Badge variant="outline" className="text-xs">
+                {translations.studyLevels[studyLevel.toLowerCase() as keyof typeof translations.studyLevels]}
+              </Badge>
+            )}
+          </div>
+          <p className="text-xs md:text-sm text-muted-foreground line-clamp-1">{subject}</p>
           
           <div className="flex items-center space-x-2">
-            <Avatar className="h-6 w-6">
+            <Avatar className="h-5 w-5 md:h-6 md:w-6">
               <AvatarImage src={authorAvatar || undefined} />
               <AvatarFallback>{displayName.charAt(0)}</AvatarFallback>
             </Avatar>
-            <span className="text-sm text-muted-foreground line-clamp-1">{displayName}</span>
+            <span className="text-xs md:text-sm text-muted-foreground line-clamp-1">{displayName}</span>
           </div>
 
           <div className="space-y-1">
@@ -94,9 +101,9 @@ export default function ProductCard({
             </div>
           </div>
 
-          <div className="flex items-center justify-between text-sm">
+          <div className="flex items-center justify-between text-xs md:text-sm">
             <div className="flex items-center space-x-1">
-              <Star className="h-4 w-4 text-yellow-400" />
+              <Star className="h-3 w-3 md:h-4 md:w-4 text-yellow-400" />
               <span>{averageRating.toFixed(1)}</span>
             </div>
             <Badge variant="secondary" className="text-xs">

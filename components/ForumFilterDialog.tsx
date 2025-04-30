@@ -87,15 +87,15 @@ export default function ForumFilterDialog({
   // Forum categories with translations
   const categories = useMemo(
     () => [
-      { id: "general", name: translations.general },
-      { id: "academic", name: translations.academic },
-      { id: "events", name: translations.events },
-      { id: "housing", name: translations.housing },
-      { id: "jobs", name: translations.jobs },
-      { id: "social", name: translations.social },
-      { id: "gaming", name: translations.gaming },
+      { id: "general", name: language === "ro" ? "General" : "General" },
+      { id: "academic", name: language === "ro" ? "Academic" : "Academic" },
+      { id: "events", name: language === "ro" ? "Evenimente" : "Events" },
+      { id: "housing", name: language === "ro" ? "Cazare" : "Housing" },
+      { id: "jobs", name: language === "ro" ? "Joburi & Stagii" : "Jobs & Internships" },
+      { id: "social", name: language === "ro" ? "Social" : "Social" },
+      { id: "gaming", name: language === "ro" ? "Gaming" : "Gaming" },
     ],
-    [translations]
+    [language]
   );
 
   // Initialize state with current filters or defaults
@@ -202,7 +202,7 @@ export default function ForumFilterDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] px-4 sm:px-6">
         <DialogHeader>
           <DialogTitle>{translations.filterTopics}</DialogTitle>
         </DialogHeader>

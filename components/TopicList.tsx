@@ -82,6 +82,7 @@ export default function TopicList({
             <TopicCard
               id={topic.id}
               title={topic.title}
+              content={topic.content}
               university={topic.university}
               faculty={topic.faculty}
               universityName={topic.universityName}

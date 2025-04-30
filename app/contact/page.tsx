@@ -189,16 +189,16 @@ export default function ContactPage() {
 
   return (
     <motion.div
-      className="container max-w-4xl mx-auto py-12 px-4 sm:px-6"
+      className="container max-w-4xl mx-auto py-4 sm:py-12 px-2 sm:px-6"
       initial="hidden"
       animate="visible"
       variants={containerVariants}
     >
-      <motion.div variants={itemVariants} className="text-center mb-12">
-        <h1 className="text-4xl font-bold text-purple-600 dark:text-purple-400 mb-4">
+      <motion.div variants={itemVariants} className="text-center mb-4 sm:mb-12">
+        <h1 className="text-xl xs:text-2xl sm:text-4xl font-bold text-purple-600 dark:text-purple-400 mb-2 sm:mb-4">
           {translations.getInTouch}
         </h1>
-        <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+        <p className="text-xs xs:text-sm sm:text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
           {translations.helpText}
         </p>
       </motion.div>
@@ -207,14 +207,14 @@ export default function ContactPage() {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
+          className="mb-4 sm:mb-8"
         >
           <Alert className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
-            <Check className="h-5 w-5 text-green-600 dark:text-green-400" />
-            <AlertTitle className="text-green-800 dark:text-green-400">
+            <Check className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 dark:text-green-400" />
+            <AlertTitle className="text-sm sm:text-base text-green-800 dark:text-green-400">
               {translations.messageSent}
             </AlertTitle>
-            <AlertDescription className="text-green-700 dark:text-green-300">
+            <AlertDescription className="text-xs sm:text-sm text-green-700 dark:text-green-300">
               {translations.thankYou}
             </AlertDescription>
           </Alert>
@@ -225,14 +225,14 @@ export default function ContactPage() {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
+          className="mb-4 sm:mb-8"
         >
           <Alert className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
-            <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
-            <AlertTitle className="text-red-800 dark:text-red-400">
+            <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-red-600 dark:text-red-400" />
+            <AlertTitle className="text-sm sm:text-base text-red-800 dark:text-red-400">
               {translations.somethingWrong}
             </AlertTitle>
-            <AlertDescription className="text-red-700 dark:text-red-300">
+            <AlertDescription className="text-xs sm:text-sm text-red-700 dark:text-red-300">
               {translations.errorMessage}
             </AlertDescription>
           </Alert>
@@ -242,8 +242,8 @@ export default function ContactPage() {
       <motion.div variants={itemVariants}>
         <Card className="border-purple-100 dark:border-purple-900/50 shadow-lg overflow-hidden">
           <CardContent className="p-0">
-            <div className="grid md:grid-cols-5 h-full">
-              <div className="bg-gradient-to-br from-purple-500 to-indigo-600 p-8 text-white md:col-span-2">
+            <div className="grid lg:grid-cols-5 h-full">
+              <div className="bg-gradient-to-br from-purple-500 to-indigo-600 p-3 xs:p-4 sm:p-8 text-white lg:col-span-2">
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -251,18 +251,20 @@ export default function ContactPage() {
                   className="h-full flex flex-col justify-between"
                 >
                   <div>
-                    <h3 className="text-2xl font-bold mb-6">
+                    <h3 className="text-lg xs:text-xl sm:text-2xl font-bold mb-3 sm:mb-6">
                       {translations.contactInfo}
                     </h3>
-                    <p className="mb-8 opacity-90">{translations.formText}</p>
+                    <p className="text-xs xs:text-sm sm:text-base mb-4 sm:mb-8 opacity-90 break-words">
+                      {translations.formText}
+                    </p>
                   </div>
 
-                  <div className="space-y-4">
-                    <div className="flex items-center space-x-3">
-                      <div className="bg-white/20 p-2 rounded-full">
+                  <div className="space-y-2 sm:space-y-4">
+                    <div className="flex items-center space-x-2 sm:space-x-3">
+                      <div className="bg-white/20 p-1 xs:p-1.5 sm:p-2 rounded-full flex-shrink-0">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5"
+                          className="h-3 w-3 xs:h-4 xs:w-4 sm:h-5 sm:w-5"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
@@ -275,13 +277,13 @@ export default function ContactPage() {
                           />
                         </svg>
                       </div>
-                      <span>support@voceacampusului.com</span>
+                      <span className="text-xs xs:text-sm sm:text-base break-all">support@voceacampusului.com</span>
                     </div>
-                    <div className="flex items-center space-x-3">
-                      <div className="bg-white/20 p-2 rounded-full">
+                    <div className="flex items-center space-x-2 sm:space-x-3">
+                      <div className="bg-white/20 p-1 xs:p-1.5 sm:p-2 rounded-full flex-shrink-0">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5"
+                          className="h-3 w-3 xs:h-4 xs:w-4 sm:h-5 sm:w-5"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
@@ -300,26 +302,25 @@ export default function ContactPage() {
                           />
                         </svg>
                       </div>
-                      <span>University Campus, Building A</span>
+                      <span className="text-xs xs:text-sm sm:text-base break-words">University Campus, Building A</span>
                     </div>
                   </div>
 
-                  <div className="mt-12 pt-8 border-t border-white/20">
-                    <p className="text-sm opacity-80">
-                      &copy; {new Date().getFullYear()} Vocea Campusului. All
-                      rights reserved.
+                  <div className="mt-4 sm:mt-12 pt-3 sm:pt-8 border-t border-white/20">
+                    <p className="text-[10px] xs:text-xs sm:text-sm opacity-80">
+                      &copy; {new Date().getFullYear()} Vocea Campusului. All rights reserved.
                     </p>
                   </div>
                 </motion.div>
               </div>
 
-              <div className="p-8 md:col-span-3">
+              <div className="p-3 xs:p-4 sm:p-8 lg:col-span-3">
                 <Form {...form}>
                   <form
                     onSubmit={form.handleSubmit(onSubmit)}
-                    className="space-y-6"
+                    className="space-y-3 xs:space-y-4 sm:space-y-6"
                   >
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 xs:gap-4 sm:gap-6">
                       <FormField
                         control={form.control}
                         name="name"
@@ -329,14 +330,15 @@ export default function ContactPage() {
                           field: ControllerRenderProps<FormValues, "name">;
                         }) => (
                           <FormItem>
-                            <FormLabel>{translations.name}</FormLabel>
+                            <FormLabel className="text-xs xs:text-sm sm:text-base">{translations.name}</FormLabel>
                             <FormControl>
                               <Input
                                 placeholder={translations.yourName}
+                                className="text-xs xs:text-sm sm:text-base h-8 xs:h-9 sm:h-10"
                                 {...field}
                               />
                             </FormControl>
-                            <FormMessage />
+                            <FormMessage className="text-[10px] xs:text-xs sm:text-sm" />
                           </FormItem>
                         )}
                       />
@@ -350,15 +352,16 @@ export default function ContactPage() {
                           field: ControllerRenderProps<FormValues, "email">;
                         }) => (
                           <FormItem>
-                            <FormLabel>{translations.email}</FormLabel>
+                            <FormLabel className="text-xs xs:text-sm sm:text-base">{translations.email}</FormLabel>
                             <FormControl>
                               <Input
                                 type="email"
                                 placeholder={translations.emailPlaceholder}
+                                className="text-xs xs:text-sm sm:text-base h-8 xs:h-9 sm:h-10"
                                 {...field}
                               />
                             </FormControl>
-                            <FormMessage />
+                            <FormMessage className="text-[10px] xs:text-xs sm:text-sm" />
                           </FormItem>
                         )}
                       />
@@ -372,35 +375,35 @@ export default function ContactPage() {
                       }: {
                         field: ControllerRenderProps<FormValues, "contactType">;
                       }) => (
-                        <FormItem className="space-y-3">
-                          <FormLabel>{translations.contactType}</FormLabel>
+                        <FormItem className="space-y-1.5 xs:space-y-2 sm:space-y-3">
+                          <FormLabel className="text-xs xs:text-sm sm:text-base">{translations.contactType}</FormLabel>
                           <FormControl>
                             <RadioGroup
                               onValueChange={field.onChange}
                               defaultValue={field.value}
-                              className="flex space-x-4"
+                              className="flex flex-col sm:flex-row sm:space-x-4 space-y-1.5 sm:space-y-0"
                             >
                               <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="issue" id="issue" />
+                                <RadioGroupItem value="issue" id="issue" className="h-3 w-3 xs:h-4 xs:w-4" />
                                 <Label
                                   htmlFor="issue"
-                                  className="cursor-pointer"
+                                  className="cursor-pointer text-xs xs:text-sm sm:text-base"
                                 >
                                   {translations.reportIssue}
                                 </Label>
                               </div>
                               <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="inquiry" id="inquiry" />
+                                <RadioGroupItem value="inquiry" id="inquiry" className="h-3 w-3 xs:h-4 xs:w-4" />
                                 <Label
                                   htmlFor="inquiry"
-                                  className="cursor-pointer"
+                                  className="cursor-pointer text-xs xs:text-sm sm:text-base"
                                 >
                                   {translations.generalInquiry}
                                 </Label>
                               </div>
                             </RadioGroup>
                           </FormControl>
-                          <FormMessage />
+                          <FormMessage className="text-[10px] xs:text-xs sm:text-sm" />
                         </FormItem>
                       )}
                     />
@@ -414,14 +417,15 @@ export default function ContactPage() {
                         field: ControllerRenderProps<FormValues, "subject">;
                       }) => (
                         <FormItem>
-                          <FormLabel>{translations.subject}</FormLabel>
+                          <FormLabel className="text-xs xs:text-sm sm:text-base">{translations.subject}</FormLabel>
                           <FormControl>
                             <Input
                               placeholder={translations.subjectPlaceholder}
+                              className="text-xs xs:text-sm sm:text-base h-8 xs:h-9 sm:h-10"
                               {...field}
                             />
                           </FormControl>
-                          <FormMessage />
+                          <FormMessage className="text-[10px] xs:text-xs sm:text-sm" />
                         </FormItem>
                       )}
                     />
@@ -435,15 +439,15 @@ export default function ContactPage() {
                         field: ControllerRenderProps<FormValues, "message">;
                       }) => (
                         <FormItem>
-                          <FormLabel>{translations.message}</FormLabel>
+                          <FormLabel className="text-xs xs:text-sm sm:text-base">{translations.message}</FormLabel>
                           <FormControl>
                             <Textarea
                               placeholder={translations.messagePlaceholder}
-                              className="min-h-32"
+                              className="min-h-20 xs:min-h-24 sm:min-h-32 text-xs xs:text-sm sm:text-base"
                               {...field}
                             />
                           </FormControl>
-                          <FormMessage />
+                          <FormMessage className="text-[10px] xs:text-xs sm:text-sm" />
                         </FormItem>
                       )}
                     />
@@ -454,13 +458,13 @@ export default function ContactPage() {
                     >
                       <Button
                         type="submit"
-                        className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+                        className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-xs xs:text-sm sm:text-base h-8 xs:h-9 sm:h-10"
                         disabled={isSubmitting}
                       >
                         {isSubmitting ? (
                           <div className="flex items-center">
                             <svg
-                              className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                              className="animate-spin -ml-1 mr-1.5 h-3 w-3 xs:h-4 xs:w-4 sm:h-5 sm:w-5 text-white"
                               xmlns="http://www.w3.org/2000/svg"
                               fill="none"
                               viewBox="0 0 24 24"
@@ -483,7 +487,7 @@ export default function ContactPage() {
                           </div>
                         ) : (
                           <div className="flex items-center">
-                            <Send className="mr-2 h-4 w-4" />{" "}
+                            <Send className="mr-1.5 h-3 w-3 xs:h-4 xs:w-4 sm:h-5 sm:w-5" />{" "}
                             {translations.sendMessage}
                           </div>
                         )}

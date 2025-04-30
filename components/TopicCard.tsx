@@ -15,6 +15,7 @@ import { useLanguage } from "@/components/LanguageToggle";
 interface TopicCardProps {
   id: string;
   title: string;
+  content: string;
   university: string;
   faculty: string;
   universityName?: string;
@@ -42,6 +43,7 @@ interface TopicCardProps {
 export default function TopicCard({
   id,
   title,
+  content,
   university,
   faculty,
   universityName,
@@ -169,7 +171,7 @@ export default function TopicCard({
               <p className="text-sm text-muted-foreground">{displayFaculty}</p>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
             <ReportButton contentType="forum_topic" contentId={id} />
             <Button
               variant="ghost"

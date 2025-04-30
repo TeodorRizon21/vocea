@@ -117,10 +117,15 @@ export default function BrowsePage() {
 
   return (
     <div className="space-y-6 sm:px-4 md:px-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-4xl font-bold text-purple-600">
-          {translations.browseTitle}
-        </h1>
+      <div className="flex flex-col sm:flex-row justify-between items-center sm:items-center gap-4">
+        <div className="flex flex-col items-center sm:items-start w-full sm:w-auto order-2 sm:order-1">
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-purple-600 text-center sm:text-left">
+            {translations.browseTitle}
+          </h1>
+        </div>
+        <div className="w-full sm:w-auto order-1 sm:order-2">
+          <UserProfile />
+        </div>
       </div>
 
       {loading ? (

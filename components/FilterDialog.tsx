@@ -136,7 +136,7 @@ export default function FilterDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] px-4 sm:px-6">
         <DialogHeader>
           <DialogTitle>{translations.filterProjects}</DialogTitle>
         </DialogHeader>

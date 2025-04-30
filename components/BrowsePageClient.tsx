@@ -285,10 +285,10 @@ export default function BrowsePageClient({
           />
         </div>
         <Button
-          className="bg-purple-600 hover:bg-purple-700 text-white w-full md:w-auto"
+          className="bg-purple-600 hover:bg-purple-700 text-white w-full md:w-auto text-sm md:text-base"
           onClick={handleNewProjectClick}
         >
-          Add a new project
+          {translations.addNewProject}
         </Button>
       </div>
 
@@ -308,7 +308,7 @@ export default function BrowsePageClient({
               variant={
                 diverseSubcategory === subcategory.id ? "default" : "outline"
               }
-              className={`whitespace-nowrap ${
+              className={`whitespace-nowrap text-xs md:text-sm ${
                 diverseSubcategory === subcategory.id
                   ? "bg-purple-600 hover:bg-purple-700"
                   : ""
@@ -336,7 +336,7 @@ export default function BrowsePageClient({
 
       <div className="mt-6">
         {filteredProjects.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
             {filteredProjects.map((project) => (
               <a
                 key={project.id}
@@ -367,8 +367,8 @@ export default function BrowsePageClient({
           </div>
         ) : (
           <div className="text-center py-10">
-            <p className="text-gray-500">
-              No projects found matching your criteria.
+            <p className="text-gray-500 text-sm md:text-base">
+              {translations.noResults}
             </p>
           </div>
         )}

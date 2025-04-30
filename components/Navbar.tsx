@@ -32,7 +32,6 @@ import {
 import { Card } from "@/components/ui/card";
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import UserProfile from "@/components/UserProfile";
 
 interface NavItemProps {
   href: string;
@@ -93,11 +92,6 @@ const Navbar = () => {
         {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
 
-      {/* Desktop User Profile */}
-      <div className="hidden md:block absolute top-4 right-16">
-        <UserProfile />
-      </div>
-
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden" onClick={() => setIsMobileMenuOpen(false)} />
@@ -117,11 +111,6 @@ const Navbar = () => {
               height={160}
               className="object-contain"
             />
-          </div>
-
-          {/* Mobile User Profile */}
-          <div className="md:hidden">
-            <UserProfile />
           </div>
 
           {/* Menu Section */}

@@ -51,8 +51,51 @@ export default function NewForumTopic() {
 
   const { language, forceRefresh } = useLanguage();
 
+  // Define the type for translations
+  type Translations = {
+    createNewTopic: string;
+    title: string;
+    enterTopicTitle: string;
+    content: string;
+    minimumChars: string;
+    enterTopicContent: string;
+    charactersMinimum: string;
+    university: string;
+    selectUniversity: string;
+    faculty: string;
+    selectFaculty: string;
+    selectUniversityFirst: string;
+    category: string;
+    selectCategory: string;
+    allFieldsRequired: string;
+    contentTooShort: string;
+    creating: string;
+    create: string;
+    cancel: string;
+    searchUniversity: string;
+    noUniversityFound: string;
+    mustBeLoggedIn: string;
+    topicCreated: string;
+    topicCreationFailed: string;
+  };
+
+  // Helper function to get translated message
+  const getTranslatedMessage = (message: string | null): string => {
+    if (!message) return "";
+    switch (message) {
+      case "You must be logged in to create a topic":
+        return translations.mustBeLoggedIn;
+      case "Topic created successfully":
+        return translations.topicCreated;
+      case "Failed to create topic":
+        return translations.topicCreationFailed;
+      default:
+        return message;
+    }
+  };
+
   // Translations for the page
-  const translations = useMemo(() => {
+  const translations = useMemo<Translations>(() => {
     return {
       createNewTopic: language === "ro" ? "Crează subiect nou" : "Create New Topic",
       title: language === "ro" ? "Titlu" : "Title",
@@ -75,6 +118,9 @@ export default function NewForumTopic() {
       cancel: language === "ro" ? "Anulează" : "Cancel",
       searchUniversity: language === "ro" ? "Caută universitate..." : "Search university...",
       noUniversityFound: language === "ro" ? "Nu s-a găsit nicio universitate" : "No university found",
+      mustBeLoggedIn: language === "ro" ? "Trebuie să fii autentificat pentru a crea un subiect" : "You must be logged in to create a topic",
+      topicCreated: language === "ro" ? "Subiectul a fost creat cu succes" : "Topic created successfully",
+      topicCreationFailed: language === "ro" ? "Nu s-a putut crea subiectul" : "Failed to create topic"
     };
   }, [language, forceRefresh]);
 
@@ -135,12 +181,12 @@ export default function NewForumTopic() {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           {error && (
             <Alert variant="destructive">
-              <AlertDescription>{translations[error] || error}</AlertDescription>
+              <AlertDescription>{getTranslatedMessage(error)}</AlertDescription>
             </Alert>
           )}
           {success && (
             <Alert>
-              <AlertDescription>{translations[success] || success}</AlertDescription>
+              <AlertDescription>{getTranslatedMessage(success)}</AlertDescription>
             </Alert>
           )}
 
@@ -194,7 +240,7 @@ export default function NewForumTopic() {
                   <SelectContent>
                     {FORUM_CATEGORIES.map((category) => (
                       <SelectItem key={category.id} value={category.id}>
-                        {category.label}
+                        {language === "ro" ? category.labelRo : category.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
