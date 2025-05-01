@@ -110,10 +110,15 @@ export default function NewsFilterDialog({
   };
 
   const handleCityChange = (value: string) => {
+    console.log("City selected:", value);
     setSelectedCity(value);
   };
 
   const handleApply = () => {
+    console.log("Applying filters:", {
+      university: selectedUniversity,
+      city: selectedCity,
+    });
     onApplyFilters({
       university: selectedUniversity,
       city: selectedCity,
