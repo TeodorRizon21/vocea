@@ -11,7 +11,7 @@ import { motion } from "framer-motion";
 import { useLanguage } from "@/components/LanguageToggle";
 
 export default function SubscriptionsPage() {
-  const { isLoaded } = useUser();
+  const { isLoaded, isSignedIn } = useUser();
   const router = useRouter();
   const { language, forceRefresh } = useLanguage();
   const [selectedSubscription, setSelectedSubscription] = useState("Basic");
@@ -131,11 +131,19 @@ export default function SubscriptionsPage() {
   ];
 
   const handleSubscriptionChange = (newSubscription: string) => {
+    if (!isSignedIn) {
+      router.push("/sign-in");
+      return;
+    }
     setPendingSubscription(newSubscription);
     setIsDialogOpen(true);
   };
 
   const confirmSubscriptionChange = async () => {
+    if (!isSignedIn) {
+      router.push("/sign-in");
+      return;
+    }
     setIsDialogOpen(false);
     setSelectedSubscription(pendingSubscription);
 

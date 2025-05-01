@@ -44,7 +44,7 @@ const NavItem = ({ href, icon, label, isActive }: NavItemProps) => (
   <li>
     <Link
       href={href}
-      className={`flex items-center space-x-3 px-4 py-2 rounded-lg transition-colors duration-200
+      className={`flex items-center space-x-3 px-4 py-2 rounded-lg transition-colors duration-200 font-medium text-sm
         ${
           isActive
             ? "bg-indigo-100 text-indigo-600 dark:bg-indigo-900 dark:text-indigo-300"
@@ -154,7 +154,7 @@ const Navbar = () => {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start px-4 py-2 h-10 font-normal"
+                  className="w-full justify-start px-4 py-2 h-10 font-medium text-sm"
                 >
                   <ShieldAlert className="mr-2 h-4 w-4" />
                   {t.adminPanel}
@@ -164,7 +164,7 @@ const Navbar = () => {
                 <Link href="/admin/projects">
                   <DropdownMenuItem className="cursor-pointer">
                     <Card className="w-full p-4">
-                      <h3 className="font-semibold">{t.projectsManagement}</h3>
+                      <h3 className="font-medium text-sm">{t.projectsManagement}</h3>
                       <p className="text-sm text-muted-foreground">
                         {language === "ro"
                           ? "Gestionează toate proiectele"
@@ -176,7 +176,7 @@ const Navbar = () => {
                 <Link href="/admin/reports">
                   <DropdownMenuItem className="cursor-pointer">
                     <Card className="w-full p-4">
-                      <h3 className="font-semibold">{t.reports}</h3>
+                      <h3 className="font-medium text-sm">{t.reports}</h3>
                       <p className="text-sm text-muted-foreground">
                         {language === "ro"
                           ? "Vizualizează conținutul raportat"
@@ -195,7 +195,7 @@ const Navbar = () => {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start px-4 py-2 h-10 font-normal"
+                  className="w-full justify-start px-4 py-2 h-10 font-medium text-sm"
                 >
                   <Shield className="mr-2 h-4 w-4" />
                   {t.moderatorPanel}
@@ -205,7 +205,7 @@ const Navbar = () => {
                 <Link href="/moderator/news">
                   <DropdownMenuItem className="cursor-pointer">
                     <Card className="w-full p-4">
-                      <h3 className="font-semibold">{t.newsManagement}</h3>
+                      <h3 className="font-medium text-sm">{t.newsManagement}</h3>
                       <p className="text-sm text-muted-foreground">
                         {language === "ro"
                           ? "Gestionează ultimele știri"
@@ -220,7 +220,7 @@ const Navbar = () => {
 
           <Button
             variant="ghost"
-            className="w-full justify-start px-4 py-2 h-10 font-normal"
+            className="w-full justify-start px-4 py-2 h-10 font-medium text-sm"
             asChild
           >
             <Link href="/contact">
@@ -230,7 +230,7 @@ const Navbar = () => {
           </Button>
           <Button
             variant="ghost"
-            className="w-full justify-start px-4 py-2 h-10 font-normal"
+            className="w-full justify-start px-4 py-2 h-10 font-medium text-sm"
             asChild
           >
             <Link href="/settings">
@@ -243,7 +243,7 @@ const Navbar = () => {
             (isSignedIn ? (
               <Button
                 variant="ghost"
-                className="w-full justify-start px-4 py-2 h-10 font-normal text-red-600 hover:text-red-700 hover:bg-red-100"
+                className="w-full justify-start px-4 py-2 h-10 font-medium text-sm text-red-600 hover:text-red-700 hover:bg-red-100"
                 onClick={handleSignOut}
               >
                 <LogOut className="mr-2 h-4 w-4" />
@@ -253,7 +253,7 @@ const Navbar = () => {
               <>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start px-4 py-2 h-10 font-normal"
+                  className="w-full justify-start px-4 py-2 h-10 font-medium text-sm"
                   onClick={() => (window.location.href = "/sign-in")}
                 >
                   <LogIn className="mr-2 h-4 w-4" />
@@ -261,7 +261,7 @@ const Navbar = () => {
                 </Button>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start px-4 py-2 h-10 font-normal"
+                  className="w-full justify-start px-4 py-2 h-10 font-medium text-sm"
                   onClick={() => (window.location.href = "/sign-up")}
                 >
                   <UserPlus className="mr-2 h-4 w-4" />
