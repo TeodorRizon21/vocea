@@ -187,28 +187,28 @@ export default function SubscriptionsPage() {
   }
 
   return (
-    <div className="pb-20">
-      <div className="flex justify-between items-center mb-12">
-        <h1 className="text-4xl font-bold text-purple-600">
+    <div className="pb-20 px-4 sm:px-6 lg:px-8">
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-8 sm:mb-12 gap-4">
+        <h1 className="text-3xl sm:text-4xl font-bold text-purple-600">
           {content.availablePlans}
         </h1>
         <UserProfile />
       </div>
 
-      <div className="text-center max-w-3xl mx-auto mb-16">
-        <h2 className="text-3xl font-bold mb-4">
+      <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-16">
+        <h2 className="text-2xl sm:text-3xl font-bold mb-4">
           {content.choosePlan}
         </h2>
-        <p className="text-gray-600 dark:text-gray-400 text-lg">
+        <p className="text-gray-600 dark:text-gray-400 text-base sm:text-lg">
           {content.description}
         </p>
       </div>
 
-      <div className="flex flex-col md:flex-row justify-center items-center md:items-stretch gap-8 md:gap-1 max-w-6xl mx-auto px-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 max-w-7xl mx-auto">
         {subscriptions.map((subscription, index) => (
           <motion.div
             key={subscription.name}
-            className="w-full md:w-1/3 max-w-md"
+            className="w-full max-w-md mx-auto"
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{
@@ -233,7 +233,7 @@ export default function SubscriptionsPage() {
               } border ${
                 subscription.borderColor
               } rounded-3xl shadow-xl overflow-hidden h-full flex flex-col relative ${
-                subscription.popular ? "md:scale-110 z-10" : ""
+                subscription.popular ? "lg:scale-105 z-10" : ""
               }`}
               style={{
                 transform: `rotateY(${
@@ -245,32 +245,32 @@ export default function SubscriptionsPage() {
               }}
             >
               {subscription.popular && (
-                <div className="absolute top-0 right-0 bg-purple-500 text-white px-4 py-1 rounded-bl-lg text-sm font-bold">
+                <div className="absolute top-0 right-0 bg-purple-500 text-white px-3 sm:px-4 py-1 rounded-bl-lg text-xs sm:text-sm font-bold">
                   {content.popular}
                 </div>
               )}
               {subscription.tag && (
-                <div className="absolute top-0 right-0 bg-amber-500 text-white px-4 py-1 rounded-bl-lg text-sm font-bold">
+                <div className="absolute top-0 right-0 bg-amber-500 text-white px-3 sm:px-4 py-1 rounded-bl-lg text-xs sm:text-sm font-bold">
                   {subscription.tag}
                 </div>
               )}
 
-              <div className="px-6 py-8 border-b border-gray-200 dark:border-gray-700">
-                <div className="text-lg font-medium mb-2">
+              <div className="px-4 sm:px-6 py-6 sm:py-8 border-b border-gray-200 dark:border-gray-700">
+                <div className="text-base sm:text-lg font-medium mb-2">
                   {subscription.name}
                 </div>
                 <div
-                  className={`text-4xl font-bold mb-1 ${subscription.accentColor}`}
+                  className={`text-3xl sm:text-4xl font-bold mb-1 ${subscription.accentColor}`}
                 >
                   {subscription.price}
                 </div>
-                <div className="text-sm text-gray-500 dark:text-gray-400">
+                <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                   {subscription.name === "Basic" ? content.noCard : content.billedMonthly}
                 </div>
               </div>
 
-              <div className="flex-grow px-6 py-6">
-                <ul className="space-y-4">
+              <div className="flex-grow px-4 sm:px-6 py-4 sm:py-6">
+                <ul className="space-y-3 sm:space-y-4">
                   {subscription.features.map((feature, idx) => (
                     <li key={idx} className="flex items-start">
                       <div
@@ -283,9 +283,9 @@ export default function SubscriptionsPage() {
                         <Check className="h-3 w-3" />
                       </div>
                       <span
-                        className={
+                        className={`text-sm sm:text-base ${
                           feature.available ? "" : "text-gray-400 line-through"
-                        }
+                        }`}
                       >
                         {feature.text}
                       </span>
@@ -294,10 +294,10 @@ export default function SubscriptionsPage() {
                 </ul>
               </div>
 
-              <div className="px-6 pb-8 pt-2">
+              <div className="px-4 sm:px-6 pb-6 sm:pb-8 pt-2">
                 <button
                   onClick={() => handleSubscriptionChange(subscription.name)}
-                  className={`w-full py-4 rounded-xl font-semibold transition-all duration-200 ${
+                  className={`w-full py-3 sm:py-4 rounded-xl font-semibold transition-all duration-200 ${
                     selectedSubscription === subscription.name
                       ? "bg-green-600 hover:bg-green-700 text-white"
                       : subscription.buttonColor
@@ -314,10 +314,10 @@ export default function SubscriptionsPage() {
         ))}
       </div>
 
-      <div className="flex justify-center mt-16">
+      <div className="flex justify-center mt-8 sm:mt-16">
         <button
           onClick={() => router.push("/dashboard")}
-          className="bg-gray-200 hover:bg-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 font-medium py-3 px-8 rounded-xl transition-all duration-200"
+          className="bg-gray-200 hover:bg-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 font-medium py-2 sm:py-3 px-6 sm:px-8 rounded-xl transition-all duration-200"
         >
           {content.toDashboard}
         </button>

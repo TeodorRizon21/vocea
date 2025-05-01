@@ -204,7 +204,7 @@ export default function AboutUs() {
         initial="hidden"
         animate={controls}
         variants={containerVariants}
-        className="grid grid-cols-1 md:grid-cols-2 gap-8"
+        className="grid grid-cols-1 lg:grid-cols-2 gap-8"
       >
         {content.features.map((feature, index) => (
           <motion.div
@@ -212,7 +212,7 @@ export default function AboutUs() {
             variants={itemVariants}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className="h-full overflow-hidden"
+            className="h-full overflow-hidden max-w-2xl mx-auto w-full"
           >
             <Card className="group h-full backdrop-blur-sm bg-white/50 dark:bg-gray-800/50 hover:shadow-lg transition-all duration-300 border-2 hover:border-purple-500">
               <CardContent className="p-4 sm:p-6">

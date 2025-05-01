@@ -63,16 +63,41 @@ export default function NewsCarousel({ news }: NewsCarouselProps) {
     }
 
     if (filters.city && filters.city !== "all") {
-      filtered = filtered.filter((item) => item.city === filters.city);
+      console.log("Filtering by city:", filters.city);
+      console.log("Available cities in news:", filtered.map(item => item.city));
+      
+      // Map of city IDs to their Romanian names
+      const cityMap = {
+        bucharest: "București",
+        cluj: "Cluj-Napoca",
+        iasi: "Iași",
+        timisoara: "Timișoara",
+        constanta: "Constanța",
+        brasov: "Brașov",
+        craiova: "Craiova",
+        galati: "Galați",
+        oradea: "Oradea"
+      };
+
+      const romanianCityName = cityMap[filters.city as keyof typeof cityMap];
+      
+      filtered = filtered.filter((item) => {
+        const itemCity = item.city?.trim() || "";
+        console.log("Comparing:", itemCity, "with", romanianCityName);
+        return itemCity === romanianCityName;
+      });
     }
 
+    console.log("Filtered news count:", filtered.length);
     setFilteredNews(filtered);
 
     // Reset current index if we filtered out the current news item
     if (filtered.length > 0 && currentIndex >= filtered.length) {
       setCurrentIndex(0);
+    } else if (filtered.length === 0) {
+      setCurrentIndex(0);
     }
-  }, [filters, allNews]);
+  }, [filters, allNews, currentIndex]);
 
   const handlePrevious = () => {
     setCurrentIndex((prevIndex) =>
@@ -91,6 +116,7 @@ export default function NewsCarousel({ news }: NewsCarouselProps) {
     city: string;
   }) => {
     setFilters(newFilters);
+    setCurrentIndex(0); // Reset to first item when filters change
   };
 
   // Count active filters
@@ -100,13 +126,14 @@ export default function NewsCarousel({ news }: NewsCarouselProps) {
 
   if (filteredNews.length === 0) {
     return (
-      <div className="bg-gray-100 rounded-lg p-8 text-center">
-        <p className="text-gray-500">{t.noNews}</p>
+      <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-8 text-center">
+        <p className="text-gray-500 dark:text-gray-400">{t.noNews}</p>
         <Button
           variant="outline"
           className="mt-4"
           onClick={() => {
             setFilters({ university: "", city: "" });
+            setCurrentIndex(0);
           }}
         >
           {t.clearFilters}
