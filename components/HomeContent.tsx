@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useEffect, useState } from "react";
 import UserProfile from "@/components/UserProfile";
 import NewsCarousel from "@/components/NewsCarousel";
 import AboutUs from "@/components/AboutUs";
 import { useLanguage } from "@/components/LanguageToggle";
+import Image from "next/image";
 
 // Define the News type
 interface News {
@@ -28,12 +29,12 @@ export default function HomeContent({ news }: HomeContentProps) {
   // Texte traduse
   const translations = {
     ro: {
-      title: "Vocea campusului",
+      title: "Vocea Campusului – Locul ideilor studențești",
       latestNews: "Ultimele știri",
       aboutUs: "Despre noi",
     },
     en: {
-      title: "Campus Voice",
+      title: "Vocea Campusului – Where student's ideas come to life",
       latestNews: "Latest News",
       aboutUs: "About Us",
     },
@@ -44,10 +45,30 @@ export default function HomeContent({ news }: HomeContentProps) {
     return translations[language as keyof typeof translations];
   }, [language, forceRefresh]);
 
+  // Responsive: show logo instead of title when navbar is hidden (mobile)
+  const [isDesktop, setIsDesktop] = useState(true);
+  useEffect(() => {
+    const checkDesktop = () => setIsDesktop(window.innerWidth >= 768);
+    checkDesktop();
+    window.addEventListener("resize", checkDesktop);
+    return () => window.removeEventListener("resize", checkDesktop);
+  }, []);
+
   return (
     <div className="space-y-12">
-      <div className="flex justify-between items-center">
-        <h1 className="text-4xl font-bold text-purple-600">{t.title}</h1>
+      <div className="flex justify-center items-center">
+        {isDesktop ? (
+          <h1 className="font-bold text-purple-600 text-2xl sm:text-3xl md:text-4xl break-words">{t.title}</h1>
+        ) : (
+          <Image
+            src="/logo2.png"
+            alt="VOC Logo"
+            width={150}
+            height={150}
+            className="object-contain"
+            priority
+          />
+        )}
       </div>
 
       <section>

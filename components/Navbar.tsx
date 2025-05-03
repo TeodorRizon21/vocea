@@ -38,9 +38,10 @@ interface NavItemProps {
   icon: React.ReactNode;
   label: string;
   isActive: boolean;
+  onClick?: () => void;
 }
 
-const NavItem = ({ href, icon, label, isActive }: NavItemProps) => (
+const NavItem = ({ href, icon, label, isActive, onClick }: NavItemProps) => (
   <li>
     <Link
       href={href}
@@ -50,6 +51,7 @@ const NavItem = ({ href, icon, label, isActive }: NavItemProps) => (
             ? "bg-indigo-100 text-indigo-600 dark:bg-indigo-900 dark:text-indigo-300"
             : "text-gray-600 dark:text-gray-300 hover:bg-indigo-100 hover:text-indigo-600 dark:hover:bg-indigo-900 dark:hover:text-indigo-300"
         }`}
+      onClick={onClick}
     >
       {icon}
       <span>{label}</span>
@@ -105,7 +107,7 @@ const Navbar = () => {
           {/* Logo */}
           <div className="flex justify-center bg-white dark:bg-white w-24 h-24 rounded-full items-center mx-auto shadow-md p-2">
             <Image
-              src="/logo.png"
+              src="/logo2.png"
               alt="VOC Logo"
               width={160}
               height={160}
@@ -120,24 +122,28 @@ const Navbar = () => {
               icon={<Home size={20} />}
               label={t.home}
               isActive={pathname === "/"}
+              onClick={() => setIsMobileMenuOpen(false)}
             />
             <NavItem
               href="/browse"
               icon={<Search size={20} />}
               label={t.browse}
               isActive={pathname === "/browse"}
+              onClick={() => setIsMobileMenuOpen(false)}
             />
             <NavItem
               href="/forum"
               icon={<MessageSquare size={20} />}
               label={t.forum}
               isActive={pathname === "/forum"}
+              onClick={() => setIsMobileMenuOpen(false)}
             />
             <NavItem
               href="/dashboard"
               icon={<LayoutDashboard size={20} />}
               label={t.dashboard}
               isActive={pathname === "/dashboard"}
+              onClick={() => setIsMobileMenuOpen(false)}
             />
           </ul>
         </div>

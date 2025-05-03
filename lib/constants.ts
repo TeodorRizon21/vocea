@@ -26,6 +26,7 @@ export const DIVERSE_CATEGORIES = [
   { id: "electronice", label: "Electronice" },
   { id: "cosmetice", label: "Cosmetice" },
   { id: "electrocasnice", label: "Electrocasnice" },
+  { id: "manuale-carti", label: "Manuale / Carti" },
   { id: "altele", label: "Altele" },
 ];
 

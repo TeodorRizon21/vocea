@@ -199,6 +199,7 @@ export default function NewProjectPage() {
         "electronics": language === "ro" ? "Electronice" : "Electronics",
         "cosmetics": language === "ro" ? "Cosmetice" : "Cosmetics",
         "appliances": language === "ro" ? "Electrocasnice" : "Appliances",
+        "manuale-carti": language === "ro" ? "Manuale / Carti" : "Manuals / Books",
         "other": language === "ro" ? "Altele" : "Other",
       },
     };
