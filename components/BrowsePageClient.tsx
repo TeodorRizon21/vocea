@@ -66,6 +66,7 @@ const diverseSubcategories = [
   { id: "electronice", label: "Electronice" },
   { id: "cosmetice", label: "Cosmetice" },
   { id: "electrocasnice", label: "Electrocasnice" },
+  { id: "manuale-carti", label: "Manuale / Carti" },
   { id: "altele", label: "Altele" },
 ];
 
@@ -89,6 +90,7 @@ export default function BrowsePageClient({
       jobOffers: language === "ro" ? "Oferte muncă" : "Job offers",
       objects: language === "ro" ? "Obiecte" : "Objects",
       services: language === "ro" ? "Servicii" : "Services",
+      manuals: language === "ro" ? "Manuale / Carti" : "Manuals / Books",
       noResults:
         language === "ro"
           ? "Nu au fost găsite proiecte care să corespundă criteriilor tale de căutare. Încearcă să schimbi criteriile de căutare sau filtrare."
@@ -105,10 +107,16 @@ export default function BrowsePageClient({
     () => [
       { id: "all", label: translations.all },
       { id: "oferte-munca", label: translations.jobOffers },
-      { id: "obiecte", label: translations.objects },
       { id: "servicii", label: translations.services },
+      { id: "autoturisme", label: language === "ro" ? "Autoturisme" : "Cars" },
+      { id: "sport", label: language === "ro" ? "Sport" : "Sport" },
+      { id: "electronice", label: language === "ro" ? "Electronice" : "Electronics" },
+      { id: "cosmetice", label: language === "ro" ? "Cosmetice" : "Cosmetics" },
+      { id: "electrocasnice", label: language === "ro" ? "Electrocasnice" : "Home Appliances" },
+      { id: "manuale-carti", label: translations.manuals },
+      { id: "altele", label: language === "ro" ? "Altele" : "Other" },
     ],
-    [translations]
+    [translations, language]
   );
 
   // State
@@ -302,7 +310,7 @@ export default function BrowsePageClient({
       {/* Show subcategories only for diverse tab */}
       {activeTab === "diverse" && (
         <div className="flex flex-wrap gap-2 my-4 overflow-x-auto pb-2">
-          {diverseSubcategories.map((subcategory) => (
+          {translatedSubcategories.map((subcategory) => (
             <Button
               key={subcategory.id}
               variant={

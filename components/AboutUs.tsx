@@ -198,6 +198,14 @@ export default function AboutUs() {
     router.push("/subscriptions");
   };
 
+  // Feature click handlers
+  const featureRoutes = [
+    "/dashboard", // Comunitate Studenteasca
+    "/browse",    // Partajare Proiecte
+    "/forum",     // Discutii deschise
+    "#news"       // Stiri din campus
+  ];
+
   return (
     <div className="space-y-16 px-4" ref={ref}>
       <motion.div
@@ -212,7 +220,14 @@ export default function AboutUs() {
             variants={itemVariants}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className="h-full overflow-hidden max-w-2xl mx-auto w-full"
+            className="h-full overflow-hidden max-w-2xl mx-auto w-full cursor-pointer"
+            onClick={() => {
+              if (index === 3) {
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              } else {
+                router.push(featureRoutes[index]);
+              }
+            }}
           >
             <Card className="group h-full backdrop-blur-sm bg-white/50 dark:bg-gray-800/50 hover:shadow-lg transition-all duration-300 border-2 hover:border-purple-500">
               <CardContent className="p-4 sm:p-6">
