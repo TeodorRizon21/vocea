@@ -60,14 +60,18 @@ export default function HomeContent({ news }: HomeContentProps) {
         {isDesktop ? (
           <h1 className="font-bold text-purple-600 text-2xl sm:text-3xl md:text-4xl break-words">{t.title}</h1>
         ) : (
-          <Image
-            src="/logo2.png"
-            alt="VOC Logo"
-            width={150}
-            height={150}
-            className="object-contain"
-            priority
-          />
+          <div className="relative w-[150px] h-[150px] bg-gray-50 rounded-full">
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Image
+                src="/logo2.png"
+                alt="VOC Logo"
+                width={150}
+                height={150}
+                className="object-contain"
+                priority
+              />
+            </div>
+          </div>
         )}
       </div>
 
