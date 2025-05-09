@@ -20,7 +20,25 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid subscription plan" }, { status: 400 })
     }
 
-    // Update user's plan type - handling the typing issue
+    // For paid plans, check if there's a pending payment
+    if (subscription !== "Basic") {
+      const pendingOrder = await prisma.order.findFirst({
+        where: {
+          userId: userId,
+          status: "pending",
+          subscriptionType: subscription,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+
+      if (!pendingOrder) {
+        return NextResponse.json({ error: "No pending payment found" }, { status: 400 });
+      }
+    }
+
+    // Update user's plan type
     await prisma.user.update({
       where: {
         clerkId: userId,
