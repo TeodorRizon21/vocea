@@ -1,105 +1,71 @@
 import { NextResponse } from 'next/server';
-import { getAuth } from '@clerk/nextjs/server';
+import { getRequest } from '@/mobilpay-sdk/order';
+import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
-import type { NextRequest } from 'next/server';
-import { generateNetopiaPaymentFields } from '@/lib/netopia';
 
-export async function POST(req: NextRequest) {
+// Log environment variables for debugging
+console.log('Payment API Environment Variables:', {
+  hasSignature: !!process.env.NETOPIA_SIGNATURE,
+  hasReturnUrl: !!process.env.NETOPIA_RETURN_URL,
+  hasConfirmUrl: !!process.env.NETOPIA_CONFIRM_URL,
+  hasPublicKey: !!process.env.NETOPIA_PUBLIC_KEY,
+  hasPrivateKey: !!process.env.NETOPIA_PRIVATE_KEY
+});
+
+export async function POST(req: Request) {
   try {
-    const { userId } = getAuth(req);
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const session = await auth();
+    if (!session?.userId) {
+      return new NextResponse("Unauthorized", { status: 401 });
     }
 
     const body = await req.json();
     const { subscriptionType } = body;
 
-    // Get user data
-    const user = await prisma.user.findUnique({
-      where: { clerkId: userId },
-    });
-
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    if (!subscriptionType) {
+      return new NextResponse("Subscription type is required", { status: 400 });
     }
 
-    // Define subscription prices
-    const prices = {
-      Basic: 0,
-      Premium: 8,
-      Gold: 28,
-    };
+    // Calculate amount based on subscription type
+    const amount = subscriptionType === 'Premium' ? 8 : 28;
 
     // Generate a unique order ID
-    const orderId = `ORDER-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const orderId = `SUB_${Date.now()}`;
 
-    // Prepare payment data for Netopia
-    const { envKey, data } = generateNetopiaPaymentFields({
-      orderId,
-      amount: prices[subscriptionType as keyof typeof prices],
-      currency: 'RON',
-      description: `${subscriptionType} Subscription Payment`,
-      billing: {
-        firstName: user.firstName || 'Nume',
-        lastName: user.lastName || 'Prenume',
-        email: user.email || 'test@mobilpay.ro',
-        address: 'strada', // required by Netopia, use a placeholder if not available
-        mobilePhone: '0700000000', // required, use a placeholder if not available
-      },
-      returnUrl: 'https://voceacampusului.ro/payment/return',
-      confirmUrl: 'https://voceacampusului.ro/api/payment/webhook',
-    });
+    // Get encrypted payment request with amount
+    const paymentRequest = getRequest(orderId, amount);
 
-    // Store the order in the database
-    await prisma.$transaction(async (tx) => {
-      await tx.order.create({
-        data: {
-          orderId,
-          userId: user.id,
-          amount: prices[subscriptionType as keyof typeof prices],
-          currency: 'RON',
-          status: 'PENDING',
-          subscriptionType,
-        },
-      });
-
-      // Create or update subscription record
-      const existingSubscription = await tx.subscription.findFirst({
-        where: {
-          userId: userId,
-        },
-      });
-
-      if (existingSubscription) {
-        await tx.subscription.update({
-          where: {
-            id: existingSubscription.id,
-          },
-          data: {
-            plan: subscriptionType,
-            status: 'pending',
-            startDate: new Date(),
-          },
-        });
-      } else {
-        await tx.subscription.create({
-          data: {
-            userId: userId,
-            plan: subscriptionType,
-            status: 'pending',
-            startDate: new Date(),
-          },
-        });
+    // First get the user to get their MongoDB ID
+    const user = await prisma.user.findUnique({
+      where: {
+        clerkId: session.userId
       }
     });
 
-    // Return the form fields to the frontend
-    return NextResponse.json({ envKey, data });
+    if (!user) {
+      return new NextResponse("User not found", { status: 404 });
+    }
+
+    // Store the order in the database using the MongoDB ID
+    await prisma.order.create({
+      data: {
+        orderId,
+        userId: user.id, // Use the MongoDB ID instead of clerkId
+        amount,
+        currency: 'RON',
+        status: 'PENDING',
+        subscriptionType
+      }
+    });
+
+    return NextResponse.json({
+      success: true,
+      envKey: paymentRequest.envKey,
+      data: paymentRequest.envData
+    });
+
   } catch (error) {
-    console.error('Payment initialization error:', error);
-    return NextResponse.json(
-      { error: 'Failed to initialize payment' },
-      { status: 500 }
-    );
+    console.error('[PAYMENT_ERROR]', error);
+    return new NextResponse("Internal Error", { status: 500 });
   }
 } 

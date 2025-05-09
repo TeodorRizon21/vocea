@@ -9,7 +9,6 @@ import { Badge } from "@/components/ui/badge";
 import { Check } from "lucide-react";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/components/LanguageToggle";
-import NetopiaPayment from "@/components/NetopiaPayment";
 import NetopiaPaymentForm from "@/components/NetopiaPaymentForm";
 
 export default function SubscriptionsPage() {
