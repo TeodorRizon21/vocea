@@ -28,6 +28,7 @@ model User {
   topics      ForumTopic[] // Added relation to forum topics
   comments    ForumComment[] // Added relation to forum comments
   reports     Report[]       @relation("UserReports") // Added relation to reports
+  orders      Order[]
 }
 
 model Project {
@@ -169,4 +170,17 @@ model Report {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Order {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  orderId         String   @unique
+  userId          String   @db.ObjectId
+  amount          Float
+  currency        String
+  status          String   // PENDING, COMPLETED, FAILED
+  subscriptionType String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  user            User     @relation(fields: [userId], references: [id])
 }
