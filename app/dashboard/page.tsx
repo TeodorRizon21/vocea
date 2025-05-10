@@ -25,7 +25,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Check, Crown, Shield, Star } from "lucide-react";
 import { useLanguage } from "@/components/LanguageToggle";
-import { PaymentHistory } from '@/components/PaymentHistory';
 
 interface UserData extends User {
   firstName?: string;
@@ -384,9 +383,6 @@ export default function DashboardPage() {
             </Card>
           </div>
         </div>
-      </div>
-      <div className="grid gap-4 md:grid-cols-2">
-        <PaymentHistory />
       </div>
       <ConfirmationDialog
         isOpen={isDialogOpen}

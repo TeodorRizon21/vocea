@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { decodeResponse } from '@/mobilpay-sdk/order';
+import { sendSubscriptionConfirmationEmail, sendPaymentFailedEmail } from '@/lib/email';
 
 export async function GET(req: Request) {
   try {
@@ -160,6 +161,34 @@ export async function POST(req: Request) {
         }
       });
 
+      // Send confirmation email
+      try {
+        // Fetch user email from our DB
+        const user = await prisma.user.findUnique({
+          where: { id: orderRecord.userId },
+          select: { email: true, firstName: true, lastName: true }
+        });
+        
+        if (user && user.email) {
+          // Send subscription confirmation email
+          const emailSent = await sendSubscriptionConfirmationEmail(
+            user.email,
+            {
+              name: user.firstName || 'User',
+              planName: orderRecord.plan.name,
+              endDate,
+              isRecurring: true, // Assuming all subscriptions are recurring
+              language: 'en' // Default to English
+            }
+          );
+          
+          console.log('Subscription confirmation email sent from return handler:', emailSent);
+        }
+      } catch (err) {
+        console.error('Error sending confirmation email from return handler:', err);
+        // Continue with the process even if email sending fails
+      }
+
       return NextResponse.redirect(new URL('/dashboard?payment=success', req.url));
     } else {
       // Create notification for failed payment
@@ -171,6 +200,26 @@ export async function POST(req: Request) {
           read: false
         }
       });
+
+      // Send failed payment email
+      try {
+        const user = await prisma.user.findUnique({
+          where: { id: orderRecord.userId },
+          select: { email: true }
+        });
+        
+        if (user && user.email) {
+          const emailSent = await sendPaymentFailedEmail(
+            user.email,
+            orderRecord.plan.name,
+            'en' // Default to English
+          );
+          
+          console.log('Payment failed email sent from return handler:', emailSent);
+        }
+      } catch (err) {
+        console.error('Error sending payment failed email:', err);
+      }
 
       return NextResponse.redirect(new URL('/subscriptions?error=payment_failed', req.url));
     }

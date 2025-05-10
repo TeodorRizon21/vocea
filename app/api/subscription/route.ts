@@ -12,6 +12,17 @@ export async function POST(req: NextRequest) {
       console.error("Unauthorized: No userId found in POST /api/subscription")
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
+    
+    // Get the user's MongoDB ID
+    const user = await prisma.user.findUnique({
+      where: {
+        clerkId: userId
+      }
+    });
+    
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 })
+    }
 
     const { subscription } = await req.json()
     console.log("Subscription data received:", subscription)
@@ -24,7 +35,7 @@ export async function POST(req: NextRequest) {
     if (subscription !== "Basic") {
       const pendingOrder = await prisma.order.findFirst({
         where: {
-          userId: userId,
+          userId: user.id,
           status: "pending",
           subscriptionType: subscription,
         },
@@ -41,7 +52,7 @@ export async function POST(req: NextRequest) {
     // Update user's plan type
     await prisma.user.update({
       where: {
-        clerkId: userId,
+        id: user.id,
       },
       data: {
         // @ts-ignore - planType exists in the schema but TypeScript definitions aren't updated
@@ -52,7 +63,7 @@ export async function POST(req: NextRequest) {
     // Create or update subscription record
     const existingSubscription = await prisma.subscription.findFirst({
       where: {
-        userId: userId,
+        userId,
       },
     })
 
@@ -72,7 +83,7 @@ export async function POST(req: NextRequest) {
     } else {
       await prisma.subscription.create({
         data: {
-          userId: userId,
+          userId,
           plan: subscription,
           status: "active",
         },
