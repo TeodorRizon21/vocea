@@ -47,8 +47,18 @@ const RO_TRANSLATIONS = {
         p5: "EARTHTRANSPORT LIMITED SRL își rezervă dreptul de a verifica autenticitatea oricărui material postat și de a refuza publicarea sau de a elimina de pe Platformă orice conținut care ridică suspiciuni de plagiat sau încălcare a drepturilor de autor, fără notificare prealabilă și la libera sa discreție. "
       }
     },
+    delivery: {
+      title: "5. Politica de Livrare și Retur/Anulare",
+      content: {
+        p1: "Serviciile oferite de Platformă sunt livrate exclusiv în format digital. După confirmarea plății, activarea abonamentului se face automat în contul Utilizatorului.",
+        p2: "Activarea este de regulă instantă, dar poate dura până la 24 de ore în cazuri excepționale. Nu sunt necesare livrări fizice.",
+        p3: "Conform legislației privind furnizarea de conținut digital, Utilizatorul își pierde dreptul de retragere din momentul activării serviciului cu acordul său explicit.",
+        p4: "Totuși, dacă apar erori tehnice sau activări greșite, Utilizatorii pot contacta suportul la liviu.covrig@gmail.com în termen de 7 zile. Cazurile vor fi analizate individual.",
+        p5: "Utilizatorii pot anula reînnoirea automată oricând din cont. Accesul rămâne valabil până la finalul perioadei deja plătite. Nu se oferă rambursări pentru perioadele deja facturate."
+      }
+    },
     content: {
-      title: "5. Sancțiuni Legale privind Plagiatul și Avertismente",
+      title: "6. Sancțiuni Legale privind Plagiatul și Avertismente",
       content: {
         p1: "Utilizatorii trebuie să fie conștienți că plagiatul și comercializarea lucrărilor academice nu sunt doar interzise de Platformă, ci și ilegale, fiind pasibile de sancțiuni extrem de severe conform legislației din România. În lumina noilor modificări legislative (Legea nr. 427/2023, care amendează Legea Învățământului Superior nr. 199/2023), următoarele consecințe legale se pot aplica:",
         p2: "•	Amenzi contravenționale substanțiale: Orice persoană care vinde, oferă, cumpără sau primește în mod deliberat lucrări științifice, referate, proiecte, lucrări de absolvire, de licență, de diplomă, de disertație sau de doctorat, în scopul de a fi folosite ca atare de către altcineva, săvârșește o contravenție gravă. Conform legii, aceste fapte se sancționează cu amendă cuprinsă între 100.000 lei și 200.000 lei. Aceste amenzi se aplică atât celui care vinde sau oferă spre vânzare lucrările, cât și celui care le cumpără ori le folosește ilegal. Platforma va coopera cu autoritățile competente în identificarea oricăror astfel de activități ilegale, dacă este cazul.",
@@ -58,7 +68,7 @@ const RO_TRANSLATIONS = {
       }
     },
     userContent: {
-      title: "6. Dreptul Administratorului de a Elimina Conținut și de a Suspenda Conturi",
+      title: "7. Dreptul Administratorului de a Elimina Conținut și de a Suspenda Conturi",
       content: {
         p1: "EARTHTRANSPORT LIMITED SRL, în calitate de administrator al Platformei VoceaCampusului.ro, are dreptul (dar nu și obligația generală) de a monitoriza conținutul încărcat de Utilizatori. În scopul asigurării respectării Termenilor și a legislației aplicabile, Operatorul își rezervă dreptul de a lua oricând următoarele măsuri, la propria discreție:",
         p2: "•	Ștergerea sau dezactivarea conținutului neconform: Orice material încărcat pe Site care încalcă prevederile prezentului document sau ale legii (de exemplu, conținut plagiat, care încalcă drepturi de autor, conținut ofensator, ilegal etc.) poate fi șters, dezactivat ori eliminat fără avertisment prealabil. Aceasta include și obligația de a elimina prompt orice lucrare distribuită online care încalcă legislația privind plagiatul, conform cerințelor legale. Utilizatorii înțeleg și acceptă că Platforma poate elimina conținutul considerat neconform imediat ce ia la cunoștință de acesta, pentru a se proteja pe sine și pe ceilalți utilizatori.",
@@ -68,7 +78,7 @@ const RO_TRANSLATIONS = {
       }
     },
     privacy: {
-      title: "7. Limitarea Răspunderii EARTHTRANSPORT LIMITED SRL",
+      title: "8. Limitarea Răspunderii EARTHTRANSPORT LIMITED SRL",
       content: {
         p1: "EARTHTRANSPORT LIMITED SRL, în calitate de Operator al Platformei, depune eforturi pentru a asigura funcționarea în siguranță și conformitatea legală a Site-ului, însă nu își asumă răspunderea pentru conținutul generat de Utilizatori sau pentru acțiunile acestora. Înțelegeți și acceptați explicit următoarele limitări de răspundere:",
         p2: "•	Conținut generat de Utilizatori: Platforma este un intermediar tehnic care găzduiește conținutul încărcat de Utilizatori, fără a exercita un control editorial prealabil. Ca atare, Operatorul nu este responsabil pentru conținutul încărcat de Utilizatori și nu garantează legalitatea, originalitatea, autenticitatea, acuratețea sau calitatea acestuia. Orice opinie, informație, recomandare sau punct de vedere exprimat în materialele publicate aparține exclusiv autorului respectiv (Utilizatorului) și nu reflectă neapărat punctul de vedere al EARTHTRANSPORT LIMITED SRL.",
@@ -80,7 +90,7 @@ const RO_TRANSLATIONS = {
       }
     },
     liability: {
-      title: "8. Despăgubirea (Indemnizația) și Răspunderea Utilizatorului",
+      title: "9. Despăgubirea (Indemnizația) și Răspunderea Utilizatorului",
       content: {
         p1: "Utilizatorul este de acord să apere, să despăgubească și să exonereze de răspundere EARTHTRANSPORT LIMITED SRL, partenerii săi, afiliații, angajații, directorii și agenții săi, pentru orice pretenții, reclamații, acțiuni, proceduri, daune, obligații, pierderi, costuri și cheltuieli (inclusiv onorarii avocațiale) care decurg din:",
         p2: "1.	Încălcarea de către Utilizator a oricărei prevederi din acești Termeni și Condiții;",
@@ -91,14 +101,14 @@ const RO_TRANSLATIONS = {
       }
     },
     changes: {
-      title: "9. Protecția Datelor cu Caracter Personal",
+      title: "10. Protecția Datelor cu Caracter Personal",
       content: {
         p1: "(Notă: Această secțiune sumarizează pe scurt politica de confidențialitate în măsura în care este relevantă pentru Termeni. Pentru detalii complete, consultați Politica de Confidențialitate separat.)",
         p2: "EARTHTRANSPORT LIMITED SRL prelucrează datele cu caracter personal ale Utilizatorilor în conformitate cu Regulamentul (UE) 2016/679 (GDPR) și legislația națională aplicabilă privind protecția datelor. Datele furnizate la crearea contului și în cursul utilizării Platformei vor fi prelucrate în scopul furnizării serviciilor, al comunicării cu Utilizatorii și al îndeplinirii obligațiilor legale (inclusiv, dacă este cazul, colaborarea cu autoritățile competente menționată la secțiunea 6). Platforma ia măsuri de securitate adecvate pentru protejarea datelor, însă Utilizatorii sunt și ei responsabili să mențină confidențialitatea datelor de acces la cont (parolă, etc.). Pentru mai multe informații despre cum colectăm, utilizăm și protejăm datele personale, vă rugăm să consultați documentul Politica de Confidențialitate disponibil pe Site.",
         }
     },
     contact: {
-      title: "10. Proprietatea Intelectuală",
+      title: "11. Proprietatea Intelectuală",
       content: {
         p1: "Toate elementele de grafică ale Platformei, baza de date, design-ul, logo-urile, mărcile, precum și orice alte materiale prezentate de EARTHTRANSPORT LIMITED SRL pe Site (cu excepția conținutului încărcat de Utilizatori) sunt protejate prin drepturi de proprietate intelectuală aparținând Operatorului sau licențiatorilor săi. Este interzisă copierea, distribuirea, publicarea sau utilizarea oricăror elemente ale Site-ului în alt scop decât cel pentru care au fost destinate, fără acordul prealabil scris al Operatorului.",
         p2: "Utilizatorii păstrează drepturile de autor asupra conținutului original pe care îl încarcă. Prin încărcarea de conținut pe Platformă, Utilizatorul acordă EARTHTRANSPORT LIMITED SRL o licență neexclusivă, gratuită, teritorial nelimitată, pentru a stoca, afișa și transmite acel conținut prin intermediul Platformei către alți Utilizatori interesați, strict în scopul operării serviciilor. Operatorul nu își asumă drepturi de proprietate asupra materialelor încărcate, dar poate elimina sau dezactiva conținutul care încalcă Termenii sau legea, conform secțiunilor 4 și 6 de mai sus.",
@@ -106,7 +116,7 @@ const RO_TRANSLATIONS = {
       }
     },
     modify: {
-      title: "11. Modificarea Termenilor și Încetarea Contractului",
+      title: "12. Modificarea Termenilor și Încetarea Contractului",
       content: {
         p1: "EARTHTRANSPORT LIMITED SRL își rezervă dreptul de a modifica sau actualiza în orice moment prezentele Termeni și Condiții, pentru a reflecta schimbări legislative, modificări ale funcționalităților Platformei sau ale politicilor interne. Orice modificare substanțială va fi anunțată Utilizatorilor prin mijloace adecvate (de ex. e-mail la adresa asociată contului sau notificare pe Site) cu o anticipație rezonabilă înainte de intrarea în vigoare, permițându-vă să luați cunoștință de noile prevederi. Continuarea utilizării Platformei după data intrării în vigoare a modificărilor constituie acceptarea de către dumneavoastră a Termenilor și Condițiilor astfel actualizate.",
         p2: "Dacă nu sunteți de acord cu modificările propuse, trebuie să încetați utilizarea Platformei și, opțional, să solicitați ștergerea contului dumneavoastră. Termenii și Condițiile actuali sunt publicați pe Site, împreună cu data ultimei actualizări. Este responsabilitatea Utilizatorului să verifice periodic eventualele actualizări.",
@@ -114,14 +124,14 @@ const RO_TRANSLATIONS = {
       }
     },
     jurisd: {
-      title: "12. Legea Aplicabilă și Jurisdicția",
+      title: "13. Legea Aplicabilă și Jurisdicția",
       content: {
         p1: "Prezentul acord este guvernat de legea română. Orice dispută apărută între EARTHTRANSPORT LIMITED SRL și un Utilizator în legătură cu utilizarea Platformei sau cu acești Termeni și Condiții va fi soluționată, pe cât posibil, pe cale amiabilă. În cazul în care nu este posibilă rezolvarea amiabilă, litigiul va fi supus soluționării instanțelor judecătorești competente din România, de la sediul social al EARTHTRANSPORT LIMITED SRL.",
         p2: "Utilizatorul este de acord că, înainte de a recurge la instanță, va încerca notificarea Operatorului cu privire la orice problemă apărută și va acorda un termen rezonabil pentru remediere. Această clauză nu aduce atingere drepturilor consumatorilor (dacă Utilizatorul are calitate de consumator) de a recurge la mecanisme legale de soluționare a disputelor sau la autoritățile competente pentru protecția consumatorilor.",
         }
     },
     final: {
-      title: "13. Dispoziții Finale",
+      title: "14. Dispoziții Finale",
       content: {
         p1: "În cazul în care orice prevedere a Termenilor și Condițiilor este declarată nulă, nevalidă sau inaplicabilă de către o instanță competentă, acea prevedere va fi înlăturată sau modificată în mod corespunzător, fără a afecta valabilitatea celorlalte prevederi rămase. Neexercitarea sau întârzierea în exercitarea de către EARTHTRANSPORT LIMITED SRL a oricărui drept prevăzut de Termeni nu va fi interpretată drept o renunțare la acel drept.",
         p2: "Prezentul document, împreună cu eventualele politici la care face referire (ex: Politica de Confidențialitate), constituie întregul acord dintre Utilizator și Operator privind utilizarea Platformei și înlocuiește orice înțelegeri anterioare, scrise sau orale, referitoare la același subiect. Pentru orice clarificări sau întrebări privind Termenii și Condițiile, ne puteți contacta la adresa de email menționată pe Site.",
@@ -177,8 +187,18 @@ const EN_TRANSLATIONS = {
         p5: "EARTHTRANSPORT LIMITED SRL reserves the right to verify the authenticity of any posted material and may refuse publication or remove any content suspected of plagiarism or copyright infringement without prior notice and at its sole discretion."
       }
     },
+    delivery: {
+      title: "5. Delivery and Cancellation Policy",
+      content: {
+        p1: "The services provided through the Platform are delivered exclusively in digital format. Once payment is confirmed, the subscription is automatically activated in the User’s account.",
+        p2: "Activation is usually instant, but may take up to 24 hours in exceptional cases. No physical delivery is required.",
+        p3: "According to legislation on digital content, the User loses their right of withdrawal once the service has been activated with their explicit consent.",
+        p4: "However, if technical errors or incorrect activations occur, Users may contact support at liviu.covrig@gmail.com within 7 days. Each case will be reviewed individually.",
+        p5: "Users can cancel auto-renewal at any time from their account. Access remains active until the end of the already paid period. No refunds are provided for billed periods."
+      }
+    },
     content: {
-      title: "5. Legal Sanctions for Plagiarism and Warnings",
+      title: "6. Legal Sanctions for Plagiarism and Warnings",
       content: {
         p1: "Users must be aware that plagiarism and academic work trading are not only prohibited by the Platform but also illegal, subject to severe penalties under Romanian law. In light of recent legislative changes (Law no. 427/2023, amending Law no. 199/2023 on Higher Education), the following legal consequences may apply:",
         p2: "• Substantial fines: Anyone who sells, offers, buys, or knowingly receives academic works (e.g., theses, reports, projects) for use by another person commits a serious offense. By law, these actions are punishable by fines between 100,000 and 200,000 RON. Fines apply to both the seller and the buyer. The Platform will cooperate with authorities in identifying such illegal activities when applicable.",
@@ -188,7 +208,7 @@ const EN_TRANSLATIONS = {
       }
     },
     userContent: {
-      title: "6. Administrator's Right to Remove Content and Suspend Accounts",
+      title: "7. Administrator's Right to Remove Content and Suspend Accounts",
       content: {
         p1: "EARTHTRANSPORT LIMITED SRL, as the administrator of VoceaCampusului.ro, reserves the right (but not the general obligation) to monitor content uploaded by Users. To ensure compliance with these Terms and applicable law, the Operator may take the following measures at its discretion:",
         p2: "• Removing or disabling non-compliant content: Any content that violates these Terms or the law (e.g., plagiarized, offensive, or illegal material) may be deleted, disabled, or removed without prior warning. This includes the obligation to promptly remove plagiarized works distributed online under legal requirements.",
@@ -198,7 +218,7 @@ const EN_TRANSLATIONS = {
       }
     },
     privacy: {
-      title: "7. Limitation of Liability of EARTHTRANSPORT LIMITED SRL",
+      title: "8. Limitation of Liability of EARTHTRANSPORT LIMITED SRL",
       content: {
         p1: "As Platform Operator, EARTHTRANSPORT LIMITED SRL strives to ensure safe operation and legal compliance but assumes no responsibility for User-generated content or actions. Users explicitly agree to the following limitations:",
         p2: "• User-generated content: The Platform is a technical intermediary that hosts content without prior editorial control. The Operator is not responsible for User content and does not guarantee its legality, originality, authenticity, accuracy, or quality. Any opinions or materials reflect the author’s (User’s) view, not that of EARTHTRANSPORT LIMITED SRL.",
@@ -210,7 +230,7 @@ const EN_TRANSLATIONS = {
       }
     },
     liability: {
-      title: "8. User Indemnification and Liability",
+      title: "9. User Indemnification and Liability",
       content: {
         p1: "The User agrees to defend, indemnify, and hold harmless EARTHTRANSPORT LIMITED SRL, its partners, affiliates, employees, directors, and agents from any claims, complaints, actions, proceedings, damages, obligations, losses, costs, and expenses (including attorney’s fees) arising from:",
         p2: "1.	The User’s violation of any provision of these Terms and Conditions;",
@@ -221,14 +241,14 @@ const EN_TRANSLATIONS = {
       }
     },
     changes: {
-      title: "9. Personal Data Protection",
+      title: "10. Personal Data Protection",
       content: {
         p1: "(Note: This section provides a brief summary of the Privacy Policy as relevant to these Terms. For full details, see the separate Privacy Policy document.)",
         p2: "EARTHTRANSPORT LIMITED SRL processes Users’ personal data in accordance with Regulation (EU) 2016/679 (GDPR) and applicable national data protection laws. Data provided when creating an account or using the Platform is processed for service delivery, communication with Users, and legal compliance (including, if necessary, cooperation with authorities mentioned in section 6). The Platform applies appropriate security measures to protect data, but Users are also responsible for keeping their account access information (password, etc.) confidential. For more details on how personal data is collected, used, and protected, please refer to the Privacy Policy available on the Site."
       }
     },
     contact: {
-      title: "10. Intellectual Property",
+      title: "11. Intellectual Property",
       content: {
         p1: "All graphical elements of the Platform, the database, design, logos, trademarks, and any other materials presented by EARTHTRANSPORT LIMITED SRL on the Site (excluding content uploaded by Users) are protected by intellectual property rights owned by the Operator or its licensors. Copying, distributing, publishing, or using any Site content for purposes other than its intended use is prohibited without prior written consent from the Operator.",
         p2: "Users retain copyright over the original content they upload. By uploading content to the Platform, the User grants EARTHTRANSPORT LIMITED SRL a non-exclusive, free, territory-unlimited license to store, display, and transmit that content via the Platform to other interested Users, solely for the purpose of operating the services. The Operator does not claim ownership of the uploaded materials but may remove or disable content that violates the Terms or the law, as outlined in sections 4 and 6.",
@@ -236,7 +256,7 @@ const EN_TRANSLATIONS = {
       }
     },
     modify: {
-      title: "11. Modification of the Terms and Termination of the Agreement",
+      title: "12. Modification of the Terms and Termination of the Agreement",
       content: {
         p1: "EARTHTRANSPORT LIMITED SRL reserves the right to modify or update these Terms and Conditions at any time to reflect legal changes, Platform functionality updates, or internal policy adjustments. Any significant changes will be communicated to Users through appropriate means (e.g., email to the account-linked address or notification on the Site) with reasonable advance notice before taking effect, allowing you to review the new provisions. Continued use of the Platform after the changes take effect constitutes your acceptance of the updated Terms and Conditions",
         p2: "If you do not agree with the proposed changes, you must stop using the Platform and optionally request the deletion of your account. The current Terms and Conditions are published on the Site, along with the date of the last update. It is the User's responsibility to periodically check for updates.",
@@ -244,14 +264,14 @@ const EN_TRANSLATIONS = {
       }
     },
     jurisd: {
-      title: "12. Governing Law and Jurisdiction",
+      title: "13. Governing Law and Jurisdiction",
       content: {
         p1: "This agreement is governed by Romanian law. Any disputes between EARTHTRANSPORT LIMITED SRL and a User related to the use of the Platform or these Terms and Conditions will be resolved, as much as possible, amicably. If amicable resolution is not possible, the dispute will be submitted to the competent courts in Romania, at the registered office of EARTHTRANSPORT LIMITED SRL.",
         p2: "The User agrees that, before resorting to court, they will notify the Operator of any issue and allow a reasonable time for resolution. This clause does not affect the rights of consumers (if the User qualifies as a consumer) to access legal dispute resolution mechanisms or consumer protection authorities.",
         }
     },
     final: {
-      title: "13. Final Provisions",
+      title: "14. Final Provisions",
       content: {
         p1: "If any provision of these Terms and Conditions is declared void, invalid, or unenforceable by a competent court, that provision shall be removed or appropriately modified without affecting the validity of the remaining provisions. The failure or delay of EARTHTRANSPORT LIMITED SRL to exercise any right provided by these Terms shall not be construed as a waiver of that right.",
         p2: "This document, along with any policies it references (e.g., the Privacy Policy), constitutes the entire agreement between the User and the Operator regarding use of the Platform and replaces any prior agreements, written or oral, regarding the same subject. For any clarifications or questions regarding the Terms and Conditions, you may contact us at the email address listed on the Site.",
@@ -259,7 +279,7 @@ const EN_TRANSLATIONS = {
         p4: "By clicking “Accept” or by continuing to use the Platform, you confirm that you have read, understood, and agreed to these Terms and Conditions in full. ",
         p5: "EARTHTRANSPORT LIMITED SRL wishes you great success in your academic and professional journey, in the spirit of honesty and mutual respect!"  
       }
-    }
+    },
   }
 }
 
@@ -322,6 +342,18 @@ export default function TermsPage() {
 
         {/* Section 5 */}
         <section className="mb-8">
+          <h2 className="text-2xl font-semibold mb-4">{translations.sections.delivery.title}</h2>
+          <div className="space-y-4">
+            <p>{translations.sections.delivery.content.p1}</p>
+            <p>{translations.sections.delivery.content.p2}</p>
+            <p>{translations.sections.delivery.content.p3}</p>
+            <p>{translations.sections.delivery.content.p4}</p>
+            <p>{translations.sections.delivery.content.p5}</p>
+          </div>
+        </section>
+
+        {/* Section 6 */}
+        <section className="mb-8">
           <h2 className="text-2xl font-semibold mb-4">{translations.sections.content.title}</h2>
           <div className="space-y-4">
             <p>{translations.sections.content.content.p1}</p>
@@ -332,7 +364,7 @@ export default function TermsPage() {
           </div>
         </section>
 
-        {/* Section 6 */}
+        {/* Section 7 */}
         <section className="mb-8">
           <h2 className="text-2xl font-semibold mb-4">{translations.sections.userContent.title}</h2>
           <div className="space-y-4">
@@ -344,7 +376,7 @@ export default function TermsPage() {
           </div>
         </section>
 
-        {/* Section 7 */}
+        {/* Section 8 */}
         <section className="mb-8">
           <h2 className="text-2xl font-semibold mb-4">{translations.sections.privacy.title}</h2>
           <div className="space-y-4">
@@ -358,7 +390,7 @@ export default function TermsPage() {
           </div>
         </section>
 
-        {/* Section 8 */}
+        {/* Section 9 */}
         <section className="mb-8">
           <h2 className="text-2xl font-semibold mb-4">{translations.sections.liability.title}</h2>
           <div className="space-y-4">
@@ -371,7 +403,7 @@ export default function TermsPage() {
           </div>
         </section>
 
-        {/* Section 9 */}
+        {/* Section 10 */}
         <section className="mb-8">
           <h2 className="text-2xl font-semibold mb-4">{translations.sections.changes.title}</h2>
           <div className="space-y-4">
@@ -380,7 +412,7 @@ export default function TermsPage() {
           </div>
         </section>
 
-        {/* Section 10 */}
+        {/* Section 11 */}
         <section className="mb-8">
           <h2 className="text-2xl font-semibold mb-4">{translations.sections.contact.title}</h2>
           <div className="space-y-4">
@@ -390,7 +422,7 @@ export default function TermsPage() {
           </div>
         </section>
 
-        {/* Section 11 */}
+        {/* Section 12 */}
         <section className="mb-8">
           <h2 className="text-2xl font-semibold mb-4">{translations.sections.modify.title}</h2>
           <div className="space-y-4">
@@ -400,7 +432,7 @@ export default function TermsPage() {
           </div>
         </section>
 
-        {/* Section 12 */}
+        {/* Section 13 */}
         <section className="mb-8">
           <h2 className="text-2xl font-semibold mb-4">{translations.sections.jurisd.title}</h2>
           <div className="space-y-4">
@@ -409,7 +441,7 @@ export default function TermsPage() {
           </div>
         </section>
 
-        {/* Section 13 */}
+        {/* Section 14 */}
         <section className="mb-8">
           <h2 className="text-2xl font-semibold mb-4">{translations.sections.final.title}</h2>
           <div className="space-y-4">
