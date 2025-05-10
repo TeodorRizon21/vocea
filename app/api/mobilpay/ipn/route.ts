@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { decodeResponse } from '@/mobilpay-sdk/order';
 import crypto from 'crypto';
+import { sendSubscriptionConfirmationEmail, sendPaymentFailedEmail } from '@/lib/email';
 
 export async function POST(req: Request) {
   try {
@@ -180,12 +181,22 @@ export async function POST(req: Request) {
       }
 
       // Create notification for the user
-      let notificationMessage = `Your ${plan.name} subscription has been activated.`;
+      let notificationMessage = '';
       
+      // Default language to English since we don't have a language field in the User model
+      const userLanguage: string = 'en';
+      
+      // Set up multilingual notification messages
       if (isRecurring) {
-        notificationMessage += ` Your subscription will automatically renew on ${endDate.toLocaleDateString()}.`;
+        // For recurring payments
+        notificationMessage = `${plan.name} ${userLanguage === 'ro' 
+          ? `abonamentul tău a fost activat. Abonamentul tău se va reînnoi automat pe ${endDate.toLocaleDateString()}.` 
+          : `subscription has been activated. Your subscription will automatically renew on ${endDate.toLocaleDateString()}.`}`;
       } else {
-        notificationMessage += ` Your subscription is valid until ${endDate.toLocaleDateString()}.`;
+        // For one-time payments
+        notificationMessage = `${plan.name} ${userLanguage === 'ro' 
+          ? `abonamentul tău a fost activat. Abonamentul tău este valabil până pe ${endDate.toLocaleDateString()}.` 
+          : `subscription has been activated. Your subscription is valid until ${endDate.toLocaleDateString()}.`}`;
       }
       
       try {
@@ -199,6 +210,36 @@ export async function POST(req: Request) {
         });
       } catch (err) {
         console.error('DB error creating notification:', err);
+      }
+
+      // Get user's email from Clerk via our database
+      try {
+        // Fetch user email from our DB or through Clerk
+        const user = await prisma.user.findUnique({
+          where: { id: orderRecord.userId },
+          select: { email: true, firstName: true, lastName: true }
+        });
+        
+        if (user && user.email) {
+          // Send subscription confirmation email
+          const emailSent = await sendSubscriptionConfirmationEmail(
+            user.email,
+            {
+              name: user.firstName || 'User',
+              planName: plan.name,
+              endDate,
+              isRecurring,
+              language: userLanguage
+            }
+          );
+          
+          console.log('Subscription confirmation email sent:', emailSent);
+        } else {
+          console.error('Could not send confirmation email: user email not found');
+        }
+      } catch (err) {
+        console.error('Error sending confirmation email:', err);
+        // Continue with the process even if email sending fails
       }
 
       console.log('Successfully updated subscription and user plan:', {
@@ -218,17 +259,41 @@ export async function POST(req: Request) {
       
     } else {
       // Create notification for failed payment
+      // Default language to English since we don't have a language field in the User model
+      const userLanguage: string = 'en';
+      
+      // Create multilingual error message
+      const failedPaymentMessage = userLanguage === 'ro'
+        ? `Plata pentru abonamentul ${orderRecord.plan.name} a eșuat. Te rugăm să încerci din nou.`
+        : `Your payment for ${orderRecord.plan.name} subscription has failed. Please try again.`;
+        
       try {
         await prisma.notification.create({
           data: {
             userId: orderRecord.user.clerkId,
             type: 'payment',
-            message: `Your payment for ${orderRecord.plan.name} subscription has failed. Please try again.`,
+            message: failedPaymentMessage,
             read: false
           }
         });
+
+        // Get user's email and send failed payment email
+        const user = await prisma.user.findUnique({
+          where: { id: orderRecord.userId },
+          select: { email: true }
+        });
+        
+        if (user && user.email) {
+          const emailSent = await sendPaymentFailedEmail(
+            user.email,
+            orderRecord.plan.name,
+            userLanguage
+          );
+          
+          console.log('Payment failed email sent:', emailSent);
+        }
       } catch (err) {
-        console.error('DB error creating failed payment notification:', err);
+        console.error('DB error creating failed payment notification or sending email:', err);
       }
     }
 

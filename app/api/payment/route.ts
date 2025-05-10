@@ -92,9 +92,9 @@ export async function POST(req: Request) {
     });
     
     // Update or create subscription with recurring info
-    const existingSubscription = await prisma.subscription.findUnique({
+    const existingSubscription = await prisma.subscription.findFirst({
       where: {
-        userId: session.userId
+        userId: user.id
       }
     });
     
@@ -113,7 +113,7 @@ export async function POST(req: Request) {
     } else {
       await prisma.subscription.create({
         data: {
-          userId: session.userId,
+          userId: user.id,
           plan: subscriptionType,
           status: 'active',
           startDate,
