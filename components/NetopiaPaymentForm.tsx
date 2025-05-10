@@ -4,16 +4,20 @@ import { useRouter } from 'next/navigation';
 interface NetopiaPaymentFormProps {
   envKey: string;
   data: string;
+  iv: string;
+  cipher: string;
 }
 
-const NetopiaPaymentForm = ({ envKey, data }: NetopiaPaymentFormProps) => {
+const NetopiaPaymentForm = ({ envKey, data, iv, cipher }: NetopiaPaymentFormProps) => {
   const router = useRouter();
 
   useEffect(() => {
     // Log the data being sent
     console.log('Payment Form Data:', {
       envKey,
-      data
+      data,
+      iv,
+      cipher
     });
 
     // Create form element
@@ -36,6 +40,20 @@ const NetopiaPaymentForm = ({ envKey, data }: NetopiaPaymentFormProps) => {
     dataInput.setAttribute('value', data);
     form.appendChild(dataInput);
 
+    // Create and append iv input
+    const ivInput = document.createElement('input');
+    ivInput.setAttribute('type', 'hidden');
+    ivInput.setAttribute('name', 'iv');
+    ivInput.setAttribute('value', iv);
+    form.appendChild(ivInput);
+
+    // Create and append cipher input
+    const cipherInput = document.createElement('input');
+    cipherInput.setAttribute('type', 'hidden');
+    cipherInput.setAttribute('name', 'cipher');
+    cipherInput.setAttribute('value', cipher);
+    form.appendChild(cipherInput);
+
     // Log the form HTML for debugging
     console.log('Form HTML:', form.outerHTML);
 
@@ -55,7 +73,7 @@ const NetopiaPaymentForm = ({ envKey, data }: NetopiaPaymentFormProps) => {
         document.body.removeChild(form);
       }
     };
-  }, [envKey, data]);
+  }, [envKey, data, iv, cipher]);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh]">

@@ -10,6 +10,7 @@ import { Check } from "lucide-react";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/components/LanguageToggle";
 import NetopiaPaymentForm from "@/components/NetopiaPaymentForm";
+import SubscriptionStatus from '@/components/SubscriptionStatus';
 
 export default function SubscriptionsPage() {
   const { isLoaded, isSignedIn } = useUser();
@@ -20,7 +21,12 @@ export default function SubscriptionsPage() {
   const [pendingSubscription, setPendingSubscription] = useState("");
   const [loading, setLoading] = useState(true);
   const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
-  const [netopiaFields, setNetopiaFields] = useState<null | { envKey: string; data: string }>(null);
+  const [netopiaFields, setNetopiaFields] = useState<null | { env_key: string; data: string; iv: string; cipher: string }>(null);
+  const [subscription, setSubscription] = useState<{
+    plan: string;
+    status: string;
+    endDate: Date;
+  } | null>(null);
 
   const translations = {
     ro: {
@@ -168,10 +174,12 @@ export default function SubscriptionsPage() {
         }
 
         const data = await response.json();
-        if (data.envKey && data.data) {
+        if (data.env_key && data.data && data.iv && data.cipher) {
           setNetopiaFields({
-            envKey: data.envKey,
+            env_key: data.env_key,
             data: data.data,
+            iv: data.iv,
+            cipher: data.cipher,
           });
           return;
         }
@@ -202,7 +210,9 @@ export default function SubscriptionsPage() {
         const response = await fetch("/api/subscription");
         if (response.ok) {
           const data = await response.json();
-          setSelectedSubscription(data.plan || "Basic");
+          setSubscription(data); // Data is directly the subscription object now
+          setSelectedSubscription(data.plan); // Set the selected subscription to the current plan
+          console.log('Fetched subscription data:', data);
         }
       } catch (error) {
         console.error("Error fetching subscription data:", error);
@@ -216,6 +226,30 @@ export default function SubscriptionsPage() {
     }
   }, [isLoaded]);
 
+  const handleCancelSubscription = async () => {
+    try {
+      const response = await fetch('/api/subscription/cancel', {
+        method: 'POST',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to cancel subscription');
+      }
+
+      // Refresh subscription data
+      const subscriptionResponse = await fetch('/api/subscription');
+      if (subscriptionResponse.ok) {
+        const data = await subscriptionResponse.json();
+        setSubscription(data); // Data is directly the subscription object
+      }
+
+      return response;
+    } catch (error) {
+      console.error('Error cancelling subscription:', error);
+      throw error;
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -225,11 +259,26 @@ export default function SubscriptionsPage() {
   }
 
   return (
-    <div className="pb-20 px-4 sm:px-6 lg:px-8">
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-8">
+        {language === "ro" ? "Abonamente" : "Subscriptions"}
+      </h1>
+
+      {subscription && (
+        <div className="mb-8">
+          <SubscriptionStatus
+            subscription={subscription}
+            onCancelSubscription={handleCancelSubscription}
+          />
+        </div>
+      )}
+
       {netopiaFields ? (
         <NetopiaPaymentForm
-          envKey={netopiaFields.envKey}
+          envKey={netopiaFields.env_key}
           data={netopiaFields.data}
+          iv={netopiaFields.iv}
+          cipher={netopiaFields.cipher}
         />
       ) : (
         <>
@@ -276,7 +325,9 @@ export default function SubscriptionsPage() {
                   className={`${subscription.color} ${
                     subscription.textColor
                   } border ${
-                    subscription.borderColor
+                    subscription.name === selectedSubscription
+                      ? "border-green-500 border-2"
+                      : subscription.borderColor
                   } rounded-3xl shadow-xl overflow-hidden h-full flex flex-col relative ${
                     subscription.popular ? "lg:scale-105 z-10" : ""
                   }`}
@@ -297,6 +348,11 @@ export default function SubscriptionsPage() {
                   {subscription.tag && (
                     <div className="absolute top-0 right-0 bg-amber-500 text-white px-3 sm:px-4 py-1 rounded-bl-lg text-xs sm:text-sm font-bold">
                       {subscription.tag}
+                    </div>
+                  )}
+                  {subscription.name === selectedSubscription && (
+                    <div className="absolute top-0 left-0 bg-green-500 text-white px-3 sm:px-4 py-1 rounded-br-lg text-xs sm:text-sm font-bold">
+                      Current Plan
                     </div>
                   )}
 
@@ -343,13 +399,13 @@ export default function SubscriptionsPage() {
                     <button
                       onClick={() => handleSubscriptionChange(subscription.name)}
                       className={`w-full py-3 sm:py-4 rounded-xl font-semibold transition-all duration-200 ${
-                        selectedSubscription === subscription.name
+                        (subscription.name === selectedSubscription)
                           ? "bg-green-600 hover:bg-green-700 text-white"
                           : subscription.buttonColor
                       }`}
-                      disabled={selectedSubscription === subscription.name}
+                      disabled={subscription.name === selectedSubscription}
                     >
-                      {selectedSubscription === subscription.name
+                      {subscription.name === selectedSubscription
                         ? content.currentPlan
                         : content.select}
                     </button>

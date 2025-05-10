@@ -21,7 +21,10 @@ export async function POST(req: Request) {
     // Find the order in our database
     const orderRecord = await prisma.order.findUnique({
       where: { orderId },
-      include: { user: true }
+      include: { 
+        user: true,
+        plan: true
+      }
     });
 
     if (!orderRecord) {
@@ -39,14 +42,62 @@ export async function POST(req: Request) {
 
     // If payment was successful, update the user's subscription
     if (status === 'approved') {
-      console.log('Payment approved, creating subscription');
-      await prisma.subscription.create({
-        data: {
+      console.log('Payment approved, updating subscription');
+      
+      // Calculate subscription end date (30 days from now)
+      const startDate = new Date();
+      const endDate = new Date();
+      endDate.setDate(endDate.getDate() + 30);
+
+      // Create or update subscription
+      await prisma.subscription.upsert({
+        where: {
+          userId: orderRecord.userId
+        },
+        create: {
           userId: orderRecord.userId,
-          plan: orderRecord.subscriptionType,
+          plan: orderRecord.plan.name,
           status: 'active',
-          startDate: new Date(),
-          endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+          startDate,
+          endDate,
+          projectsPosted: 0
+        },
+        update: {
+          plan: orderRecord.plan.name,
+          status: 'active',
+          startDate,
+          endDate,
+          // Reset projectsPosted if upgrading to a higher plan
+          ...(orderRecord.plan.name === 'Gold' ? { projectsPosted: 0 } : {})
+        }
+      });
+
+      // Update user's plan type
+      await prisma.user.update({
+        where: {
+          id: orderRecord.userId
+        },
+        data: {
+          planType: orderRecord.plan.name
+        }
+      });
+
+      // Create notification for the user
+      await prisma.notification.create({
+        data: {
+          userId: orderRecord.user.clerkId,
+          type: 'subscription',
+          message: `Your ${orderRecord.plan.name} subscription has been activated. Your subscription will renew on ${endDate.toLocaleDateString()}.`,
+          read: false
+        }
+      });
+
+      // Update order status to completed
+      await prisma.order.update({
+        where: { orderId },
+        data: { 
+          status: 'COMPLETED',
+          updatedAt: new Date()
         }
       });
     }
