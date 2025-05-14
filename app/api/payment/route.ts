@@ -1,7 +1,13 @@
 import { NextResponse } from 'next/server';
-import { getRequest } from '@/mobilpay-sdk/order';
+import { getRequest } from '@/order';
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
+
+// Add SSL bypass for development
+if (process.env.NODE_ENV === 'development') {
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+  console.log('SSL verification disabled for development environment in payment API');
+}
 
 // Log environment variables for debugging
 console.log('Payment API Environment Variables:', {
@@ -12,6 +18,21 @@ console.log('Payment API Environment Variables:', {
   hasPrivateKey: !!process.env.NETOPIA_PRIVATE_KEY
 });
 
+type PlanType = 'Basic' | 'Premium' | 'Gold';
+
+// Plan hierarchy and prices
+const PLAN_HIERARCHY: Record<PlanType, number> = {
+  Basic: 1,
+  Premium: 2,
+  Gold: 3
+};
+
+const PLAN_PRICES: Record<PlanType, number> = {
+  Basic: 0,
+  Premium: 8,
+  Gold: 28
+};
+
 export async function POST(req: Request) {
   try {
     const session = await auth();
@@ -20,31 +41,99 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { subscriptionType } = body;
+    const { subscriptionType, billingInfo } = body;
 
-    if (!subscriptionType) {
-      return new NextResponse("Subscription type is required", { status: 400 });
+    // Validate subscription type
+    if (!subscriptionType || !Object.keys(PLAN_HIERARCHY).includes(subscriptionType)) {
+      return new NextResponse("Invalid subscription type", { status: 400 });
     }
 
-    // Calculate amount based on subscription type
-    const amount = subscriptionType === 'Premium' ? 8 : 28;
+    if (!billingInfo) {
+      return new NextResponse("Billing information is required", { status: 400 });
+    }
 
-    // Generate a unique order ID
-    const orderId = `SUB_${Date.now()}`;
-
-    // Get encrypted payment request with amount
-    const paymentRequest = getRequest(orderId, amount);
-
-    // First get the user to get their MongoDB ID
+    // Get the user and their current subscription
     const user = await prisma.user.findUnique({
-      where: {
-        clerkId: session.userId
-      }
+      where: { clerkId: session.userId }
     });
 
     if (!user) {
       return new NextResponse("User not found", { status: 404 });
     }
+
+    // Get current active subscription
+    const currentSubscription = await prisma.subscription.findFirst({
+      where: {
+        userId: session.userId,
+        status: {
+          in: ['active', 'cancelled']
+        },
+        endDate: {
+          gt: new Date()
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
+    // Check if user can purchase the requested plan
+    if (currentSubscription?.plan) {
+      const currentPlanRank = PLAN_HIERARCHY[currentSubscription.plan as PlanType];
+      const requestedPlanRank = PLAN_HIERARCHY[subscriptionType as PlanType];
+
+      // Prevent downgrade if current plan is active
+      if (requestedPlanRank < currentPlanRank) {
+        return new NextResponse(
+          "Cannot downgrade to a lower plan while current plan is active. Please wait until your current plan expires.", 
+          { status: 400 }
+        );
+      }
+
+      // If same plan, prevent purchase unless expired
+      if (requestedPlanRank === currentPlanRank) {
+        return new NextResponse(
+          "You already have this plan. Please wait until your current plan expires to purchase it again.", 
+          { status: 400 }
+        );
+      }
+    }
+
+    // Calculate amount based on subscription type and current plan
+    let amount = PLAN_PRICES[subscriptionType as PlanType];
+    
+    // If upgrading from an active plan, calculate the price difference
+    if (currentSubscription?.status === 'active' && currentSubscription.plan && currentSubscription.endDate) {
+      const currentPlanPrice = PLAN_PRICES[currentSubscription.plan as PlanType];
+      const remainingDays = Math.ceil(
+        (new Date(currentSubscription.endDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+      );
+      const totalDays = 30; // Assuming 30-day subscription periods
+      
+      // Calculate prorated refund for current plan
+      const proratedRefund = (currentPlanPrice * remainingDays) / totalDays;
+      
+      // Calculate final amount (new plan price - prorated refund)
+      amount = Math.max(0, amount - proratedRefund);
+    }
+
+    // Generate a unique order ID
+    const orderId = `SUB_${Date.now()}`;
+
+    // Get encrypted payment request with amount and billing info
+    const paymentRequest = getRequest(orderId, amount, billingInfo);
+
+    // Log the payment request details
+    console.log('Payment Request Details:', {
+      orderId,
+      amount,
+      currentPlan: currentSubscription?.plan,
+      newPlan: subscriptionType,
+      returnUrl: `${process.env.NEXT_PUBLIC_APP_URL}/api/mobilpay/return`,
+      confirmUrl: `${process.env.NEXT_PUBLIC_APP_URL}/api/mobilpay/ipn`,
+      ipnUrl: `${process.env.NEXT_PUBLIC_APP_URL}/api/mobilpay/ipn`,
+      appUrl: process.env.NEXT_PUBLIC_APP_URL
+    });
 
     // Find or create the plan
     const plan = await prisma.plan.upsert({
@@ -53,24 +142,19 @@ export async function POST(req: Request) {
       },
       create: {
         name: subscriptionType,
-        price: amount,
+        price: PLAN_PRICES[subscriptionType as PlanType],
         currency: 'RON',
         features: subscriptionType === 'Premium' 
           ? ['Unlimited projects', 'Priority support'] 
           : ['Unlimited projects', 'Priority support', 'Advanced features']
       },
       update: {
-        price: amount,
+        price: PLAN_PRICES[subscriptionType as PlanType],
         currency: 'RON'
       }
     });
     
-    // Calculate recurring billing dates
-    const startDate = new Date();
-    const nextBillingDate = new Date();
-    nextBillingDate.setDate(nextBillingDate.getDate() + 30); // 30 days from now
-    
-    // Store the order in the database using the MongoDB ID
+    // Store the order in the database
     await prisma.order.create({
       data: {
         orderId,
@@ -91,37 +175,6 @@ export async function POST(req: Request) {
       }
     });
     
-    // Update or create subscription with recurring info
-    const existingSubscription = await prisma.subscription.findFirst({
-      where: {
-        userId: user.id
-      }
-    });
-    
-    if (existingSubscription) {
-      await prisma.subscription.update({
-        where: {
-          id: existingSubscription.id
-        },
-        data: {
-          plan: subscriptionType,
-          status: 'active',
-          startDate,
-          endDate: nextBillingDate
-        }
-      });
-    } else {
-      await prisma.subscription.create({
-        data: {
-          userId: user.id,
-          plan: subscriptionType,
-          status: 'active',
-          startDate,
-          endDate: nextBillingDate
-        }
-      });
-    }
-
     return NextResponse.json({
       success: true,
       env_key: paymentRequest.env_key,

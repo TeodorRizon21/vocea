@@ -1,108 +1,151 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { decodeResponse } from '@/mobilpay-sdk/order';
+import { decodeResponse } from '@/order';
+
+// Add SSL bypass for development
+if (process.env.NODE_ENV === 'development') {
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+  console.log('SSL verification disabled for development environment in webhook handler');
+}
 
 export async function POST(req: Request) {
   try {
-    console.log('Received webhook from Netopia');
-    
-    const body = await req.json();
-    console.log('Webhook body:', body);
-    
-    // Decode the response from Netopia
-    const decodedResponse = await decodeResponse(body);
-    console.log('Decoded response:', decodedResponse);
+    console.log('--- WEBHOOK DEBUG START ---');
+    console.log('Request method:', req.method);
+    console.log('Request URL:', req.url);
+    console.log('Request headers:', Object.fromEntries(req.headers.entries()));
 
-    // Extract order information
-    const { order } = decodedResponse;
-    const { id: orderId, status } = order;
-    console.log('Order details:', { orderId, status });
+    // Parse form data
+    const formData = await req.formData();
+    const envKey = formData.get('env_key');
+    const data = formData.get('data');
+    const iv = formData.get('iv');
+    const cipher = formData.get('cipher');
 
-    // Find the order in our database
-    const orderRecord = await prisma.order.findUnique({
-      where: { orderId },
-      include: { 
-        user: true,
-        plan: true
-      }
+    console.log('Form data received:', {
+      hasEnvKey: !!envKey,
+      hasData: !!data,
+      hasIv: !!iv,
+      hasCipher: !!cipher
     });
 
-    if (!orderRecord) {
-      console.log('Order not found:', orderId);
-      return new NextResponse("Order not found", { status: 404 });
+    if (!envKey || !data || !iv || !cipher) {
+      console.error('Missing required payment data');
+      return new NextResponse("Missing required payment data", { status: 400 });
     }
 
-    console.log('Found order:', orderRecord);
+    // Decode the response from Netopia
+    let decodedResponse;
+    try {
+      decodedResponse = await decodeResponse({
+        env_key: envKey.toString(),
+        data: data.toString(),
+        iv: iv.toString(),
+        cipher: cipher.toString()
+      });
+      console.log('Decoded webhook response:', decodedResponse);
+    } catch (err) {
+      console.error('Failed to decode Netopia response:', err);
+      return new NextResponse("Failed to decode Netopia response", { status: 400 });
+    }
 
-    // Update order status
-    await prisma.order.update({
-      where: { orderId },
-      data: { status: status === 'approved' ? 'COMPLETED' : 'FAILED' }
+    // Extract transaction information
+    const { order } = decodedResponse;
+    const { 
+      $: { id: orderId, timestamp },
+      mobilpay: {
+        action: status,
+        original_amount: amount,
+        pan_masked: maskedCard,
+        payment_instrument_id: paymentMethod,
+        error
+      },
+      params
+    } = order;
+
+    // Check if this is a recurring payment
+    const isRecurring = !!(params && params.recurring);
+    const recurringDetails = isRecurring ? params.recurring : null;
+    
+    console.log('Transaction details:', { 
+      orderId, 
+      status, 
+      timestamp, 
+      amount, 
+      maskedCard,
+      paymentMethod,
+      isRecurring,
+      recurringDetails,
+      error
     });
 
-    // If payment was successful, update the user's subscription
-    if (status === 'approved') {
-      console.log('Payment approved, updating subscription');
-      
-      // Calculate subscription end date (30 days from now)
-      const startDate = new Date();
-      const endDate = new Date();
-      endDate.setDate(endDate.getDate() + 30);
-
-      // Create or update subscription
-      await prisma.subscription.upsert({
-        where: {
-          userId: orderRecord.userId
-        },
-        create: {
-          userId: orderRecord.userId,
-          plan: orderRecord.plan.name,
-          status: 'active',
-          startDate,
-          endDate,
-          projectsPosted: 0
-        },
-        update: {
-          plan: orderRecord.plan.name,
-          status: 'active',
-          startDate,
-          endDate,
-          // Reset projectsPosted if upgrading to a higher plan
-          ...(orderRecord.plan.name === 'Gold' ? { projectsPosted: 0 } : {})
+    // Find the order in our database with plan details
+    let orderRecord;
+    try {
+      orderRecord = await prisma.order.findUnique({
+        where: { orderId },
+        include: { 
+          user: true,
+          plan: true
         }
       });
+    } catch (err) {
+      console.error('DB error finding order:', err);
+      return new NextResponse("DB error finding order", { status: 500 });
+    }
 
-      // Update user's plan type
-      await prisma.user.update({
-        where: {
-          id: orderRecord.userId
-        },
-        data: {
-          planType: orderRecord.plan.name
-        }
-      });
+    if (!orderRecord) {
+      console.error('Order not found:', orderId);
+      return new NextResponse("Order not found", { status: 404 });
+    }
+    console.log('Found order:', orderRecord);
 
-      // Create notification for the user
-      await prisma.notification.create({
-        data: {
-          userId: orderRecord.user.clerkId,
-          type: 'subscription',
-          message: `Your ${orderRecord.plan.name} subscription has been activated. Your subscription will renew on ${endDate.toLocaleDateString()}.`,
-          read: false
-        }
-      });
+    // Check if there's an error in the payment response
+    const hasError = error && (error._ || error.$?.code);
+    const paymentStatus = hasError ? 'FAILED' : (status === 'paid' ? 'COMPLETED' : 'FAILED');
 
-      // Update order status to completed
-      await prisma.order.update({
+    // Update order status and transaction details
+    let updatedOrder;
+    try {
+      updatedOrder = await prisma.order.update({
         where: { orderId },
         data: { 
-          status: 'COMPLETED',
+          status: paymentStatus,
           updatedAt: new Date()
         }
       });
+    } catch (err) {
+      console.error('DB error updating order:', err);
+      return new NextResponse("DB error updating order", { status: 500 });
     }
 
-    return NextResponse.json({ success: true });
+    // Create notification for the user based on payment status
+    try {
+      const notificationMessage = hasError 
+        ? `Your payment for ${orderRecord.plan.name} subscription has failed. Please try again.`
+        : `Your payment for ${orderRecord.plan.name} subscription was successful. Please go to your dashboard to activate your subscription.`;
+
+      await prisma.notification.create({
+        data: {
+          userId: orderRecord.user.clerkId,
+          type: 'payment',
+          message: notificationMessage,
+          read: false
+        }
+      });
+    } catch (err) {
+      console.error('DB error creating notification:', err);
+    }
+
+    // Return success response to Netopia
+    console.log('--- WEBHOOK DEBUG END ---');
+    return NextResponse.json({ 
+      success: true,
+      message: 'Webhook processed successfully',
+      orderId,
+      status: updatedOrder.status
+    });
+
   } catch (error) {
     console.error('[NETOPIA_WEBHOOK_ERROR]', error);
     return new NextResponse("Internal Error", { status: 500 });

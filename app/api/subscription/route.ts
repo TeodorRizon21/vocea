@@ -132,7 +132,8 @@ export async function GET(req: NextRequest) {
     // Check for latest order, even if it's still PENDING
     const latestOrder = await prisma.order.findFirst({
       where: {
-        userId: user.id
+        userId: user.id,
+        status: 'COMPLETED' // Only consider COMPLETED orders
       },
       include: {
         plan: true
@@ -142,18 +143,9 @@ export async function GET(req: NextRequest) {
       }
     });
 
-    // If we have a latest payment and it's not already reflected in subscription
+    // If we have a completed order that's not reflected in subscription
     if (latestOrder && (!currentSubscription || currentSubscription.plan !== latestOrder.plan.name)) {
-      console.log('Found newer order with plan:', latestOrder.plan.name);
-      
-      // Automatically update order to COMPLETED if it's still PENDING
-      if (latestOrder.status === 'PENDING') {
-        console.log('Updating order status from PENDING to COMPLETED');
-        await prisma.order.update({
-          where: { id: latestOrder.id },
-          data: { status: 'COMPLETED' }
-        });
-      }
+      console.log('Found newer completed order with plan:', latestOrder.plan.name);
 
       // Calculate subscription dates
       const startDate = new Date();

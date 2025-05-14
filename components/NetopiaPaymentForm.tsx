@@ -26,6 +26,13 @@ const NetopiaPaymentForm = ({ envKey, data, iv, cipher }: NetopiaPaymentFormProp
     form.setAttribute('action', 'https://sandboxsecure.mobilpay.ro');
     form.setAttribute('accept-charset', 'utf-8');
 
+    // Add SSL bypass for development
+    if (process.env.NODE_ENV === 'development') {
+      // Set environment variable to bypass SSL check
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+      console.log('SSL verification disabled for development environment');
+    }
+
     // Create and append env_key input
     const envKeyInput = document.createElement('input');
     envKeyInput.setAttribute('type', 'hidden');
