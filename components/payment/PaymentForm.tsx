@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Toaster } from '@/components/ui/toaster';
+import NetopiaPaymentForm from '@/components/NetopiaPaymentForm';
 
 interface PaymentFormProps {
   subscriptionId: string;
@@ -17,6 +16,7 @@ export const PaymentForm = ({
   onError
 }: PaymentFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [netopiaFields, setNetopiaFields] = useState<null | { env_key: string; data: string; iv: string; cipher: string }>(null);
   const { toast } = useToast();
 
   const handlePayment = async () => {
@@ -31,6 +31,13 @@ export const PaymentForm = ({
         body: JSON.stringify({
           subscriptionId,
           subscriptionType,
+          billingInfo: {
+            firstName: "Test", // This should come from a form
+            lastName: "User",
+            email: "test@example.com",
+            phone: "1234567890",
+            address: "Test Address"
+          }
         }),
       });
 
@@ -39,10 +46,18 @@ export const PaymentForm = ({
       }
 
       const data = await response.json();
+      console.log('Payment request response:', data);
 
-      // Here you would typically redirect to Netopia's payment page
-      // or handle the payment request according to their documentation
-      console.log('Payment request:', data);
+      if (data.success && data.env_key && data.data && data.iv && data.cipher) {
+        setNetopiaFields({
+          env_key: data.env_key,
+          data: data.data,
+          iv: data.iv,
+          cipher: data.cipher
+        });
+      } else {
+        throw new Error('Invalid payment response');
+      }
 
       toast({
         title: "Payment initiated",
@@ -63,27 +78,24 @@ export const PaymentForm = ({
     }
   };
 
-  return (
-    <>
-      <div className="w-full max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold mb-6 text-center">Complete Your Payment</h2>
-        
-        <div className="space-y-4">
-          <div className="p-4 bg-gray-50 rounded-md">
-            <p className="text-sm text-gray-600">Subscription Type</p>
-            <p className="font-medium">{subscriptionType}</p>
-          </div>
+  if (netopiaFields) {
+    return (
+      <NetopiaPaymentForm
+        envKey={netopiaFields.env_key}
+        data={netopiaFields.data}
+        iv={netopiaFields.iv}
+        cipher={netopiaFields.cipher}
+      />
+    );
+  }
 
-          <Button
-            onClick={handlePayment}
-            disabled={isLoading}
-            className="w-full"
-          >
-            {isLoading ? 'Processing...' : 'Proceed to Payment'}
-          </Button>
-        </div>
-      </div>
-      <Toaster />
-    </>
+  return (
+    <button
+      onClick={handlePayment}
+      disabled={isLoading}
+      className="w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 disabled:opacity-50"
+    >
+      {isLoading ? 'Processing...' : 'Pay Now'}
+    </button>
   );
 }; 

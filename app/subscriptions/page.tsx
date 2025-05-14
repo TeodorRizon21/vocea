@@ -11,6 +11,8 @@ import { motion } from "framer-motion";
 import { useLanguage } from "@/components/LanguageToggle";
 import NetopiaPaymentForm from "@/components/NetopiaPaymentForm";
 import SubscriptionStatus from '@/components/SubscriptionStatus';
+import SubscriptionCards from "@/components/SubscriptionCards";
+import { useToast } from "@/hooks/use-toast";
 
 export default function SubscriptionsPage() {
   const { isLoaded, isSignedIn } = useUser();
@@ -18,6 +20,7 @@ export default function SubscriptionsPage() {
   const { language, forceRefresh } = useLanguage();
   const [selectedSubscription, setSelectedSubscription] = useState("Basic");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
   const [pendingSubscription, setPendingSubscription] = useState("");
   const [loading, setLoading] = useState(true);
   const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
@@ -42,6 +45,10 @@ export default function SubscriptionsPage() {
       toDashboard: "Mergi la Dashboard",
       changeSubscription: "Schimbare abonament",
       confirmChange: "Ești sigur că vrei să schimbi abonamentul la",
+      cancelSubscription: "Anulare abonament",
+      confirmCancel: "Ești sigur că vrei să anulezi abonamentul? Această acțiune nu poate fi anulată.",
+      yes: "Da",
+      no: "Nu",
       features: [
         "Acces la pagina de browse",
         "Vizualizare listă completă de proiecte",
@@ -65,6 +72,10 @@ export default function SubscriptionsPage() {
       toDashboard: "Go to Dashboard",
       changeSubscription: "Change Subscription",
       confirmChange: "Are you sure you want to change your subscription to",
+      cancelSubscription: "Cancel Subscription",
+      confirmCancel: "Are you sure you want to cancel your subscription? This action cannot be undone.",
+      yes: "Yes",
+      no: "No",
       features: [
         "Access to browse page",
         "View complete project list",
@@ -157,35 +168,13 @@ export default function SubscriptionsPage() {
     setSelectedSubscription(pendingSubscription);
 
     try {
-      // If selecting a paid plan, initiate payment
+      // If selecting a paid plan, redirect to order page
       if (pendingSubscription !== "Basic") {
-        const response = await fetch("/api/payment", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ 
-            subscriptionType: pendingSubscription
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to initialize payment");
-        }
-
-        const data = await response.json();
-        if (data.env_key && data.data && data.iv && data.cipher) {
-          setNetopiaFields({
-            env_key: data.env_key,
-            data: data.data,
-            iv: data.iv,
-            cipher: data.cipher,
-          });
-          return;
-        }
+        router.push(`/order?plan=${pendingSubscription}`);
+        return;
       }
 
-      // For Basic plan or if payment initialization failed, update subscription directly
+      // For Basic plan, update subscription directly
       const response = await fetch("/api/subscription", {
         method: "POST",
         headers: {
@@ -227,26 +216,55 @@ export default function SubscriptionsPage() {
   }, [isLoaded]);
 
   const handleCancelSubscription = async () => {
+    setIsCancelDialogOpen(true);
+    return new Response(null, { status: 200 });
+  };
+
+  const confirmCancelSubscription = async () => {
+    const { toast } = useToast();
+    
     try {
       const response = await fetch('/api/subscription/cancel', {
         method: 'POST',
       });
 
+      const data = await response.json().catch(() => null);
+
       if (!response.ok) {
-        throw new Error('Failed to cancel subscription');
+        throw new Error(data?.message || 'Failed to cancel subscription');
       }
 
       // Refresh subscription data
       const subscriptionResponse = await fetch('/api/subscription');
       if (subscriptionResponse.ok) {
-        const data = await subscriptionResponse.json();
-        setSubscription(data); // Data is directly the subscription object
+        const subscriptionData = await subscriptionResponse.json();
+        setSubscription(subscriptionData);
       }
 
-      return response;
+      setIsCancelDialogOpen(false);
+
+      // Show success toast
+      toast({
+        title: language === 'ro' ? 'Succes' : 'Success',
+        description: data?.message || (language === 'ro' 
+          ? 'Abonamentul a fost anulat cu succes.' 
+          : 'Subscription has been cancelled successfully.'),
+        variant: 'default',
+      });
+
     } catch (error) {
       console.error('Error cancelling subscription:', error);
-      throw error;
+      
+      // Show error toast
+      toast({
+        title: language === 'ro' ? 'Eroare' : 'Error',
+        description: error instanceof Error 
+          ? error.message 
+          : (language === 'ro' 
+              ? 'Nu s-a putut anula abonamentul. Vă rugăm să încercați din nou.' 
+              : 'Could not cancel subscription. Please try again.'),
+        variant: 'destructive',
+      });
     }
   };
 
@@ -260,171 +278,25 @@ export default function SubscriptionsPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">
-        {language === "ro" ? "Abonamente" : "Subscriptions"}
-      </h1>
+      <h1 className="text-3xl font-bold mb-2">{content.availablePlans}</h1>
+      <p className="text-gray-600 dark:text-gray-400 mb-8">{content.description}</p>
 
       {subscription && (
         <div className="mb-8">
-          <SubscriptionStatus
-            subscription={subscription}
-            onCancelSubscription={handleCancelSubscription}
+          <h2 className="text-xl font-semibold mb-4">{content.currentPlan}</h2>
+          <SubscriptionStatus 
+            subscription={subscription} 
+            onCancelSubscription={handleCancelSubscription} 
           />
         </div>
       )}
 
-      {netopiaFields ? (
-        <NetopiaPaymentForm
-          envKey={netopiaFields.env_key}
-          data={netopiaFields.data}
-          iv={netopiaFields.iv}
-          cipher={netopiaFields.cipher}
-        />
-      ) : (
-        <>
-          <div className="flex flex-col sm:flex-row justify-between items-center mb-8 sm:mb-12 gap-4">
-            <h1 className="text-3xl sm:text-4xl font-bold text-purple-600">
-              {content.availablePlans}
-            </h1>
-            <UserProfile />
-          </div>
-
-          <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-16">
-            <h2 className="text-2xl sm:text-3xl font-bold mb-4">
-              {content.choosePlan}
-            </h2>
-            <p className="text-gray-600 dark:text-gray-400 text-base sm:text-lg">
-              {content.description}
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 max-w-7xl mx-auto">
-            {subscriptions.map((subscription, index) => (
-              <motion.div
-                key={subscription.name}
-                className="w-full max-w-md mx-auto"
-                initial={{ opacity: 0, y: 50 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{
-                  duration: 0.6,
-                  delay: index * 0.2,
-                  type: "spring",
-                  stiffness: 100,
-                }}
-                whileHover={{
-                  y: -10,
-                  transition: { duration: 0.2 },
-                }}
-                style={{
-                  perspective: "1000px",
-                  transformStyle: "preserve-3d",
-                  zIndex: subscription.popular ? 20 : 10,
-                }}
-              >
-                <div
-                  className={`${subscription.color} ${
-                    subscription.textColor
-                  } border ${
-                    subscription.name === selectedSubscription
-                      ? "border-green-500 border-2"
-                      : subscription.borderColor
-                  } rounded-3xl shadow-xl overflow-hidden h-full flex flex-col relative ${
-                    subscription.popular ? "lg:scale-105 z-10" : ""
-                  }`}
-                  style={{
-                    transform: `rotateY(${
-                      index === 0 ? "5deg" : index === 2 ? "-5deg" : "0deg"
-                    })`,
-                    boxShadow: subscription.popular
-                      ? "0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1)"
-                      : "0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1)",
-                  }}
-                >
-                  {subscription.popular && (
-                    <div className="absolute top-0 right-0 bg-purple-500 text-white px-3 sm:px-4 py-1 rounded-bl-lg text-xs sm:text-sm font-bold">
-                      {content.popular}
-                    </div>
-                  )}
-                  {subscription.tag && (
-                    <div className="absolute top-0 right-0 bg-amber-500 text-white px-3 sm:px-4 py-1 rounded-bl-lg text-xs sm:text-sm font-bold">
-                      {subscription.tag}
-                    </div>
-                  )}
-                  {subscription.name === selectedSubscription && (
-                    <div className="absolute top-0 left-0 bg-green-500 text-white px-3 sm:px-4 py-1 rounded-br-lg text-xs sm:text-sm font-bold">
-                      Current Plan
-                    </div>
-                  )}
-
-                  <div className="px-4 sm:px-6 py-6 sm:py-8 border-b border-gray-200 dark:border-gray-700">
-                    <div className="text-base sm:text-lg font-medium mb-2">
-                      {subscription.name}
-                    </div>
-                    <div
-                      className={`text-3xl sm:text-4xl font-bold mb-1 ${subscription.accentColor}`}
-                    >
-                      {subscription.price}
-                    </div>
-                    <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-                      {subscription.name === "Basic" ? content.noCard : content.billedMonthly}
-                    </div>
-                  </div>
-
-                  <div className="flex-grow px-4 sm:px-6 py-4 sm:py-6">
-                    <ul className="space-y-3 sm:space-y-4">
-                      {subscription.features.map((feature, idx) => (
-                        <li key={idx} className="flex items-start">
-                          <div
-                            className={`mt-0.5 mr-3 rounded-full p-1 ${
-                              feature.available
-                                ? "text-green-500 bg-green-100 dark:bg-green-900/30"
-                                : "text-gray-400 bg-gray-100 dark:bg-gray-800"
-                            }`}
-                          >
-                            <Check className="h-3 w-3" />
-                          </div>
-                          <span
-                            className={`text-sm sm:text-base ${
-                              feature.available ? "" : "text-gray-400 line-through"
-                            }`}
-                          >
-                            {feature.text}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <div className="px-4 sm:px-6 pb-6 sm:pb-8 pt-2">
-                    <button
-                      onClick={() => handleSubscriptionChange(subscription.name)}
-                      className={`w-full py-3 sm:py-4 rounded-xl font-semibold transition-all duration-200 ${
-                        (subscription.name === selectedSubscription)
-                          ? "bg-green-600 hover:bg-green-700 text-white"
-                          : subscription.buttonColor
-                      }`}
-                      disabled={subscription.name === selectedSubscription}
-                    >
-                      {subscription.name === selectedSubscription
-                        ? content.currentPlan
-                        : content.select}
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-
-          <div className="flex justify-center mt-8 sm:mt-16">
-            <button
-              onClick={() => router.push("/dashboard")}
-              className="bg-gray-200 hover:bg-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 font-medium py-2 sm:py-3 px-6 sm:px-8 rounded-xl transition-all duration-200"
-            >
-              {content.toDashboard}
-            </button>
-          </div>
-        </>
-      )}
+      <SubscriptionCards
+        selectedSubscription={selectedSubscription}
+        onSubscriptionChange={handleSubscriptionChange}
+        currentPlan={subscription?.plan}
+        className="mt-8"
+      />
 
       <ConfirmationDialog
         isOpen={isDialogOpen}
@@ -432,7 +304,28 @@ export default function SubscriptionsPage() {
         onConfirm={confirmSubscriptionChange}
         title={content.changeSubscription}
         message={`${content.confirmChange} ${pendingSubscription}?`}
+        confirmText={content.yes}
+        cancelText={content.no}
       />
+
+      <ConfirmationDialog
+        isOpen={isCancelDialogOpen}
+        onClose={() => setIsCancelDialogOpen(false)}
+        onConfirm={confirmCancelSubscription}
+        title={content.cancelSubscription}
+        message={content.confirmCancel}
+        confirmText={content.yes}
+        cancelText={content.no}
+      />
+
+      {netopiaFields && (
+        <NetopiaPaymentForm
+          envKey={netopiaFields.env_key}
+          data={netopiaFields.data}
+          iv={netopiaFields.iv}
+          cipher={netopiaFields.cipher}
+        />
+      )}
     </div>
   );
 }

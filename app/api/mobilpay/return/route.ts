@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { decodeResponse } from '@/mobilpay-sdk/order';
-import { sendSubscriptionConfirmationEmail, sendPaymentFailedEmail } from '@/lib/email';
+import { decodeResponse } from '@/order';
 
 export async function GET(req: Request) {
   try {
@@ -16,23 +15,8 @@ export async function GET(req: Request) {
       return NextResponse.redirect(new URL('/subscriptions?error=missing_order', req.url));
     }
 
-    // Find the order in our database
-    const orderRecord = await prisma.order.findUnique({
-      where: { orderId },
-      include: { 
-        user: true,
-        plan: true
-      }
-    });
-
-    if (!orderRecord) {
-      console.error('Order not found:', orderId);
-      return NextResponse.redirect(new URL('/subscriptions?error=order_not_found', req.url));
-    }
-
-    // For GET requests, we'll just redirect to the dashboard
-    // The IPN handler will handle the actual payment confirmation
-    return NextResponse.redirect(new URL('/dashboard?payment=pending', req.url));
+    // Always redirect to verification page with orderId
+    return NextResponse.redirect(new URL(`/payment/verify?orderId=${orderId}`, req.url));
   } catch (error) {
     console.error('[NETOPIA_RETURN_GET_ERROR]', error);
     return NextResponse.redirect(new URL('/subscriptions?error=internal_error', req.url));
@@ -67,163 +51,11 @@ export async function POST(req: Request) {
     // Extract transaction information
     const { order } = decodedResponse;
     const { 
-      id: orderId, 
-      status,
-      timestamp,
-      amount,
-      currency,
-      pan_masked: maskedCard,
-      payment_instrument: paymentMethod
+      $: { id: orderId }
     } = order;
 
-    console.log('Transaction details:', { 
-      orderId, 
-      status, 
-      timestamp, 
-      amount, 
-      currency,
-      maskedCard,
-      paymentMethod
-    });
-
-    // Find the order in our database
-    const orderRecord = await prisma.order.findUnique({
-      where: { orderId },
-      include: { 
-        user: true,
-        plan: true
-      }
-    });
-
-    if (!orderRecord) {
-      console.error('Order not found:', orderId);
-      return NextResponse.redirect(new URL('/subscriptions?error=order_not_found', req.url));
-    }
-
-    // Update order status
-    await prisma.order.update({
-      where: { orderId },
-      data: { 
-        status: status === 'approved' ? 'COMPLETED' : 'FAILED',
-        updatedAt: new Date()
-      }
-    });
-
-    // If payment was successful, update the user's subscription
-    if (status === 'approved') {
-      console.log('Payment approved, updating subscription');
-      
-      // Calculate subscription end date (30 days from now)
-      const startDate = new Date();
-      const endDate = new Date();
-      endDate.setDate(endDate.getDate() + 30);
-
-      // Create or update subscription
-      await prisma.subscription.upsert({
-        where: {
-          userId: orderRecord.userId
-        },
-        create: {
-          userId: orderRecord.userId,
-          plan: orderRecord.plan.name,
-          status: 'active',
-          startDate,
-          endDate,
-          projectsPosted: 0
-        },
-        update: {
-          plan: orderRecord.plan.name,
-          status: 'active',
-          startDate,
-          endDate,
-          // Reset projectsPosted if upgrading to a higher plan
-          ...(orderRecord.plan.name === 'Gold' ? { projectsPosted: 0 } : {})
-        }
-      });
-
-      // Update user's plan type
-      await prisma.user.update({
-        where: {
-          id: orderRecord.userId
-        },
-        data: {
-          planType: orderRecord.plan.name
-        }
-      });
-
-      // Create notification for the user
-      await prisma.notification.create({
-        data: {
-          userId: orderRecord.user.clerkId,
-          type: 'subscription',
-          message: `Your ${orderRecord.plan.name} subscription has been activated. Your subscription will renew on ${endDate.toLocaleDateString()}.`,
-          read: false
-        }
-      });
-
-      // Send confirmation email
-      try {
-        // Fetch user email from our DB
-        const user = await prisma.user.findUnique({
-          where: { id: orderRecord.userId },
-          select: { email: true, firstName: true, lastName: true }
-        });
-        
-        if (user && user.email) {
-          // Send subscription confirmation email
-          const emailSent = await sendSubscriptionConfirmationEmail(
-            user.email,
-            {
-              name: user.firstName || 'User',
-              planName: orderRecord.plan.name,
-              endDate,
-              isRecurring: true, // Assuming all subscriptions are recurring
-              language: 'en' // Default to English
-            }
-          );
-          
-          console.log('Subscription confirmation email sent from return handler:', emailSent);
-        }
-      } catch (err) {
-        console.error('Error sending confirmation email from return handler:', err);
-        // Continue with the process even if email sending fails
-      }
-
-      return NextResponse.redirect(new URL('/dashboard?payment=success', req.url));
-    } else {
-      // Create notification for failed payment
-      await prisma.notification.create({
-        data: {
-          userId: orderRecord.user.clerkId,
-          type: 'payment',
-          message: `Your payment for ${orderRecord.plan.name} subscription has failed. Please try again.`,
-          read: false
-        }
-      });
-
-      // Send failed payment email
-      try {
-        const user = await prisma.user.findUnique({
-          where: { id: orderRecord.userId },
-          select: { email: true }
-        });
-        
-        if (user && user.email) {
-          const emailSent = await sendPaymentFailedEmail(
-            user.email,
-            orderRecord.plan.name,
-            'en' // Default to English
-          );
-          
-          console.log('Payment failed email sent from return handler:', emailSent);
-        }
-      } catch (err) {
-        console.error('Error sending payment failed email:', err);
-      }
-
-      return NextResponse.redirect(new URL('/subscriptions?error=payment_failed', req.url));
-    }
-
+    // Always redirect to verification page with orderId
+    return NextResponse.redirect(new URL(`/payment/verify?orderId=${orderId}`, req.url));
   } catch (error) {
     console.error('[NETOPIA_RETURN_POST_ERROR]', error);
     return NextResponse.redirect(new URL('/subscriptions?error=internal_error', req.url));

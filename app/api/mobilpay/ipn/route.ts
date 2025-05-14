@@ -1,54 +1,50 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { decodeResponse } from '@/mobilpay-sdk/order';
+import { decodeResponse } from '@/order';
 import crypto from 'crypto';
 import { sendSubscriptionConfirmationEmail, sendPaymentFailedEmail } from '@/lib/email';
+
+// Add SSL bypass for development
+if (process.env.NODE_ENV === 'development') {
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+  console.log('SSL verification disabled for development environment in IPN handler');
+}
 
 export async function POST(req: Request) {
   try {
     console.log('--- IPN DEBUG START ---');
     console.log('Request method:', req.method);
+    console.log('Request URL:', req.url);
     console.log('Request headers:', Object.fromEntries(req.headers.entries()));
 
-    // Read raw body as text for debugging
-    const rawBody = await req.text();
-    console.log('Raw IPN body (text):', rawBody);
+    // Parse form data
+    const formData = await req.formData();
+    const envKey = formData.get('env_key');
+    const data = formData.get('data');
+    const iv = formData.get('iv');
+    const cipher = formData.get('cipher');
 
-    // Try to parse JSON body
-    let body;
-    try {
-      body = JSON.parse(rawBody);
-    } catch (err) {
-      console.error('Failed to parse IPN body as JSON:', err);
-      return new NextResponse("Malformed JSON", { status: 400 });
-    }
-    console.log('Parsed IPN body:', body);
+    console.log('Form data received:', {
+      hasEnvKey: !!envKey,
+      hasData: !!data,
+      hasIv: !!iv,
+      hasCipher: !!cipher
+    });
 
-    // Validate the IPN signature
-    const signature = req.headers.get('x-mobilpay-signature');
-    if (!signature) {
-      console.error('No signature provided in IPN');
-      return new NextResponse("Unauthorized: No signature", { status: 401 });
+    if (!envKey || !data || !iv || !cipher) {
+      console.error('Missing required payment data');
+      return new NextResponse("Missing required payment data", { status: 400 });
     }
 
-    // Verify signature using your Netopia private key
-    const privateKey = process.env.NETOPIA_PRIVATE_KEY;
-    if (!privateKey) {
-      console.error('NETOPIA_PRIVATE_KEY not configured');
-      return new NextResponse("Server configuration error: No private key", { status: 500 });
-    }
-
-    const isValid = verifySignature(body, signature, privateKey);
-    if (!isValid) {
-      console.error('Invalid IPN signature');
-      return new NextResponse("Invalid signature", { status: 401 });
-    }
-    console.log('IPN signature verified.');
-    
     // Decode the response from Netopia
     let decodedResponse;
     try {
-      decodedResponse = await decodeResponse(body);
+      decodedResponse = await decodeResponse({
+        env_key: envKey.toString(),
+        data: data.toString(),
+        iv: iv.toString(),
+        cipher: cipher.toString()
+      });
       console.log('Decoded IPN response:', decodedResponse);
     } catch (err) {
       console.error('Failed to decode Netopia response:', err);
@@ -58,13 +54,14 @@ export async function POST(req: Request) {
     // Extract transaction information
     const { order } = decodedResponse;
     const { 
-      id: orderId, 
-      status,
-      timestamp,
-      amount,
-      currency,
-      pan_masked: maskedCard,
-      payment_instrument: paymentMethod,
+      $: { id: orderId, timestamp },
+      mobilpay: {
+        action: status,
+        original_amount: amount,
+        pan_masked: maskedCard,
+        payment_instrument_id: paymentMethod,
+        error
+      },
       params
     } = order;
 
@@ -77,11 +74,11 @@ export async function POST(req: Request) {
       status, 
       timestamp, 
       amount, 
-      currency,
       maskedCard,
       paymentMethod,
       isRecurring,
-      recurringDetails
+      recurringDetails,
+      error
     });
 
     // Find the order in our database with plan details
@@ -105,196 +102,73 @@ export async function POST(req: Request) {
     }
     console.log('Found order:', orderRecord);
 
+    // Properly validate the payment status based on Netopia's response
+    // Error code '0' means success, any other code means failure
+    const isErrorCode = error && error.$?.code && error.$?.code !== '0';
+    const isSuccessStatus = status === 'confirmed' || status === 'paid';
+    const paymentStatus = (!isErrorCode && isSuccessStatus) ? 'COMPLETED' : 'FAILED';
+
+    // Log payment validation for debugging
+    console.log('Payment validation:', {
+      status,
+      errorCode: error?.$?.code,
+      errorMessage: error?._,
+      isErrorCode,
+      isSuccessStatus,
+      paymentStatus
+    });
+
     // Update order status and transaction details
     let updatedOrder;
     try {
       updatedOrder = await prisma.order.update({
         where: { orderId },
         data: { 
-          status: status === 'approved' ? 'COMPLETED' : 'FAILED',
+          status: paymentStatus,
           updatedAt: new Date()
         }
       });
+
+      // Log the order update
+      console.log('Updated order status:', {
+        orderId,
+        status: paymentStatus,
+        isErrorCode,
+        errorDetails: error
+      });
+
+      // Send appropriate email notification based on payment status
+      if (orderRecord.user.email) {
+        if (paymentStatus === 'FAILED') {
+          await sendPaymentFailedEmail(
+            orderRecord.user.email,
+            orderRecord.plan.name
+          );
+        }
+      }
+
     } catch (err) {
       console.error('DB error updating order:', err);
       return new NextResponse("DB error updating order", { status: 500 });
     }
 
-    // If payment was successful, update the user's subscription
-    if (status === 'approved') {
-      console.log('Payment approved, updating subscription');
-      
-      // Calculate subscription end date (30 days from now)
-      const startDate = new Date();
-      const endDate = new Date();
-      endDate.setDate(endDate.getDate() + 30);
+    // Create notification for the user based on payment status
+    try {
+      const notificationMessage = paymentStatus === 'FAILED'
+        ? `Your payment for ${orderRecord.plan.name} subscription has failed. Please try again.`
+        : `Your payment for ${orderRecord.plan.name} subscription was successful. Please go to your dashboard to activate your subscription.`;
 
-      // Get the plan from the order
-      const plan = orderRecord.plan;
-      if (!plan) {
-        console.error('No plan found in order:', orderId);
-        return new NextResponse("Plan not found in order", { status: 400 });
-      }
-
-      // Create or update subscription with the plan from the order
-      let subscription;
-      try {
-        subscription = await prisma.subscription.upsert({
-          where: {
-            userId: orderRecord.userId
-          },
-          create: {
-            userId: orderRecord.userId,
-            plan: plan.name,
-            status: 'active',
-            startDate,
-            endDate,
-            projectsPosted: 0
-          },
-          update: {
-            plan: plan.name,
-            status: 'active',
-            startDate,
-            endDate,
-            ...(plan.name === 'Gold' ? { projectsPosted: 0 } : {})
-          }
-        });
-      } catch (err) {
-        console.error('DB error upserting subscription:', err);
-        return new NextResponse("DB error upserting subscription", { status: 500 });
-      }
-
-      // Update user's plan type with the plan from the order
-      let updatedUser;
-      try {
-        updatedUser = await prisma.user.update({
-          where: {
-            id: orderRecord.userId
-          },
-          data: {
-            planType: plan.name
-          }
-        });
-      } catch (err) {
-        console.error('DB error updating user plan:', err);
-        return new NextResponse("DB error updating user plan", { status: 500 });
-      }
-
-      // Create notification for the user
-      let notificationMessage = '';
-      
-      // Default language to English since we don't have a language field in the User model
-      const userLanguage: string = 'en';
-      
-      // Set up multilingual notification messages
-      if (isRecurring) {
-        // For recurring payments
-        notificationMessage = `${plan.name} ${userLanguage === 'ro' 
-          ? `abonamentul tău a fost activat. Abonamentul tău se va reînnoi automat pe ${endDate.toLocaleDateString()}.` 
-          : `subscription has been activated. Your subscription will automatically renew on ${endDate.toLocaleDateString()}.`}`;
-      } else {
-        // For one-time payments
-        notificationMessage = `${plan.name} ${userLanguage === 'ro' 
-          ? `abonamentul tău a fost activat. Abonamentul tău este valabil până pe ${endDate.toLocaleDateString()}.` 
-          : `subscription has been activated. Your subscription is valid until ${endDate.toLocaleDateString()}.`}`;
-      }
-      
-      try {
-        await prisma.notification.create({
-          data: {
-            userId: orderRecord.user.clerkId,
-            type: 'subscription',
-            message: notificationMessage,
-            read: false
-          }
-        });
-      } catch (err) {
-        console.error('DB error creating notification:', err);
-      }
-
-      // Get user's email from Clerk via our database
-      try {
-        // Fetch user email from our DB or through Clerk
-        const user = await prisma.user.findUnique({
-          where: { id: orderRecord.userId },
-          select: { email: true, firstName: true, lastName: true }
-        });
-        
-        if (user && user.email) {
-          // Send subscription confirmation email
-          const emailSent = await sendSubscriptionConfirmationEmail(
-            user.email,
-            {
-              name: user.firstName || 'User',
-              planName: plan.name,
-              endDate,
-              isRecurring,
-              language: userLanguage
-            }
-          );
-          
-          console.log('Subscription confirmation email sent:', emailSent);
-        } else {
-          console.error('Could not send confirmation email: user email not found');
+      await prisma.notification.create({
+        data: {
+          userId: orderRecord.user.clerkId,
+          type: 'payment',
+          message: notificationMessage,
+          read: false
         }
-      } catch (err) {
-        console.error('Error sending confirmation email:', err);
-        // Continue with the process even if email sending fails
-      }
-
-      console.log('Successfully updated subscription and user plan:', {
-        orderId,
-        plan: plan.name,
-        subscriptionId: subscription.id,
-        userId: updatedUser.id,
-        isRecurring
       });
-      
-      // If this is a recurring payment, store the token for future use
-      if (isRecurring && recurringDetails && recurringDetails.token) {
-        console.log('Storing recurring payment token for future billing');
-        // Here you would typically store the token in your database
-        // for future automatic charges
-      }
-      
-    } else {
-      // Create notification for failed payment
-      // Default language to English since we don't have a language field in the User model
-      const userLanguage: string = 'en';
-      
-      // Create multilingual error message
-      const failedPaymentMessage = userLanguage === 'ro'
-        ? `Plata pentru abonamentul ${orderRecord.plan.name} a eșuat. Te rugăm să încerci din nou.`
-        : `Your payment for ${orderRecord.plan.name} subscription has failed. Please try again.`;
-        
-      try {
-        await prisma.notification.create({
-          data: {
-            userId: orderRecord.user.clerkId,
-            type: 'payment',
-            message: failedPaymentMessage,
-            read: false
-          }
-        });
 
-        // Get user's email and send failed payment email
-        const user = await prisma.user.findUnique({
-          where: { id: orderRecord.userId },
-          select: { email: true }
-        });
-        
-        if (user && user.email) {
-          const emailSent = await sendPaymentFailedEmail(
-            user.email,
-            orderRecord.plan.name,
-            userLanguage
-          );
-          
-          console.log('Payment failed email sent:', emailSent);
-        }
-      } catch (err) {
-        console.error('DB error creating failed payment notification or sending email:', err);
-      }
+    } catch (err) {
+      console.error('Error creating notification:', err);
     }
 
     // Return success response to Netopia

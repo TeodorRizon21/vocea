@@ -16,6 +16,10 @@ interface ConfirmationDialogProps {
   onConfirm: () => void;
   title: string;
   message: string;
+  confirmText?: string;
+  cancelText?: string;
+  confirmButtonClass?: string;
+  cancelButtonClass?: string;
 }
 
 export default function ConfirmationDialog({
@@ -24,6 +28,10 @@ export default function ConfirmationDialog({
   onConfirm,
   title,
   message,
+  confirmText = "Confirmă",
+  cancelText = "Anulează",
+  confirmButtonClass = "bg-purple-600 hover:bg-purple-700",
+  cancelButtonClass = "bg-white hover:bg-gray-100 text-gray-900",
 }: ConfirmationDialogProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -33,14 +41,14 @@ export default function ConfirmationDialog({
           <DialogDescription>{message}</DialogDescription>
         </DialogHeader>
         <DialogFooter className="mt-4">
-          <Button variant="outline" onClick={onClose}>
-            Anulează
+          <Button variant="outline" onClick={onClose} className={cancelButtonClass}>
+            {cancelText}
           </Button>
           <Button
-            className="bg-purple-600 hover:bg-purple-700"
+            className={confirmButtonClass}
             onClick={onConfirm}
           >
-            Confirmă
+            {confirmText}
           </Button>
         </DialogFooter>
       </DialogContent>
