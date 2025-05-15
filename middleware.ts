@@ -15,6 +15,8 @@ const isPublicRoute = createRouteMatcher([
   "/api/user",
   "/payment/(.*)",
   "/api/webhooks/clerk",
+  "/api/mobilpay/(.*)",
+  "/api/payment/(.*)",
 ]);
 
 export default clerkMiddleware(async (auth, req) => {

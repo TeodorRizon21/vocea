@@ -30,10 +30,24 @@ export async function GET(req: Request) {
       timestamp: new Date().toISOString()
     });
 
-    // Return the order status and plan info
+    // Check if we need to wait for payment processing
+    if (order.status === 'PENDING') {
+      // Payment is still being processed
+      return NextResponse.json({
+        status: 'PENDING',
+        message: 'Payment is being processed'
+      });
+    }
+
+    // Return the order status and redirect URL
+    const redirectUrl = order.status === 'COMPLETED'
+      ? `/payment/success?orderId=${orderId}`
+      : `/payment/failed?orderId=${orderId}`;
+
     return NextResponse.json({
       status: order.status,
       plan: order.plan.name,
+      redirectUrl,
       message: order.status === 'FAILED' ? 'Payment was not successful' : undefined
     });
 

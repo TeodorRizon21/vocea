@@ -33,11 +33,11 @@ export default function PaymentVerificationPage() {
 
         // Redirect based on payment status
         if (data.status === 'COMPLETED') {
-          router.push('/payment/success');
+          router.push(`/payment/success?orderId=${orderId}`);
         } else if (data.status === 'FAILED') {
-          router.push(`/payment/failed?message=${encodeURIComponent(data.message || 'Payment was not successful')}`);
+          router.push(`/payment/failed?orderId=${orderId}&message=${encodeURIComponent(data.message || 'Payment was not successful')}`);
         } else {
-          router.push('/dashboard?payment=pending');
+          router.push(`/dashboard?payment=pending&orderId=${orderId}`);
         }
       } catch (err) {
         console.error('Error verifying payment:', err);
