@@ -3,36 +3,71 @@ import { prisma } from '@/lib/prisma';
 import { decodeResponse } from '@/order';
 import crypto from 'crypto';
 import { sendSubscriptionConfirmationEmail, sendPaymentFailedEmail } from '@/lib/email';
+import fs from 'fs';
+import path from 'path';
+
+// Setup logging
+const LOG_FILE = path.join(process.cwd(), 'ipn-debug.log');
+
+function logToFile(message: string) {
+  const timestamp = new Date().toISOString();
+  const logMessage = `[${timestamp}] ${message}\n`;
+  fs.appendFileSync(LOG_FILE, logMessage);
+  console.log(logMessage);
+}
 
 // Add SSL bypass for development
 if (process.env.NODE_ENV === 'development') {
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-  console.log('SSL verification disabled for development environment in IPN handler');
+  logToFile('[IPN_SETUP] SSL verification disabled for development environment');
 }
+
+// Add global error handler for unhandled rejections
+process.on('unhandledRejection', (reason, promise) => {
+  logToFile(`[IPN_UNHANDLED_REJECTION] ${reason}`);
+});
 
 export async function POST(req: Request) {
   try {
-    console.log('--- IPN DEBUG START ---');
-    console.log('Request method:', req.method);
-    console.log('Request URL:', req.url);
-    console.log('Request headers:', Object.fromEntries(req.headers.entries()));
+    logToFile('\n=== IPN REQUEST RECEIVED ===');
+    logToFile(`Request URL: ${req.url}`);
+    logToFile(`Request method: ${req.method}`);
+    
+    // Log all headers
+    const headers = Object.fromEntries(req.headers.entries());
+    logToFile(`Request headers: ${JSON.stringify(headers, null, 2)}`);
+
+    // Log raw body if available
+    const clonedReq = req.clone();
+    try {
+      const rawBody = await clonedReq.text();
+      logToFile(`Raw request body: ${rawBody}`);
+    } catch (err: any) {
+      logToFile(`Could not read raw body: ${err.message || err}`);
+    }
 
     // Parse form data
     const formData = await req.formData();
+    logToFile(`Form data keys: ${Array.from(formData.keys()).join(', ')}`);
+    
+    // Log each form field
+    for (const [key, value] of formData.entries()) {
+      logToFile(`Form field ${key}: ${typeof value === 'string' ? value : 'Binary data'}`);
+    }
+
     const envKey = formData.get('env_key');
     const data = formData.get('data');
     const iv = formData.get('iv');
     const cipher = formData.get('cipher');
 
-    console.log('Form data received:', {
-      hasEnvKey: !!envKey,
-      hasData: !!data,
-      hasIv: !!iv,
-      hasCipher: !!cipher
-    });
+    logToFile('Form data received:');
+    logToFile(`  hasEnvKey: ${!!envKey}`);
+    logToFile(`  hasData: ${!!data}`);
+    logToFile(`  hasIv: ${!!iv}`);
+    logToFile(`  hasCipher: ${!!cipher}`);
 
     if (!envKey || !data || !iv || !cipher) {
-      console.error('Missing required payment data');
+      logToFile('Missing required payment data');
       return new NextResponse("Missing required payment data", { status: 400 });
     }
 
@@ -45,9 +80,11 @@ export async function POST(req: Request) {
         iv: iv.toString(),
         cipher: cipher.toString()
       });
-      console.log('Decoded IPN response:', decodedResponse);
-    } catch (err) {
-      console.error('Failed to decode Netopia response:', err);
+      logToFile('Decoded IPN response:');
+      logToFile(JSON.stringify(decodedResponse, null, 2));
+    } catch (err: any) {
+      logToFile('Failed to decode Netopia response:');
+      logToFile(err.message || err.toString());
       return new NextResponse("Failed to decode Netopia response", { status: 400 });
     }
 
@@ -69,17 +106,16 @@ export async function POST(req: Request) {
     const isRecurring = !!(params && params.recurring);
     const recurringDetails = isRecurring ? params.recurring : null;
     
-    console.log('Transaction details:', { 
-      orderId, 
-      status, 
-      timestamp, 
-      amount, 
-      maskedCard,
-      paymentMethod,
-      isRecurring,
-      recurringDetails,
-      error
-    });
+    logToFile('Transaction details:');
+    logToFile(`  orderId: ${orderId}`);
+    logToFile(`  status: ${status}`);
+    logToFile(`  timestamp: ${timestamp}`);
+    logToFile(`  amount: ${amount}`);
+    logToFile(`  maskedCard: ${maskedCard}`);
+    logToFile(`  paymentMethod: ${paymentMethod}`);
+    logToFile(`  isRecurring: ${isRecurring}`);
+    logToFile(`  recurringDetails: ${JSON.stringify(recurringDetails)}`);
+    logToFile(`  error: ${JSON.stringify(error)}`);
 
     // Find the order in our database with plan details
     let orderRecord;
@@ -91,16 +127,19 @@ export async function POST(req: Request) {
           plan: true
         }
       });
-    } catch (err) {
-      console.error('DB error finding order:', err);
+    } catch (err: any) {
+      logToFile('DB error finding order:');
+      logToFile(err.message || err.toString());
       return new NextResponse("DB error finding order", { status: 500 });
     }
 
     if (!orderRecord) {
-      console.error('Order not found:', orderId);
+      logToFile('Order not found:');
+      logToFile(orderId);
       return new NextResponse("Order not found", { status: 404 });
     }
-    console.log('Found order:', orderRecord);
+    logToFile('Found order:');
+    logToFile(JSON.stringify(orderRecord));
 
     // Properly validate the payment status based on Netopia's response
     // Error code '0' means success, any other code means failure
@@ -109,14 +148,13 @@ export async function POST(req: Request) {
     const paymentStatus = (!isErrorCode && isSuccessStatus) ? 'COMPLETED' : 'FAILED';
 
     // Log payment validation for debugging
-    console.log('Payment validation:', {
-      status,
-      errorCode: error?.$?.code,
-      errorMessage: error?._,
-      isErrorCode,
-      isSuccessStatus,
-      paymentStatus
-    });
+    logToFile('Payment validation:');
+    logToFile(`  status: ${status}`);
+    logToFile(`  errorCode: ${error?.$?.code}`);
+    logToFile(`  errorMessage: ${error?._}`);
+    logToFile(`  isErrorCode: ${isErrorCode}`);
+    logToFile(`  isSuccessStatus: ${isSuccessStatus}`);
+    logToFile(`  paymentStatus: ${paymentStatus}`);
 
     // Update order status and transaction details
     let updatedOrder;
@@ -129,26 +167,53 @@ export async function POST(req: Request) {
         }
       });
 
-      // Log the order update
-      console.log('Updated order status:', {
-        orderId,
-        status: paymentStatus,
-        isErrorCode,
-        errorDetails: error
-      });
+      // If payment is successful, update user's plan and create subscription
+      if (paymentStatus === 'COMPLETED') {
+        // Update user's plan type
+        await prisma.user.update({
+          where: { id: orderRecord.user.id },
+          data: { planType: orderRecord.subscriptionType }
+        });
 
-      // Send appropriate email notification based on payment status
-      if (orderRecord.user.email) {
-        if (paymentStatus === 'FAILED') {
-          await sendPaymentFailedEmail(
+        // Create or update subscription
+        const startDate = new Date();
+        const endDate = new Date();
+        endDate.setMonth(endDate.getMonth() + 1); // 1 month subscription
+
+        await prisma.subscription.create({
+          data: {
+            userId: orderRecord.user.clerkId,
+            plan: orderRecord.subscriptionType,
+            startDate,
+            endDate,
+            status: 'active',
+            projectsPosted: 0
+          }
+        });
+
+        // Send confirmation email
+        if (orderRecord.user.email) {
+          await sendSubscriptionConfirmationEmail(
             orderRecord.user.email,
-            orderRecord.plan.name
+            {
+              name: orderRecord.user.firstName ? `${orderRecord.user.firstName} ${orderRecord.user.lastName || ''}`.trim() : 'User',
+              planName: orderRecord.plan.name,
+              endDate: endDate,
+              isRecurring: false,
+              language: 'en'
+            }
           );
         }
+      } else if (paymentStatus === 'FAILED' && orderRecord.user.email) {
+        await sendPaymentFailedEmail(
+          orderRecord.user.email,
+          orderRecord.plan.name
+        );
       }
 
-    } catch (err) {
-      console.error('DB error updating order:', err);
+    } catch (err: any) {
+      logToFile('DB error updating order:');
+      logToFile(err.message || err.toString());
       return new NextResponse("DB error updating order", { status: 500 });
     }
 
@@ -156,7 +221,7 @@ export async function POST(req: Request) {
     try {
       const notificationMessage = paymentStatus === 'FAILED'
         ? `Your payment for ${orderRecord.plan.name} subscription has failed. Please try again.`
-        : `Your payment for ${orderRecord.plan.name} subscription was successful. Please go to your dashboard to activate your subscription.`;
+        : `Your payment for ${orderRecord.plan.name} subscription was successful! Your plan has been upgraded.`;
 
       await prisma.notification.create({
         data: {
@@ -167,12 +232,13 @@ export async function POST(req: Request) {
         }
       });
 
-    } catch (err) {
-      console.error('Error creating notification:', err);
+    } catch (err: any) {
+      logToFile('Error creating notification:');
+      logToFile(err.message || err.toString());
     }
 
     // Return success response to Netopia
-    console.log('--- IPN DEBUG END ---');
+    logToFile('--- IPN DEBUG END ---');
     return NextResponse.json({ 
       success: true,
       message: 'IPN processed successfully',
@@ -180,8 +246,9 @@ export async function POST(req: Request) {
       status: updatedOrder.status
     });
 
-  } catch (error) {
-    console.error('[NETOPIA_IPN_ERROR]', error);
+  } catch (error: any) {
+    logToFile('[NETOPIA_IPN_ERROR]');
+    logToFile(error.message || error.toString());
     return new NextResponse("Internal Error", { status: 500 });
   }
 }
@@ -198,9 +265,10 @@ function verifySignature(body: any, signature: string, privateKey: string): bool
     const verifier = crypto.createVerify('RSA-SHA256');
     verifier.update(hash);
     
-    return verifier.verify(privateKey, signature, 'base64');
-  } catch (error) {
-    console.error('Error verifying signature:', error);
+    return verifier.verify(privateKey, Buffer.from(signature, 'base64'));
+  } catch (error: any) {
+    logToFile('Error verifying signature:');
+    logToFile(error.message || error.toString());
     return false;
   }
 } 

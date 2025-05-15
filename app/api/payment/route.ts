@@ -121,19 +121,31 @@ export async function POST(req: Request) {
     const orderId = `SUB_${Date.now()}`;
 
     // Get encrypted payment request with amount and billing info
-    const paymentRequest = getRequest(orderId, amount, billingInfo);
-
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    
     // Log the payment request details
     console.log('Payment Request Details:', {
       orderId,
       amount,
       currentPlan: currentSubscription?.plan,
       newPlan: subscriptionType,
-      returnUrl: `${process.env.NEXT_PUBLIC_APP_URL}/api/mobilpay/return`,
-      confirmUrl: `${process.env.NEXT_PUBLIC_APP_URL}/api/mobilpay/ipn`,
-      ipnUrl: `${process.env.NEXT_PUBLIC_APP_URL}/api/mobilpay/ipn`,
-      appUrl: process.env.NEXT_PUBLIC_APP_URL
+      returnUrl: `${baseUrl}/api/mobilpay/return`,
+      confirmUrl: `${baseUrl}/api/mobilpay/ipn`,
+      ipnUrl: `${baseUrl}/api/mobilpay/ipn`,
+      appUrl: baseUrl
     });
+
+    // Create the payment request with consistent URLs
+    const paymentRequest = getRequest(
+      orderId, 
+      amount, 
+      billingInfo,
+      {
+        returnUrl: `${baseUrl}/api/mobilpay/return`,
+        confirmUrl: `${baseUrl}/api/mobilpay/ipn`,
+        ipnUrl: `${baseUrl}/api/mobilpay/ipn`
+      }
+    );
 
     // Find or create the plan
     const plan = await prisma.plan.upsert({
