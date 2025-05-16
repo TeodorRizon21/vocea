@@ -20,25 +20,37 @@ export default function PaymentVerificationPage() {
           return;
         }
 
-        // Add a small delay to ensure IPN has processed
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Add a longer initial delay to ensure IPN has processed
+        await new Promise(resolve => setTimeout(resolve, 3000));
 
-        // Check payment status
-        const response = await fetch(`/api/payment/verify?orderId=${orderId}`);
-        const data = await response.json();
+        // Try up to 5 times with increasing delays
+        for (let attempt = 0; attempt < 5; attempt++) {
+          // Check payment status
+          const response = await fetch(`/api/payment/verify?orderId=${orderId}`);
+          const data = await response.json();
 
-        if (!response.ok) {
-          throw new Error(data.error || 'Failed to verify payment');
+          if (!response.ok) {
+            throw new Error(data.error || 'Failed to verify payment');
+          }
+
+          // If payment is no longer pending, redirect accordingly
+          if (data.status !== 'PENDING') {
+            if (data.status === 'COMPLETED') {
+              router.push(`/payment/success?orderId=${orderId}`);
+            } else if (data.status === 'FAILED') {
+              router.push(`/payment/failed?orderId=${orderId}&message=${encodeURIComponent(data.message || 'Payment was not successful')}`);
+            }
+            return;
+          }
+
+          // If still pending and not the last attempt, wait before retrying
+          if (attempt < 4) {
+            await new Promise(resolve => setTimeout(resolve, 2000 * (attempt + 1)));
+          }
         }
 
-        // Redirect based on payment status
-        if (data.status === 'COMPLETED') {
-          router.push(`/payment/success?orderId=${orderId}`);
-        } else if (data.status === 'FAILED') {
-          router.push(`/payment/failed?orderId=${orderId}&message=${encodeURIComponent(data.message || 'Payment was not successful')}`);
-        } else {
-          router.push(`/dashboard?payment=pending&orderId=${orderId}`);
-        }
+        // If we get here, payment is still pending after all attempts
+        router.push(`/dashboard?payment=pending&orderId=${orderId}`);
       } catch (err) {
         console.error('Error verifying payment:', err);
         setError('Failed to verify payment status. Please contact support if this persists.');

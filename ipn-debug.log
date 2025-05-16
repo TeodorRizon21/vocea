@@ -209,3 +209,149 @@
 [2025-05-15T17:17:26.776Z]   isSuccessStatus: true
 [2025-05-15T17:17:26.776Z]   paymentStatus: COMPLETED
 [2025-05-15T17:17:27.329Z] --- IPN DEBUG END ---
+[2025-05-16T11:29:20.184Z] [IPN_SETUP] SSL verification disabled for development environment
+[2025-05-16T11:29:20.191Z] 
+=== IPN REQUEST RECEIVED ===
+[2025-05-16T11:29:20.193Z] Request URL: https://localhost:3000/api/mobilpay/ipn
+[2025-05-16T11:29:20.194Z] Request method: POST
+[2025-05-16T11:29:20.195Z] Request headers: {
+  "accept-encoding": ", gzip",
+  "content-length": "3455",
+  "content-type": "application/x-www-form-urlencoded",
+  "host": "544b-2a02-2f0d-260d-6c00-d13-5281-a6f7-9ce4.ngrok-free.app",
+  "user-agent": "Zend_Http_Client",
+  "x-clerk-auth-message": "",
+  "x-clerk-auth-reason": "dev-browser-missing",
+  "x-clerk-auth-signature": "",
+  "x-clerk-auth-status": "signed-out",
+  "x-clerk-auth-token": "",
+  "x-clerk-clerk-url": "https://544b-2a02-2f0d-260d-6c00-d13-5281-a6f7-9ce4.ngrok-free.app/api/mobilpay/ipn",
+  "x-forwarded-for": "217.156.103.69",
+  "x-forwarded-host": "544b-2a02-2f0d-260d-6c00-d13-5281-a6f7-9ce4.ngrok-free.app",
+  "x-forwarded-port": "3000",
+  "x-forwarded-proto": "https"
+}
+[2025-05-16T11:29:20.199Z] Raw request body: env_key=7jio3WtQVYk49OYdSKhezHaEVbIvoRWfzEm3aCDw1d97m3w10fte7qnewiIHj%2B1KLpH8eg%2BmW1x1j9P3P61cXenTbJZrhiBrPifZybKh9%2FKLdp%2BXemUSGygswjCuklub0uIsVq5tFulZ83TLWsb%2BIczxPWLiBjEWkBFXtrToQn4%3D&data=3LKn85P3Tkjkf3xH1aBAZi1Ee0ho8h5nA%2FWe%2FCLazoFxP5QhVdHcbBGjoQVClC3ST9jQSMrNMNbG88V51FWc9ZoxDo7%2BOoCy4cC3MZDQ%2Fj%2FRKYIRP8R0XgXiJ4HqBRQMnmShDENXKgfwApSIgoCeh2ww0yapmUeQaxZVMWRdIncgHU0Qqlyj1z9AtuIJJa%2FbI8yFO2NP47HtbTVqktcVtDVSGM%2BfDuxGRAlNf2NP3v92cSAnWlmcpKLZxlDhuvH9umTz2iuv7dbxP%2FxM9i%2FstL8%2BiRaaCL3RPV%2BB8mptw178MMDWYr9w%2BPZwEOMy1voKyh8m8lKeSwYI5fuzK8v9h7S8gybe%2Fwi7kBQhnhuyt%2BVQ6WI16TK0uqq%2FbvTgHOlt8ot8GtNLAFel2MBO2bcZYd1en2ou23yk5luQgqaiY3xqPS0Wi%2B5ngP9U3yzjPPlsUTq58E7uLnZUX8OuMQdyqdAuG4KB9YSKfGJzpuVpm9oZ4e2q5Cvj9Puj3u6E%2F1LE3aooHHI%2Fo8psXmAptz%2FFELfDLxWz7asksxIjeL5Jp2zTct3i5yJ%2BOI%2BK%2FBpwLSSwybnfBVgr%2BAAdTH7TXcgpZDtj2vu7heT8mOBWKzqdgEesLoxl7Es%2FE00QMZw8UQqWDENgmqxg81iMN8lQpJxFeIGxOvIV1hvl4WiRTQ2WyLSasSOUVJeKQcc2%2FYKpqGRK9NmaaoOUjCHkkykncKDeodRr7oc1ZkBwhkVWrwQyZD6ydARLLRSnGiG%2BsL4AoQln0eIf4w8c04rUW6LQB6B55DOjqTXFcGsyEA18khxoevQna2owYn0F0FUkySix6hVUtLrjWCyWiinZ8HQUJVohepBXkAesljYPxszvJZug8ZV%2F0odaWgCH%2FLeKwY3S3sc%2BZTXh7%2BfNpCzAfn8n06teNRdchPCVeYviXY6ISua18WyVt0ERimaWILi4hbujXkSRjZ25ZVuMTGGUlGOZ6L%2F8CwFRFPgjmEgFswPcOKTmKCwACYP70RKM8suxs3v5O7zeJrMXSoffkangmBLpLu1JGk1e1bHahcujykHcHTN05E17quGE%2FeIU52%2BO%2FrutlSpcih%2BGm2j4t5bw5Np%2FqBQXCWW7tnRgTbrfir0ilyxBUlKdKZ6Ho5AbJ%2FNdwj1ll1txcQs8TM2tevlm8iRb%2BRfBsTthwNpu%2B9kblc29vsTbMWXPnfaObap7wRrTcKKcOhC3r68dhOdmUnK6Vq6QtfbLdAfpXAjTNInFuJ8lxtDSrhn9274S%2BBMUf%2FoVt4BKWqrFX2HOIK%2BBMHygzIxo4JO0vNdt6RQqcmsyOtHPo%2F%2BL0RTHqvsHPYN%2Bs4QL3G06GQGgkaRsJenuDJA%2F3Ksg9f37d2VQtTENKSPt53p%2BUq%2FMCZFDUBNIrtfEA%2BOaC5ZS3mLs3CpgiEThtdRs5wz4MYHQLJ9PEEhc2M9xqu1r7TUCYGPc1mwyCTDzQjjmNy1PgsSoth6ZmsXnfwIbBK%2F6h5Fw6FXj4VG2i2aJsSksBvYphc6Q4bbTbR0Qpnc1qRrNbNf47KSSx2R7O6bkTYKv180czvBlq1tvYApe%2BeQckE%2BTfsBESmXzST8gLzEd4NLjUBfTqWT9t9h3FTm0aGAMzULM5ZwaFc3ouV1nsApm6qXkvYEHSMBSASaCO91edJ%2B0zfOgnoz0RHvkyfbYkvAWv%2BY%2FMSXz2cGyn375RX7RWzhdcQCXxscqZdKfm41a1TYYcTaSF3rRqYo7GSL%2BMQBrjqcPMzEVxTyR0FGOKP3t%2FYHQTxjsLCgELPSSxbEQEZ3qs6FhdU8W9jqPUb4WBizXXfcAqxlSDf9Jf7yte5SdwGAuNJNojIxm2a5ohqRMet5l3opcePUEpOILmeYa0%2FkGLuuoSm2D9BTlyr1%2BCcgU9rDX0vR5pNU0pIS7aD2rCZ2UQPRl0joUEnz4KueHnKy1wuXTX%2BlLp757qCQ0gWUU6Ak8Pf1mO3zyL30K3t3sJzsUDKwW3G76KO63AqThShaRxXwXZwWQVLc4T%2B8FeVk9xFbrq%2F4TRXFXe0Ug5yaO%2F65IbJ5bZa2zVnqsKAYPbQgKj3CbSZzYwMAwlX2%2B8RkwAjD9kbN2vTb97bXlB0b2Reibp68UELjIDCJNBr4kZQSkLHqAe3VKT%2BSUCQrCdi0CaySaa3qKp%2BQnkI9VFWP4NpmxLmhNxYTFRxfCpHRgjuG9F26f%2Bmt8kReYTY7gbGqgLsL%2FmBQnVKi%2BuRfdenYcTI9zX%2FAjhObfh1m5iWq6fUG%2BhVhMdf%2BBpel%2BKSSonhHZ9dpwwMS8gz1MbKaxF6XYhNHCLD7WupjmExD03E%2BL1HQA6uBfB4B2%2BWL%2FP4uZ8geQyz%2FeDVrfvD4hAzL4VGZCSgaUZhfaROik2Z9EEBotm2YtPt249yo3GEJbJk1bq6oLyVp2FU%2FNqDBy7oT2%2F3bAeBSJyznz6tFjCmjUUsQ1fycS8FqLCWbjDhftpLNhqu7Hi43bKfAjTBkbO5qHJ8QoB%2FhR4U5Enrj2m2Jp%2Bk1ZaWsKdRTLDeHAF913yiW5hJ%2BZwhRaeueo%2F2IzLihyURzz0DRRXE1xR%2BGvnk4K9HqHY5aAX2XSnz5YAoWWocd1g9QL2ZJ0mXz%2BgqqbiAQt5BcryrsLasmtxAypJeMOPTpiEfLRXo8Xt9e%2B%2B1qbTQxP0F9kXM82sIwLwCo4ot2OEhSTVXyZ8IyN1SLWEAIPiR0hpmrdbHSPid5yDJMJ7%2B9smJ7wW37y%2Bl%2BylucQ6vrQykkaqizVs9Bt6xrwgyNpma5cZQYdk7UximvO7THnXTBhRVk81mQZJHqbQ%2FM7gQ1ceiHLTtUgHXwoR7jhhkZRjUWKSY6mqX5cdClkjG%2BBUdH0II6fJTDKEiVEk7w6PUxfqo%2Bl0YZf82O1DLlHKvsd5SwYGQh%2B76jmEKf39jh1%2By1P0vGygs8NbiXDkGZ7mpCe5SYAqFgCb58ZNg7min5dKcWXQLYIBiOoWpQC%2Bg%2BdXS8WIg%2BC0%2FgGBRGpniwFLTMdUPZFClMuSrN1&cipher=aes-256-cbc&iv=pu2Cz62n95U6hn7OGblC6A%3D%3D
+[2025-05-16T11:29:20.204Z] Form data keys: env_key, data, cipher, iv
+[2025-05-16T11:29:20.206Z] Form field env_key: 7jio3WtQVYk49OYdSKhezHaEVbIvoRWfzEm3aCDw1d97m3w10fte7qnewiIHj+1KLpH8eg+mW1x1j9P3P61cXenTbJZrhiBrPifZybKh9/KLdp+XemUSGygswjCuklub0uIsVq5tFulZ83TLWsb+IczxPWLiBjEWkBFXtrToQn4=
+[2025-05-16T11:29:20.207Z] Form field data: 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
+[2025-05-16T11:29:20.210Z] Form field cipher: aes-256-cbc
+[2025-05-16T11:29:20.211Z] Form field iv: pu2Cz62n95U6hn7OGblC6A==
+[2025-05-16T11:29:20.212Z] Form data received:
+[2025-05-16T11:29:20.213Z]   hasEnvKey: true
+[2025-05-16T11:29:20.213Z]   hasData: true
+[2025-05-16T11:29:20.213Z]   hasIv: true
+[2025-05-16T11:29:20.214Z]   hasCipher: true
+[2025-05-16T11:29:20.545Z] Decoded IPN response:
+[2025-05-16T11:29:20.546Z] {
+  "order": {
+    "$": {
+      "id": "SUB_1747394920185",
+      "timestamp": "1747394920188",
+      "type": "card"
+    },
+    "signature": "2WDB-4K4X-VHSY-QDT8-7GYE",
+    "url": {
+      "return": "https://544b-2a02-2f0d-260d-6c00-d13-5281-a6f7-9ce4.ngrok-free.app/api/mobilpay/return",
+      "confirm": "https://544b-2a02-2f0d-260d-6c00-d13-5281-a6f7-9ce4.ngrok-free.app/api/mobilpay/ipn",
+      "ipn": "https://544b-2a02-2f0d-260d-6c00-d13-5281-a6f7-9ce4.ngrok-free.app/api/mobilpay/ipn"
+    },
+    "invoice": {
+      "$": {
+        "currency": "RON",
+        "amount": "20"
+      },
+      "details": "Subscription payment",
+      "contact_info": {
+        "billing": {
+          "$": {
+            "type": "person"
+          },
+          "first_name": "Platinum",
+          "last_name": "Rizon",
+          "address": "Strada Astrelor 57",
+          "email": "platinum.socialev@gmail.com",
+          "mobile_phone": "0722438098"
+        },
+        "shipping": {
+          "$": {
+            "type": "person"
+          },
+          "first_name": "Platinum",
+          "last_name": "Rizon",
+          "address": "Strada Astrelor 57",
+          "email": "platinum.socialev@gmail.com",
+          "mobile_phone": "0722438098"
+        }
+      }
+    },
+    "params": {
+      "recurring": {
+        "expiration_date": "2026-05-16",
+        "frequency": {
+          "days": "30"
+        },
+        "auto": "true"
+      }
+    },
+    "ipn_cipher": "aes-256-cbc",
+    "mobilpay": {
+      "$": {
+        "timestamp": "20250516142918",
+        "crc": "82aa77dc9b4afc5e77dc32e5291a5106"
+      },
+      "action": "confirmed",
+      "customer": {
+        "$": {
+          "type": "person"
+        },
+        "first_name": "Platinum",
+        "last_name": "Rizon",
+        "country": "642",
+        "city": "Bucharest",
+        "address": "Strada+Astrelor+57",
+        "email": "platinum.socialev%40gmail.com",
+        "mobile_phone": "40722438098"
+      },
+      "purchase": "2329316",
+      "original_amount": "20.00",
+      "processed_amount": "20.00",
+      "current_payment_count": "1",
+      "pan_masked": "990000****5098",
+      "rrn": "NRD0TAT-j-Cm",
+      "payment_instrument_id": "101609",
+      "installments": "1",
+      "error": {
+        "_": "Tranzactie aprobata",
+        "$": {
+          "code": "0"
+        }
+      }
+    }
+  }
+}
+[2025-05-16T11:29:20.549Z] Transaction details:
+[2025-05-16T11:29:20.550Z]   orderId: SUB_1747394920185
+[2025-05-16T11:29:20.551Z]   status: confirmed
+[2025-05-16T11:29:20.551Z]   timestamp: 1747394920188
+[2025-05-16T11:29:20.552Z]   amount: 20.00
+[2025-05-16T11:29:20.553Z]   maskedCard: 990000****5098
+[2025-05-16T11:29:20.553Z]   paymentMethod: 101609
+[2025-05-16T11:29:20.554Z]   isRecurring: true
+[2025-05-16T11:29:20.556Z]   recurringDetails: {"expiration_date":"2026-05-16","frequency":{"days":"30"},"auto":"true"}
+[2025-05-16T11:29:20.556Z]   error: {"_":"Tranzactie aprobata","$":{"code":"0"}}
+[2025-05-16T11:29:20.957Z] Found order:
+[2025-05-16T11:29:20.958Z] {"id":"682721684fa14de3d15f4b05","orderId":"SUB_1747394920185","userId":"682610c3bbc5ffbd72b05d00","planId":"681f2a3b17a7e84735b7892e","amount":20,"currency":"RON","status":"PENDING","subscriptionType":"Gold","createdAt":"2025-05-16T11:28:40.418Z","updatedAt":"2025-05-16T11:28:40.418Z","user":{"id":"682610c3bbc5ffbd72b05d00","clerkId":"user_2vB8PWy3gwSXrjXXTer6VVbdxDh","email":null,"firstName":"Feraru","lastName":"Andreusi","university":"uni_13","faculty":"fac_13_1","city":"Arad","year":"4","avatar":null,"isOnboarded":true,"isAdmin":false,"planType":"Premium","createdAt":"2025-05-15T16:05:23.557Z","updatedAt":"2025-05-16T10:54:39.717Z"},"plan":{"id":"681f2a3b17a7e84735b7892e","name":"Gold","price":28,"currency":"RON","features":["Unlimited projects","Priority support","Advanced features"],"createdAt":"2025-05-10T10:28:11.620Z","updatedAt":"2025-05-16T11:28:40.245Z"}}
+[2025-05-16T11:29:20.959Z] Payment validation:
+[2025-05-16T11:29:20.959Z]   status: confirmed
+[2025-05-16T11:29:20.960Z]   errorCode: 0
+[2025-05-16T11:29:20.960Z]   errorMessage: Tranzactie aprobata
+[2025-05-16T11:29:20.961Z]   isErrorCode: false
+[2025-05-16T11:29:20.961Z]   isSuccessStatus: true
+[2025-05-16T11:29:20.962Z]   paymentStatus: COMPLETED
+[2025-05-16T11:29:21.843Z] DB error updating order:
+[2025-05-16T11:29:21.844Z] 
+Invalid `prisma.subscription.create()` invocation:
+
+
+Unique constraint failed on the constraint: `Subscription_userId_key`
