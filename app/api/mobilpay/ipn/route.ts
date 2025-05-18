@@ -11,15 +11,8 @@ const LOG_FILE = path.join(process.cwd(), 'ipn-debug.log');
 
 function logToFile(message: string) {
   const timestamp = new Date().toISOString();
-  const logMessage = `[${timestamp}] ${message}\n`;
-  fs.appendFileSync(LOG_FILE, logMessage);
-  console.log(logMessage);
-}
-
-// Add SSL bypass for development
-if (process.env.NODE_ENV === 'development') {
-  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-  logToFile('[IPN_SETUP] SSL verification disabled for development environment');
+  const logMessage = `[${timestamp}] ${message}`;
+  console.log(`IPN DEBUG: ${logMessage}`);
 }
 
 // Add global error handler for unhandled rejections

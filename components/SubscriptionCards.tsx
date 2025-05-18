@@ -243,10 +243,12 @@ export default function SubscriptionCards({
 
             <div className="px-4 sm:px-6 pb-6 sm:pb-8 pt-2">
               <button
-                onClick={() => handleSubscriptionSelect(subscription.name)}
+                onClick={() => subscription.name !== currentPlan && handleSubscriptionSelect(subscription.name)}
                 className={`w-full py-3 sm:py-4 rounded-xl font-semibold transition-all duration-200 ${
                   isButtonDisabled(subscription.name)
                     ? "bg-gray-400 cursor-not-allowed"
+                    : subscription.name === currentPlan
+                    ? "bg-green-600 text-white"
                     : subscription.name === selectedSubscription
                     ? "bg-green-600 hover:bg-green-700 text-white"
                     : subscription.buttonColor
@@ -257,7 +259,7 @@ export default function SubscriptionCards({
                   ? translations.processing
                   : isButtonDisabled(subscription.name)
                   ? translations.notAvailable
-                  : subscription.name === selectedSubscription
+                  : subscription.name === currentPlan
                   ? translations.currentPlan
                   : translations.select}
               </button>

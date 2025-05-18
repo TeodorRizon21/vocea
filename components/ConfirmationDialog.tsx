@@ -31,7 +31,7 @@ export default function ConfirmationDialog({
   confirmText = "Confirmă",
   cancelText = "Anulează",
   confirmButtonClass = "bg-purple-600 hover:bg-purple-700",
-  cancelButtonClass = "bg-white hover:bg-gray-100 text-gray-900",
+  cancelButtonClass = "bg-gray-200 text-gray-700 hover:bg-gray-100 hover:text-red-500",
 }: ConfirmationDialogProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
