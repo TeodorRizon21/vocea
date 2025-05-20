@@ -21,6 +21,7 @@ model User {
   isOnboarded Boolean        @default(false)
   isAdmin     Boolean        @default(false) // Added isAdmin field
   planType    String         @default("Basic") // Added planType field for subscription
+  language    String         @default("ro") // Added language field with Romanian as default
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
   projects    Project[]      @relation("UserProjects")
