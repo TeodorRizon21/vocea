@@ -272,7 +272,7 @@ export default function EditProfileDialog({ isOpen, onClose, initialData, onSave
               placeholder={translations.enterCity}
               required
               readOnly={!!formData.universityId}
-              className={formData.universityId ? "bg-gray-100" : ""}
+              className={formData.universityId ? "bg-transparent" : ""}
             />
             {formData.universityId && (
               <p className="text-xs text-muted-foreground">{translations.cityAutoSet}</p>

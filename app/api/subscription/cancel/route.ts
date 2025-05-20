@@ -1,12 +1,24 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
+import { sendPlanCancellationEmail } from '@/lib/email';
 
 export async function POST(req: Request) {
   try {
     const session = await auth();
     if (!session?.userId) {
       return new NextResponse("Unauthorized", { status: 401 });
+    }
+
+    // First get the user details
+    const user = await prisma.user.findUnique({
+      where: {
+        clerkId: session.userId
+      }
+    });
+
+    if (!user) {
+      return new NextResponse("User not found", { status: 404 });
     }
 
     // Find the user's active subscription
@@ -41,6 +53,16 @@ export async function POST(req: Request) {
         read: false
       }
     });
+
+    // Send cancellation email
+    if (user.email) {
+      await sendPlanCancellationEmail({
+        name: user.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : 'User',
+        email: user.email,
+        planName: subscription.plan,
+        endDate: subscription.endDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // Use existing end date or default to 30 days from now
+      });
+    }
 
     return NextResponse.json({ 
       success: true,

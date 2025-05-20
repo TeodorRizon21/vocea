@@ -299,7 +299,7 @@ export default function OnboardingDialog({ isOpen, onClose, onSubmit }: Onboardi
               placeholder="Enter your city"
               required
               readOnly={!!formData.universityId}
-              className={formData.universityId ? "bg-gray-100" : ""}
+              className={formData.universityId ? "bg-transparent" : ""}
             />
             {formData.universityId && (
               <p className="text-xs text-muted-foreground">City is automatically set based on your university.</p>

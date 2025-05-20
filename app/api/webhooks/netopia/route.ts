@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { decodeResponse } from '@/order';
+import { sendPlanUpdateEmail } from '@/lib/email';
 
 // Add SSL bypass for development
 if (process.env.NODE_ENV === 'development') {
@@ -114,6 +115,24 @@ export async function POST(req: Request) {
           updatedAt: new Date()
         }
       });
+
+      // Send appropriate email based on payment status
+      if (orderRecord.user.email) {
+        const userName = orderRecord.user.firstName 
+          ? `${orderRecord.user.firstName} ${orderRecord.user.lastName || ''}`.trim() 
+          : 'User';
+
+        if (paymentStatus === 'COMPLETED') {
+          await sendPlanUpdateEmail({
+            name: userName,
+            email: orderRecord.user.email,
+            planName: orderRecord.plan.name,
+            amount: orderRecord.amount,
+            currency: orderRecord.currency
+          });
+        }
+        // We no longer send emails for failed payments
+      }
     } catch (err) {
       console.error('DB error updating order:', err);
       return new NextResponse("DB error updating order", { status: 500 });

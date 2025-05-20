@@ -105,9 +105,9 @@ const Navbar = () => {
       }`}>
         <div className="space-y-8">
           {/* Logo */}
-          <div className="flex justify-center bg-white dark:bg-white w-24 h-24 rounded-full items-center mx-auto shadow-md p-2">
+          <div className="flex justify-center bg-indigo-900 dark:bg-indigo-900 w-24 h-24 rounded-full items-center mx-auto shadow-md p-2">
             <Image
-              src="/logo2.png"
+              src="/logo-vocea.png"
               alt="VOC Logo"
               width={160}
               height={160}

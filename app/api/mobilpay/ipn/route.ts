@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { decodeResponse } from '@/order';
 import crypto from 'crypto';
-import { sendSubscriptionConfirmationEmail, sendPaymentFailedEmail } from '@/lib/email';
+import { sendPlanUpdateEmail } from '@/lib/email';
+
 import fs from 'fs';
 import path from 'path';
 
@@ -184,24 +185,29 @@ export async function POST(req: Request) {
           }
         });
 
-        // Send confirmation email
+        // Send plan update email
         if (orderRecord.user.email) {
-          await sendSubscriptionConfirmationEmail(
-            orderRecord.user.email,
-            {
+          console.log('📨 Sending plan update email to:', orderRecord.user.email);
+          try {
+            const emailResult = await sendPlanUpdateEmail({
               name: orderRecord.user.firstName ? `${orderRecord.user.firstName} ${orderRecord.user.lastName || ''}`.trim() : 'User',
+              email: orderRecord.user.email,
               planName: orderRecord.plan.name,
-              endDate: endDate,
-              isRecurring: false,
-              language: 'en'
+              amount: orderRecord.amount,
+              currency: orderRecord.currency
+            });
+            
+            if (emailResult.success) {
+              console.log('✅ Plan update email sent successfully');
+            } else {
+              console.error('❌ Failed to send plan update email:', emailResult.error);
             }
-          );
+          } catch (emailError) {
+            console.error('❌ Error sending plan update email:', emailError);
+          }
+        } else {
+          console.log('⚠️ Skipping plan update email - no email address available');
         }
-      } else if (paymentStatus === 'FAILED' && orderRecord.user.email) {
-        await sendPaymentFailedEmail(
-          orderRecord.user.email,
-          orderRecord.plan.name
-        );
       }
 
     } catch (err: any) {

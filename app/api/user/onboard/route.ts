@@ -2,6 +2,7 @@ import { getAuth } from "@clerk/nextjs/server"
 import { prisma } from "@/lib/prisma"
 import { NextResponse, type NextRequest } from "next/server"
 import { Prisma } from "@prisma/client"
+import { sendAccountCreationEmail } from "@/lib/email"
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,6 +14,17 @@ export async function POST(req: NextRequest) {
       console.error("Unauthorized: No userId found")
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
+
+    // Get user's email from Clerk
+    const clerkUser = await fetch(`https://api.clerk.dev/v1/users/${userId}`, {
+      headers: {
+        'Authorization': `Bearer ${process.env.CLERK_SECRET_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    }).then(res => res.json());
+
+    const email = clerkUser.email_addresses?.[0]?.email_address;
+    console.log("User email from Clerk:", email);
 
     const body = await req.json();
     console.log("Request body received:", body);
@@ -81,6 +93,7 @@ export async function POST(req: NextRequest) {
             city,
             year,
             isOnboarded: true,
+            email,            // Update email from Clerk
           },
         });
       } else {
@@ -95,8 +108,33 @@ export async function POST(req: NextRequest) {
             city,
             year,
             isOnboarded: true,
+            planType: "Basic", // Set default plan type
+            language: "ro",    // Set default language
+            email,            // Add email from Clerk
           },
         });
+
+        // Send account creation email for new users
+        if (email) {
+          console.log('📨 Sending account creation email to:', email);
+          try {
+            const emailResult = await sendAccountCreationEmail({
+              name: firstName ? `${firstName} ${lastName || ''}`.trim() : 'User',
+              email: email
+            });
+            
+            if (emailResult.success) {
+              console.log('✅ Account creation email sent successfully');
+            } else {
+              console.error('❌ Failed to send account creation email:', emailResult.error);
+            }
+          } catch (emailError) {
+            console.error('❌ Error sending account creation email:', emailError);
+            // Continue execution even if email fails
+          }
+        } else {
+          console.log('⚠️ Skipping account creation email - no email address available');
+        }
       }
 
       console.log("Successfully saved user with university and faculty:", user);

@@ -678,7 +678,7 @@ export default function NewProjectPage() {
             id="city"
             value={formData.city}
             readOnly
-            className="bg-gray-100"
+            className="bg-transparent dark:bg-transparent"
           />
           <p className="text-sm text-gray-500 mt-1">{translations.cityAuto}</p>
         </div>

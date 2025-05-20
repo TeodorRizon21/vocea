@@ -90,9 +90,20 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       return new NextResponse("Unauthorized", { status: 401 })
     }
 
+    // Remove fields that are not allowed in the update operation
+    const { 
+      id, 
+      userId: projectUserId, 
+      universityId, 
+      facultyId,
+      createdAt,
+      updatedAt,
+      ...updateData 
+    } = data
+
     const updatedProject = await prisma.project.update({
       where: { id: params.id },
-      data,
+      data: updateData,
       include: {
         user: {
           select: {
@@ -101,7 +112,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
             university: true,
             faculty: true,
             avatar: true,
-          }, //ia vezi pe ce rand e comentariul asta :*
+          },
         },
       },
     })

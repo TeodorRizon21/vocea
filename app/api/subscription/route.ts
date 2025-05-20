@@ -2,6 +2,7 @@ import { getAuth } from "@clerk/nextjs/server"
 import { prisma } from "@/lib/prisma"
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
+import { sendPlanUpdateEmail } from "@/lib/email"
 
 export async function POST(req: NextRequest) {
   try {
@@ -88,6 +89,22 @@ export async function POST(req: NextRequest) {
           status: "active",
         },
       })
+    }
+
+    // Send plan update email for Basic plan (paid plans are handled in activation)
+    if (subscription === "Basic" && user.email) {
+      try {
+        await sendPlanUpdateEmail({
+          name: user.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : 'User',
+          email: user.email,
+          planName: subscription,
+          amount: 0,
+          currency: 'RON'
+        });
+      } catch (emailError) {
+        console.error('Error sending plan update email:', emailError);
+        // Continue execution even if email fails
+      }
     }
 
     return NextResponse.json({ success: true, plan: subscription })

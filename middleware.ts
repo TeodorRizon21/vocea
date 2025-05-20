@@ -15,11 +15,20 @@ const isPublicRoute = createRouteMatcher([
   "/api/user",
   "/payment/(.*)",
   "/api/webhooks/clerk",
+  "/api/webhooks/(.*)",
+  "/api/test/(.*)",
+  "/api/uploadthing",
+  "/api/uploadthing/(.*)",
   "/api/mobilpay/(.*)",
   "/api/payment/(.*)",
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
+  // Skip auth check for UploadThing routes
+  if (req.nextUrl.pathname.startsWith('/api/uploadthing')) {
+    return;
+  }
+  
   if (!isPublicRoute(req)) {
     await auth.protect();
   }

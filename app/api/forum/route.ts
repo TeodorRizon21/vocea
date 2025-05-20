@@ -121,6 +121,20 @@ export async function POST(req: NextRequest) {
       return new NextResponse("Unauthorized", { status: 401 })
     }
 
+    // Get user and check their plan
+    const user = await prisma.user.findUnique({
+      where: { clerkId: userId }
+    });
+
+    if (!user) {
+      return new NextResponse("User not found", { status: 404 });
+    }
+
+    // Validate user's plan
+    if (user.planType === "Basic") {
+      return new NextResponse("Premium or Gold plan required to create topics", { status: 403 });
+    }
+
     const data = await req.json()
 
     // Validate required fields

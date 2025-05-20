@@ -18,6 +18,7 @@ export default function SubscriptionsPage() {
   const { isLoaded, isSignedIn } = useUser();
   const router = useRouter();
   const { language, forceRefresh } = useLanguage();
+  const { toast } = useToast();
   const [selectedSubscription, setSelectedSubscription] = useState("Basic");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
@@ -221,8 +222,6 @@ export default function SubscriptionsPage() {
   };
 
   const confirmCancelSubscription = async () => {
-    const { toast } = useToast();
-    
     try {
       const response = await fetch('/api/subscription/cancel', {
         method: 'POST',

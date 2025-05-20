@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
+import { sendPlanUpdateEmail } from '@/lib/email';
 
 export async function POST(req: Request) {
   try {
@@ -93,6 +94,22 @@ export async function POST(req: Request) {
         read: false
       }
     });
+
+    // Send plan update email
+    if (user.email) {
+      try {
+        await sendPlanUpdateEmail({
+          name: user.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : 'User',
+          email: user.email,
+          planName: latestOrder.plan.name,
+          amount: latestOrder.amount,
+          currency: latestOrder.currency
+        });
+      } catch (emailError) {
+        console.error('Error sending plan update email:', emailError);
+        // Continue execution even if email fails
+      }
+    }
 
     return NextResponse.json({
       success: true,

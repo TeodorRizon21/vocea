@@ -9,11 +9,13 @@ import { useLanguage } from "@/components/LanguageToggle";
 interface CreateTopicButtonProps {
   onClick: () => void;
   userPlan?: string;
+  disabled?: boolean;
 }
 
 export default function CreateTopicButton({
   onClick,
   userPlan = "Basic",
+  disabled = false,
 }: CreateTopicButtonProps) {
   const [showAccessDenied, setShowAccessDenied] = useState(false);
   const { language, forceRefresh } = useLanguage();
@@ -30,11 +32,14 @@ export default function CreateTopicButton({
     onClick();
   };
 
+  const isBasicPlan = userPlan === "Basic";
+
   return (
     <>
       <Button
         onClick={handleClick}
         className="bg-purple-600 hover:bg-purple-700"
+        disabled={disabled || isBasicPlan}
       >
         <Plus className="mr-2 h-4 w-4" /> {buttonText}
       </Button>

@@ -279,7 +279,10 @@ export default function ForumPage() {
             activeFiltersCount={activeFiltersCount}
           />
         </div>
-        <CreateTopicButton onClick={() => router.push("/forum/new")} />
+        <CreateTopicButton 
+          onClick={() => router.push("/forum/new")} 
+          userPlan={userPlan}
+        />
       </div>
 
       <ForumTabs

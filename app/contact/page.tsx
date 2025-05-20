@@ -21,7 +21,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import emailjs from "@emailjs/browser";
 import { useLanguage } from "@/components/LanguageToggle";
 
 export default function ContactPage() {
@@ -136,29 +135,22 @@ export default function ContactPage() {
     setIsError(false);
 
     try {
-      // Get the current time to send as part of the email content
-      const currentTime = new Date().toLocaleString();
-
-      // Use EmailJS to send the form data
-      const result = await emailjs.send(
-        "service_g5i2hp9", // Replace with your service ID
-        "template_fswhdgr", // Replace with your template ID
-        {
-          name: data.name,
-          email: data.email,
-          contactType: data.contactType,
-          subject: data.subject,
-          message: data.message,
-          time: currentTime, // Pass the current time as the 'time' placeholder
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-        "-2SQ07NramZyU8SrM" // Replace with your user ID
-      );
+        body: JSON.stringify(data),
+      });
 
-      console.log(result.text); // Log the result from EmailJS for debugging
+      if (!response.ok) {
+        throw new Error('Failed to send message');
+      }
+
       setIsSuccess(true);
       form.reset(); // Reset the form on success
     } catch (error) {
-      console.error("Error sending email:", error);
+      console.error('[Contact Form] Submission failed:', error);
       setIsError(true);
     } finally {
       setIsSubmitting(false);

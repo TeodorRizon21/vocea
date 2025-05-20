@@ -1,168 +1,143 @@
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
+import AccountCreationEmail from '../emails/account-creation';
+import PlanUpdateEmail from '../emails/plan-update';
+import PlanCancellationEmail from '../emails/plan-cancellation';
+import { ContactFormEmail } from '../emails/contact-form';
 
-// Configure the email transporter
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-  port: Number(process.env.EMAIL_PORT) || 587,
-  secure: process.env.EMAIL_SECURE === 'true',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD,
-  },
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-// Types
-interface EmailOptions {
-  to: string;
-  subject: string;
-  text?: string;
-  html?: string;
+// Account Creation Email
+export async function sendAccountCreationEmail({
+  name,
+  email,
+}: {
+  name: string;
+  email: string;
+}) {
+  try {
+    const data = await resend.emails.send({
+      from: 'Vocea Campusului <contact@voceacampusului.ro>',
+      to: email,
+      subject: 'Bun venit la Vocea Campusului! Contul tău este gata',
+      react: AccountCreationEmail({ name }),
+    });
+
+    if (data.error) {
+      throw data.error;
+    }
+    return { success: true, data };
+  } catch (error) {
+    console.error('[Email] Failed to send account creation email:', error);
+    return { success: false, error };
+  }
 }
 
-interface SubscriptionEmailData {
+// Plan Update Email
+export async function sendPlanUpdateEmail({
+  name,
+  email,
+  planName,
+  amount,
+  currency,
+}: {
   name: string;
+  email: string;
+  planName: string;
+  amount: number;
+  currency: string;
+}) {
+  try {
+    const data = await resend.emails.send({
+      from: 'Vocea Campusului <contact@voceacampusului.ro>',
+      to: email,
+      subject: 'Planul tău Vocea Campusului a fost actualizat',
+      react: PlanUpdateEmail({ 
+        name,
+        planName,
+        amount,
+        currency
+      }),
+    });
+
+    if (data.error) {
+      throw data.error;
+    }
+    return { success: true, data };
+  } catch (error) {
+    console.error('[Email] Failed to send plan update email:', error);
+    return { success: false, error };
+  }
+}
+
+// Plan Cancellation Email
+export async function sendPlanCancellationEmail({
+  name,
+  email,
+  planName,
+  endDate,
+}: {
+  name: string;
+  email: string;
   planName: string;
   endDate: Date;
-  isRecurring: boolean;
-  language?: string;
-}
-
-/**
- * Send a generic email
- */
-export async function sendEmail({ to, subject, text, html }: EmailOptions): Promise<boolean> {
+}) {
   try {
-    await transporter.sendMail({
-      from: `"${process.env.EMAIL_FROM_NAME || 'Vocea Campusului'}" <${process.env.EMAIL_FROM || 'noreply@voceacampusului.ro'}>`,
-      to,
-      subject,
-      text,
-      html,
+    const data = await resend.emails.send({
+      from: 'Vocea Campusului <contact@voceacampusului.ro>',
+      to: email,
+      subject: 'Confirmare anulare plan Vocea Campusului',
+      react: PlanCancellationEmail({ 
+        name,
+        planName,
+        endDate: endDate.toLocaleDateString()
+      }),
     });
-    return true;
+
+    if (data.error) {
+      throw data.error;
+    }
+    return { success: true, data };
   } catch (error) {
-    console.error('Error sending email:', error);
-    return false;
+    console.error('[Email] Failed to send plan cancellation email:', error);
+    return { success: false, error };
   }
 }
 
-/**
- * Send a subscription confirmation email
- */
-export async function sendSubscriptionConfirmationEmail(
-  to: string,
-  data: SubscriptionEmailData
-): Promise<boolean> {
-  const { name, planName, endDate, isRecurring, language = 'en' } = data;
-  
-  // Format date based on locale
-  const formattedDate = endDate.toLocaleDateString(language === 'ro' ? 'ro-RO' : 'en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  });
+// Contact Form Email
+export async function sendContactFormEmail({
+  name,
+  email,
+  contactType,
+  subject,
+  message,
+}: {
+  name: string;
+  email: string;
+  contactType: string;
+  subject: string;
+  message: string;
+}) {
+  try {
+    const data = await resend.emails.send({
+      from: 'Vocea Campusului <contact@voceacampusului.ro>',
+      to: 'contact@voceacampusului.ro',
+      replyTo: email,
+      subject: `[Contact Form] ${subject}`,
+      react: ContactFormEmail({ 
+        name,
+        email,
+        contactType,
+        subject,
+        message
+      }),
+    });
 
-  // Create email content based on language
-  const subject = language === 'ro' 
-    ? `Confirmare abonament ${planName}` 
-    : `${planName} Subscription Confirmation`;
-
-  // Multilingual templates
-  let html: string;
-  
-  if (language === 'ro') {
-    html = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
-        <h1 style="color: #6b46c1; text-align: center;">Confirmare Abonament</h1>
-        <p>Salut ${name},</p>
-        <p>Îți mulțumim pentru achiziționarea abonamentului <strong>${planName}</strong>.</p>
-        <div style="background-color: #f8f4ff; padding: 15px; border-radius: 5px; margin: 20px 0;">
-          <h2 style="color: #6b46c1; margin-top: 0;">Detalii Abonament</h2>
-          <p><strong>Plan:</strong> ${planName}</p>
-          <p><strong>Status:</strong> Activ</p>
-          ${isRecurring 
-            ? `<p><strong>Reînnoire automată:</strong> Da, pe ${formattedDate}</p>` 
-            : `<p><strong>Valabil până la:</strong> ${formattedDate}</p>`}
-        </div>
-        <p>Acum poți să te bucuri de toate beneficiile planului tău. Dacă ai întrebări sau ai nevoie de asistență, te rugăm să ne contactezi.</p>
-        <p>Cu stimă,<br>Echipa Vocea Campusului</p>
-      </div>
-    `;
-  } else {
-    html = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
-        <h1 style="color: #6b46c1; text-align: center;">Subscription Confirmation</h1>
-        <p>Hello ${name},</p>
-        <p>Thank you for purchasing the <strong>${planName}</strong> subscription.</p>
-        <div style="background-color: #f8f4ff; padding: 15px; border-radius: 5px; margin: 20px 0;">
-          <h2 style="color: #6b46c1; margin-top: 0;">Subscription Details</h2>
-          <p><strong>Plan:</strong> ${planName}</p>
-          <p><strong>Status:</strong> Active</p>
-          ${isRecurring 
-            ? `<p><strong>Auto-renewal:</strong> Yes, on ${formattedDate}</p>` 
-            : `<p><strong>Valid until:</strong> ${formattedDate}</p>`}
-        </div>
-        <p>You can now enjoy all the benefits of your plan. If you have any questions or need assistance, please contact us.</p>
-        <p>Best regards,<br>The Vocea Campusului Team</p>
-      </div>
-    `;
+    if (data.error) {
+      throw data.error;
+    }
+    return { success: true, data };
+  } catch (error) {
+    console.error('[Email] Failed to send contact form email:', error);
+    return { success: false, error };
   }
-
-  // Plain text fallback
-  const text = language === 'ro'
-    ? `Confirmare Abonament\n\nSalut ${name},\n\nÎți mulțumim pentru achiziționarea abonamentului ${planName}.\n\nDetalii Abonament:\nPlan: ${planName}\nStatus: Activ\n${isRecurring ? `Reînnoire automată: Da, pe ${formattedDate}` : `Valabil până la: ${formattedDate}`}\n\nAcum poți să te bucuri de toate beneficiile planului tău. Dacă ai întrebări sau ai nevoie de asistență, te rugăm să ne contactezi.\n\nCu stimă,\nEchipa Vocea Campusului`
-    : `Subscription Confirmation\n\nHello ${name},\n\nThank you for purchasing the ${planName} subscription.\n\nSubscription Details:\nPlan: ${planName}\nStatus: Active\n${isRecurring ? `Auto-renewal: Yes, on ${formattedDate}` : `Valid until: ${formattedDate}`}\n\nYou can now enjoy all the benefits of your plan. If you have any questions or need assistance, please contact us.\n\nBest regards,\nThe Vocea Campusului Team`;
-
-  return sendEmail({
-    to,
-    subject,
-    text,
-    html,
-  });
-}
-
-/**
- * Send a payment failed notification email
- */
-export async function sendPaymentFailedEmail(
-  to: string,
-  planName: string,
-  language: string = 'en'
-): Promise<boolean> {
-  const subject = language === 'ro' 
-    ? `Plată eșuată pentru abonamentul ${planName}` 
-    : `Payment Failed for ${planName} Subscription`;
-
-  let html: string;
-  
-  if (language === 'ro') {
-    html = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
-        <h1 style="color: #e53e3e; text-align: center;">Plată Eșuată</h1>
-        <p>Ne pare rău, dar plata pentru abonamentul <strong>${planName}</strong> nu a putut fi procesată.</p>
-        <p>Te rugăm să verifici detaliile de plată și să încerci din nou. Dacă problema persistă, contactează-ne pentru asistență.</p>
-        <p>Cu stimă,<br>Echipa Vocea Campusului</p>
-      </div>
-    `;
-  } else {
-    html = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
-        <h1 style="color: #e53e3e; text-align: center;">Payment Failed</h1>
-        <p>We're sorry, but the payment for your <strong>${planName}</strong> subscription could not be processed.</p>
-        <p>Please check your payment details and try again. If the problem persists, contact us for assistance.</p>
-        <p>Best regards,<br>The Vocea Campusului Team</p>
-      </div>
-    `;
-  }
-
-  const text = language === 'ro'
-    ? `Plată Eșuată\n\nNe pare rău, dar plata pentru abonamentul ${planName} nu a putut fi procesată.\n\nTe rugăm să verifici detaliile de plată și să încerci din nou. Dacă problema persistă, contactează-ne pentru asistență.\n\nCu stimă,\nEchipa Vocea Campusului`
-    : `Payment Failed\n\nWe're sorry, but the payment for your ${planName} subscription could not be processed.\n\nPlease check your payment details and try again. If the problem persists, contact us for assistance.\n\nBest regards,\nThe Vocea Campusului Team`;
-
-  return sendEmail({
-    to,
-    subject,
-    text,
-    html,
-  });
 } 
