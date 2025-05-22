@@ -1786,7 +1786,6 @@
     }
   ]
 },
-
   {
     "institutie": "UNIVERSITATEA DE MEDICINĂ ȘI FARMACIE „IULIU HAȚIEGANU” DIN CLUJ-NAPOCA",
     "oras": "Cluj-Napoca",
@@ -1888,7 +1887,6 @@
       }
     ]
   },
-  [
   {
     "institutie": "UNIVERSITATEA \"OVIDIUS\" DIN CONSTANȚA",
     "oras": "Constanța",
@@ -5286,11 +5284,4 @@
       }
     ]
   }
-]]
-
-
-
-
-
-
-
+]
