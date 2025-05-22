@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import Image from "next/image";
@@ -32,6 +32,8 @@ import ReviewForm from "@/components/ReviewForm";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 import { useLanguage } from "@/components/LanguageToggle";
+import { useTheme } from "next-themes";
+import useEmblaCarousel from 'embla-carousel-react';
 
 interface ProjectDetailsProps {
   project: {
@@ -71,10 +73,13 @@ export default function ProjectDetails({ project }: ProjectDetailsProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [showReviewForm, setShowReviewForm] = useState(false);
+  const [currentSlide, setCurrentSlide] = useState(0);
   const { user, isSignedIn } = useUser();
   const router = useRouter();
   const [hasReviewed, setHasReviewed] = useState(false);
   const { language, forceRefresh } = useLanguage();
+  const { theme } = useTheme();
+  const [emblaRef, emblaApi] = useEmblaCarousel();
 
   // Traduceri pentru pagina
   const translations = useMemo(() => {
@@ -157,6 +162,14 @@ export default function ProjectDetails({ project }: ProjectDetailsProps) {
 
     checkUserReview();
   }, [project.id, isSignedIn, user]);
+
+  useEffect(() => {
+    if (emblaApi) {
+      emblaApi.on('select', () => {
+        setCurrentSlide(emblaApi.selectedScrollSnap());
+      });
+    }
+  }, [emblaApi]);
 
   const handleRevealContact = () => {
     setIsDialogOpen(true);
@@ -295,11 +308,11 @@ export default function ProjectDetails({ project }: ProjectDetailsProps) {
       <Card className="overflow-hidden">
         <CardContent className="p-0">
           {/* Project Images */}
-          <div className="w-full">
-            <Carousel className="w-full">
-              <CarouselContent>
+          <div className="w-full relative">
+            <div className="overflow-hidden" ref={emblaRef}>
+              <div className="flex">
                 {project.images.map((image, index) => (
-                  <CarouselItem key={index}>
+                  <div key={index} className="flex-[0_0_100%] min-w-0">
                     <div className="p-1">
                       <div className="relative w-full aspect-video">
                         <Image
@@ -312,12 +325,66 @@ export default function ProjectDetails({ project }: ProjectDetailsProps) {
                         />
                       </div>
                     </div>
-                  </CarouselItem>
+                  </div>
                 ))}
-              </CarouselContent>
-              <CarouselPrevious />
-              <CarouselNext />
-            </Carousel>
+              </div>
+            </div>
+            <button
+              onClick={() => emblaApi?.scrollPrev()}
+              className={`absolute left-2 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full w-10 h-10 flex items-center justify-center ${
+                theme === 'dark' 
+                  ? 'bg-indigo-900/80 hover:bg-indigo-900 text-white' 
+                  : 'bg-indigo-600/80 hover:bg-indigo-600 text-white'
+              }`}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={2}
+                stroke="currentColor"
+                className="w-6 h-6"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+              </svg>
+            </button>
+            <button
+              onClick={() => emblaApi?.scrollNext()}
+              className={`absolute right-2 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full w-10 h-10 flex items-center justify-center ${
+                theme === 'dark' 
+                  ? 'bg-indigo-900/80 hover:bg-indigo-900 text-white' 
+                  : 'bg-indigo-600/80 hover:bg-indigo-600 text-white'
+              }`}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={2}
+                stroke="currentColor"
+                className="w-6 h-6"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+              </svg>
+            </button>
+            {/* Image Indicators */}
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+              {project.images.map((_, index) => (
+                <div
+                  key={index}
+                  className={`w-2.5 h-2.5 rounded-full cursor-pointer transition-all ${
+                    currentSlide === index
+                      ? theme === 'dark'
+                        ? 'bg-indigo-900 scale-125'
+                        : 'bg-indigo-600 scale-125'
+                      : theme === 'dark'
+                        ? 'bg-indigo-900/50 hover:bg-indigo-900/80'
+                        : 'bg-indigo-600/50 hover:bg-indigo-600/80'
+                  }`}
+                  onClick={() => emblaApi?.scrollTo(index)}
+                />
+              ))}
+            </div>
           </div>
 
           {/* Project Description */}
