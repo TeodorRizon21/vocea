@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
-export const maxDuration = 300 // Set maximum duration to 300 seconds (5 minutes)
+export const maxDuration = 60 // Set maximum duration to 60 seconds (Vercel Hobby plan limit)
 export const dynamic = 'force-dynamic' // Ensure the route is dynamic
 
 export async function GET(req: NextRequest) {
@@ -14,27 +14,28 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Use Prisma's transactions to perform all queries atomically
-    const [
-      user,
-      projectCount,
-      forumTopicsCount,
-      commentCount,
-      recentComments,
-      projectReviews
-    ] = await prisma.$transaction([
+    // Split the transaction into smaller chunks to improve performance
+    const [user, activityCounts] = await Promise.all([
+      // Get user data
       prisma.user.findUnique({
         where: { clerkId }
       }),
-      prisma.project.count({
-        where: { userId: clerkId }
-      }),
-      prisma.forumTopic.count({
-        where: { userId: clerkId }
-      }),
-      prisma.forumComment.count({
-        where: { userId: clerkId }
-      }),
+      // Get all counts in a single transaction
+      prisma.$transaction([
+        prisma.project.count({ where: { userId: clerkId } }),
+        prisma.forumTopic.count({ where: { userId: clerkId } }),
+        prisma.forumComment.count({ where: { userId: clerkId } })
+      ])
+    ])
+
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 })
+    }
+
+    const [projectCount, forumTopicsCount, commentCount] = activityCounts
+
+    // Get recent activity data in parallel
+    const [recentComments, projectReviews] = await Promise.all([
       prisma.forumComment.findMany({
         where: { userId: clerkId },
         orderBy: { createdAt: "desc" },
@@ -69,10 +70,6 @@ export async function GET(req: NextRequest) {
         orderBy: { createdAt: 'desc' },
       })
     ])
-
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 })
-    }
 
     const formattedRecentComments = recentComments.map((comment) => ({
       id: comment.id,
