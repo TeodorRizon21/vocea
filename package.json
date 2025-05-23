@@ -36,6 +36,7 @@
     "@types/axios": "^0.9.36",
     "@types/nodemailer": "^6.4.17",
     "@uploadthing/react": "^6.4.0",
+    "@vercel/kv": "^3.0.0",
     "axios": "^1.9.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
