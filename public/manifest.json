@@ -1,0 +1,28 @@
+{
+  "name": "Vocea Campusului",
+  "short_name": "VOC",
+  "description": "Platforma educațională colaborativă pentru studenți",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#7c3aed",
+  "icons": [
+    {
+      "src": "/logo-vocea.png",
+      "sizes": "150x150",
+      "type": "image/png"
+    }
+  ],
+  "lang": "ro",
+  "dir": "ltr",
+  "orientation": "any",
+  "categories": ["education", "social"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Explorează Resurse",
+      "url": "/browse",
+      "description": "Descoperă resurse academice"
+    }
+  ]
+} 

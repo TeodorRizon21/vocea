@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
-
 import UserProfile from "@/components/UserProfile";
 import BrowsePageClient from "@/components/BrowsePageClient";
 import AccessDeniedDialog from "@/components/AccessDeniedDialog";

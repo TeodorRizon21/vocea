@@ -7,12 +7,60 @@ import RootLayout from "@/components/RootLayout"
 import { LanguageProvider } from "@/components/LanguageToggle";
 import "./globals.css"
 import Footer from "@/components/Footer"
-
+import { Metadata } from "next"
 
 const inter = Inter({ subsets: ["latin"] })
-export const metadata = {
-  title: "VOC - Vocea campusului",
-  description: "A platform for students to collaborate on projects and share resources.",
+
+export const metadata: Metadata = {
+  title: {
+    default: "VOC - Vocea Campusului",
+    template: "%s | VOC - Vocea Campusului"
+  },
+  description: "Vocea Campusului - Platforma educațională colaborativă pentru studenți. Partajează și descoperă resurse academice, proiecte și materiale de studiu.",
+  keywords: ["educație", "studenți", "universitate", "resurse academice", "proiecte", "colaborare"],
+  authors: [{ name: "Vocea Campusului" }],
+  creator: "Vocea Campusului",
+  publisher: "Vocea Campusului",
+  openGraph: {
+    type: "website",
+    locale: "ro_RO",
+    alternateLocale: "en_US",
+    title: "VOC - Vocea Campusului",
+    description: "Vocea Campusului - Platforma educațională colaborativă pentru studenți. Partajează și descoperă resurse academice, proiecte și materiale de studiu.",
+    siteName: "Vocea Campusului",
+    images: [{
+      url: "/logo-vocea.png",
+      width: 150,
+      height: 150,
+      alt: "Vocea Campusului Logo"
+    }]
+  },
+  twitter: {
+    card: "summary",
+    title: "VOC - Vocea Campusului",
+    description: "Vocea Campusului - Platforma educațională colaborativă pentru studenți. Partajează și descoperă resurse academice, proiecte și materiale de studiu.",
+    images: ["/logo-vocea.png"],
+  },
+  icons: {
+    icon: "/logo-vocea.png",
+    shortcut: "/logo-vocea.png",
+    apple: "/logo-vocea.png",
+  },
+  manifest: "/manifest.json",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  verification: {
+    google: "verification_token",
+  },
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {

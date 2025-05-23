@@ -1,6 +1,13 @@
 const nextConfig = {
   images: {
-    domains: ["utfs.io"], // Allow UploadThing's file storage domain
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'utfs.io',
+        port: '',
+        pathname: '/**',
+      },
+    ],
   },
 }
 

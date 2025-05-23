@@ -3,6 +3,7 @@ import UserProfile from "@/components/UserProfile";
 import NewsCarousel from "@/components/NewsCarousel";
 import AboutUs from "@/components/AboutUs";
 import HomeContent from "@/components/HomeContent";
+import { Metadata } from "next";
 
 // Define the News type to match what NewsCarousel expects
 interface News {
@@ -14,6 +15,19 @@ interface News {
   city?: string;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export const metadata: Metadata = {
+  title: "Acasă | Vocea Campusului - Locul ideilor studențești",
+  description: "Bine ai venit la Vocea Campusului! Descoperă și partajează resurse academice, proiecte și materiale de studiu într-o comunitate studențească vibrantă.",
+  openGraph: {
+    title: "Acasă | Vocea Campusului - Locul ideilor studențești",
+    description: "Bine ai venit la Vocea Campusului! Descoperă și partajează resurse academice, proiecte și materiale de studiu într-o comunitate studențească vibrantă.",
+  },
+  twitter: {
+    title: "Acasă | Vocea Campusului - Locul ideilor studențești",
+    description: "Bine ai venit la Vocea Campusului! Descoperă și partajează resurse academice, proiecte și materiale de studiu într-o comunitate studențească vibrantă.",
+  }
 }
 
 async function getNews() {
