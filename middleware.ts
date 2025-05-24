@@ -21,11 +21,19 @@ const isPublicRoute = createRouteMatcher([
   "/api/uploadthing/(.*)",
   "/api/mobilpay/(.*)",
   "/api/payment/(.*)",
+  // Add sign-in and sign-up routes as public
+  "/sign-in(.*)",
+  "/sign-up(.*)",
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
   // Skip auth check for UploadThing routes
   if (req.nextUrl.pathname.startsWith('/api/uploadthing')) {
+    return;
+  }
+
+  // Handle Clerk handshake requests
+  if (req.nextUrl.searchParams.has('__clerk_handshake')) {
     return;
   }
   
