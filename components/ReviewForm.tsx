@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/hooks/use-toast"
 import { Star } from "lucide-react"
+import { censorText } from '@/lib/censor'
 
 interface ReviewFormProps {
   projectId: string
@@ -34,6 +35,7 @@ export default function ReviewForm({ projectId, onSubmit }: ReviewFormProps) {
     setIsSubmitting(true)
 
     try {
+      const censoredComment = censorText(comment)
       const response = await fetch("/api/reviews", {
         method: "POST",
         headers: {
@@ -42,7 +44,7 @@ export default function ReviewForm({ projectId, onSubmit }: ReviewFormProps) {
         body: JSON.stringify({
           projectId,
           score: rating,
-          comment,
+          comment: censoredComment,
         }),
       })
 
