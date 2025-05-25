@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast"
 import { useLanguage } from "@/components/LanguageToggle"
 import { Check } from "lucide-react"
 import { motion } from "framer-motion"
+import { PROJECT_LIMITS, type SubscriptionType } from "@/lib/constants"
 
 interface SubscriptionCardsProps {
   selectedSubscription: string
@@ -16,8 +17,9 @@ interface SubscriptionCardsProps {
 // Plan hierarchy for button disable logic
 const PLAN_HIERARCHY = {
   Basic: 1,
-  Premium: 2,
-  Gold: 3
+  Bronze: 2,
+  Premium: 3,
+  Gold: 4
 } as const;
 
 export default function SubscriptionCards({
@@ -88,8 +90,26 @@ export default function SubscriptionCards({
         { text: translations.features[2], available: true },
         { text: translations.features[3], available: false },
         { text: translations.features[4], available: false },
-        { text: language === "ro" ? "Creare proiecte noi" : "Create new projects", available: false },
+        { text: language === "ro" ? "Creare proiecte noi (0)" : "Create new projects (0)", available: false },
         { text: translations.features[6], available: false },
+      ],
+    },
+    {
+      name: "Bronze",
+      price: language === "ro" ? "3.8 RON/lună" : "3.8 RON/month",
+      color: "bg-amber-50 dark:bg-amber-900",
+      textColor: "text-gray-900 dark:text-amber-50",
+      accentColor: "text-amber-700 dark:text-amber-300",
+      buttonColor: "bg-amber-700 hover:bg-amber-800 text-white",
+      borderColor: "border-amber-200 dark:border-amber-700",
+      features: [
+        { text: translations.features[0], available: true },
+        { text: translations.features[1], available: true },
+        { text: translations.features[2], available: true },
+        { text: translations.features[3], available: true },
+        { text: translations.features[4], available: true },
+        { text: language === "ro" ? "Creare proiecte noi (max 2/lună)" : "Create new projects (max 2/month)", available: true },
+        { text: translations.features[6], available: true },
       ],
     },
     {
@@ -148,7 +168,7 @@ export default function SubscriptionCards({
   }
 
   return (
-    <div className={`grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 max-w-7xl mx-auto ${className}`}>
+    <div className={`grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 max-w-7xl mx-auto ${className}`}>
       {subscriptions.map((subscription, index) => (
         <motion.div
           key={subscription.name}
@@ -157,7 +177,7 @@ export default function SubscriptionCards({
           animate={{ opacity: 1, y: 0 }}
           transition={{
             duration: 0.6,
-            delay: index * 0.2,
+            delay: index * 0.15,
             type: "spring",
             stiffness: 100,
           }}

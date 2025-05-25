@@ -5,6 +5,7 @@ import NetopiaPaymentForm from '@/components/NetopiaPaymentForm';
 interface PaymentFormProps {
   subscriptionId: string;
   subscriptionType: string;
+  isRecurring?: boolean;
   onSuccess?: () => void;
   onError?: () => void;
 }
@@ -12,6 +13,7 @@ interface PaymentFormProps {
 export const PaymentForm = ({
   subscriptionId,
   subscriptionType,
+  isRecurring = true, // Default to true for subscriptions
   onSuccess,
   onError
 }: PaymentFormProps) => {
@@ -31,6 +33,7 @@ export const PaymentForm = ({
         body: JSON.stringify({
           subscriptionId,
           subscriptionType,
+          isRecurring,
           billingInfo: {
             firstName: "Test", // This should come from a form
             lastName: "User",
@@ -55,16 +58,16 @@ export const PaymentForm = ({
           iv: data.iv,
           cipher: data.cipher
         });
+
+        toast({
+          title: isRecurring ? "Recurring payment initiated" : "One-time payment initiated",
+          description: "You will be redirected to the payment page.",
+        });
+
+        onSuccess?.();
       } else {
         throw new Error('Invalid payment response');
       }
-
-      toast({
-        title: "Payment initiated",
-        description: "You will be redirected to the payment page.",
-      });
-
-      onSuccess?.();
     } catch (error) {
       console.error('Payment error:', error);
       toast({
@@ -95,7 +98,7 @@ export const PaymentForm = ({
       disabled={isLoading}
       className="w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 disabled:opacity-50"
     >
-      {isLoading ? 'Processing...' : 'Pay Now'}
+      {isLoading ? 'Processing...' : isRecurring ? 'Subscribe Now' : 'Pay Now'}
     </button>
   );
 }; 

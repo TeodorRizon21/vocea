@@ -50,4 +50,13 @@ export const STUDY_LEVELS = [
   "Bachelors",
   "Masters",
   "PhD"
-]; 
+];
+
+export const PROJECT_LIMITS = {
+  Basic: 0,
+  Bronze: 2,
+  Premium: 4,
+  Gold: Infinity
+} as const;
+
+export type SubscriptionType = keyof typeof PROJECT_LIMITS; 

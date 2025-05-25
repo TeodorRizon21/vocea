@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { decodeResponse } from '@/order';
+import { decodeIpnResponse, validatePayment } from '@/lib/netopia';
 import crypto from 'crypto';
-import { sendPlanUpdateEmail } from '@/lib/email';
+import { sendPlanUpdateEmail, sendPaymentFailedEmail } from '@/lib/email';
+import type { Prisma } from '@prisma/client';
+import { OrderStatus } from '@prisma/client';
 
 import fs from 'fs';
 import path from 'path';
@@ -21,234 +23,164 @@ process.on('unhandledRejection', (reason, promise) => {
   logToFile(`[IPN_UNHANDLED_REJECTION] ${reason}`);
 });
 
+// Keep track of processed IPNs to avoid duplicates
+const processedIpns = new Set<string>();
+
 export async function POST(req: Request) {
   try {
-    logToFile('\n=== IPN REQUEST RECEIVED ===');
-    logToFile(`Request URL: ${req.url}`);
-    logToFile(`Request method: ${req.method}`);
+    // Decode and validate the IPN response
+    const ipnResponse = await decodeIpnResponse(req);
+    const { orderId, status, errorCode, errorMessage, amount, isRecurring, recurringDetails } = ipnResponse;
+
+    // Generate a unique IPN ID
+    const ipnId = `${orderId}_${Date.now()}`;
     
-    // Log all headers
-    const headers = Object.fromEntries(req.headers.entries());
-    logToFile(`Request headers: ${JSON.stringify(headers, null, 2)}`);
-
-    // Log raw body if available
-    const clonedReq = req.clone();
-    try {
-      const rawBody = await clonedReq.text();
-      logToFile(`Raw request body: ${rawBody}`);
-    } catch (err: any) {
-      logToFile(`Could not read raw body: ${err.message || err}`);
+    // Check if we've already processed this IPN
+    if (processedIpns.has(ipnId)) {
+      console.log('[IPN_DUPLICATE]', { ipnId });
+      return new NextResponse('Already processed', { status: 200 });
     }
 
-    // Parse form data
-    const formData = await req.formData();
-    logToFile(`Form data keys: ${Array.from(formData.keys()).join(', ')}`);
+    // Add to processed set
+    processedIpns.add(ipnId);
     
-    // Log each form field
-    for (const [key, value] of formData.entries()) {
-      logToFile(`Form field ${key}: ${typeof value === 'string' ? value : 'Binary data'}`);
+    // Clean up old IPN IDs (keep last 1000)
+    if (processedIpns.size > 1000) {
+      const idsArray = Array.from(processedIpns);
+      idsArray.slice(0, idsArray.length - 1000).forEach(id => processedIpns.delete(id));
     }
 
-    const envKey = formData.get('env_key');
-    const data = formData.get('data');
-    const iv = formData.get('iv');
-    const cipher = formData.get('cipher');
-
-    logToFile('Form data received:');
-    logToFile(`  hasEnvKey: ${!!envKey}`);
-    logToFile(`  hasData: ${!!data}`);
-    logToFile(`  hasIv: ${!!iv}`);
-    logToFile(`  hasCipher: ${!!cipher}`);
-
-    if (!envKey || !data || !iv || !cipher) {
-      logToFile('Missing required payment data');
-      return new NextResponse("Missing required payment data", { status: 400 });
-    }
-
-    // Decode the response from Netopia
-    let decodedResponse;
-    try {
-      decodedResponse = await decodeResponse({
-        env_key: envKey.toString(),
-        data: data.toString(),
-        iv: iv.toString(),
-        cipher: cipher.toString()
-      });
-      logToFile('Decoded IPN response:');
-      logToFile(JSON.stringify(decodedResponse, null, 2));
-    } catch (err: any) {
-      logToFile('Failed to decode Netopia response:');
-      logToFile(err.message || err.toString());
-      return new NextResponse("Failed to decode Netopia response", { status: 400 });
-    }
-
-    // Extract transaction information
-    const { order } = decodedResponse;
-    const { 
-      $: { id: orderId, timestamp },
-      mobilpay: {
-        action: status,
-        original_amount: amount,
-        pan_masked: maskedCard,
-        payment_instrument_id: paymentMethod,
-        error
-      },
-      params
-    } = order;
-
-    // Check if this is a recurring payment
-    const isRecurring = !!(params && params.recurring);
-    const recurringDetails = isRecurring ? params.recurring : null;
-    
-    logToFile('Transaction details:');
-    logToFile(`  orderId: ${orderId}`);
-    logToFile(`  status: ${status}`);
-    logToFile(`  timestamp: ${timestamp}`);
-    logToFile(`  amount: ${amount}`);
-    logToFile(`  maskedCard: ${maskedCard}`);
-    logToFile(`  paymentMethod: ${paymentMethod}`);
-    logToFile(`  isRecurring: ${isRecurring}`);
-    logToFile(`  recurringDetails: ${JSON.stringify(recurringDetails)}`);
-    logToFile(`  error: ${JSON.stringify(error)}`);
-
-    // Find the order in our database with plan details
-    let orderRecord;
-    try {
-      orderRecord = await prisma.order.findUnique({
-        where: { orderId },
-        include: { 
-          user: true,
-          plan: true
-        }
-      });
-    } catch (err: any) {
-      logToFile('DB error finding order:');
-      logToFile(err.message || err.toString());
-      return new NextResponse("DB error finding order", { status: 500 });
-    }
-
-    if (!orderRecord) {
-      logToFile('Order not found:');
-      logToFile(orderId);
-      return new NextResponse("Order not found", { status: 404 });
-    }
-    logToFile('Found order:');
-    logToFile(JSON.stringify(orderRecord));
-
-    // Properly validate the payment status based on Netopia's response
-    // Error code '0' means success, any other code means failure
-    const isErrorCode = error && error.$?.code && error.$?.code !== '0';
-    const isSuccessStatus = status === 'confirmed' || status === 'paid';
-    const paymentStatus = (!isErrorCode && isSuccessStatus) ? 'COMPLETED' : 'FAILED';
-
-    // Log payment validation for debugging
-    logToFile('Payment validation:');
-    logToFile(`  status: ${status}`);
-    logToFile(`  errorCode: ${error?.$?.code}`);
-    logToFile(`  errorMessage: ${error?._}`);
-    logToFile(`  isErrorCode: ${isErrorCode}`);
-    logToFile(`  isSuccessStatus: ${isSuccessStatus}`);
-    logToFile(`  paymentStatus: ${paymentStatus}`);
-
-    // Update order status and transaction details
-    let updatedOrder;
-    try {
-      updatedOrder = await prisma.order.update({
-        where: { orderId },
-        data: { 
-          status: paymentStatus,
-          updatedAt: new Date()
-        }
-      });
-
-      // If payment is successful, update user's plan and create subscription
-      if (paymentStatus === 'COMPLETED') {
-        // Update user's plan type
-        await prisma.user.update({
-          where: { id: orderRecord.user.id },
-          data: { planType: orderRecord.subscriptionType }
-        });
-
-        // Create or update subscription
-        const startDate = new Date();
-        const endDate = new Date();
-        endDate.setMonth(endDate.getMonth() + 1); // 1 month subscription
-
-        await prisma.subscription.create({
-          data: {
-            userId: orderRecord.user.clerkId,
-            plan: orderRecord.subscriptionType,
-            startDate,
-            endDate,
-            status: 'active',
-            projectsPosted: 0
-          }
-        });
-
-        // Send plan update email
-        if (orderRecord.user.email) {
-          console.log('📨 Sending plan update email to:', orderRecord.user.email);
-          try {
-            const emailResult = await sendPlanUpdateEmail({
-              name: orderRecord.user.firstName ? `${orderRecord.user.firstName} ${orderRecord.user.lastName || ''}`.trim() : 'User',
-              email: orderRecord.user.email,
-              planName: orderRecord.plan.name,
-              amount: orderRecord.amount,
-              currency: orderRecord.currency
-            });
-            
-            if (emailResult.success) {
-              console.log('✅ Plan update email sent successfully');
-            } else {
-              console.error('❌ Failed to send plan update email:', emailResult.error);
-            }
-          } catch (emailError) {
-            console.error('❌ Error sending plan update email:', emailError);
-          }
-        } else {
-          console.log('⚠️ Skipping plan update email - no email address available');
-        }
-      }
-
-    } catch (err: any) {
-      logToFile('DB error updating order:');
-      logToFile(err.message || err.toString());
-      return new NextResponse("DB error updating order", { status: 500 });
-    }
-
-    // Create notification for the user based on payment status
-    try {
-      const notificationMessage = paymentStatus === 'FAILED'
-        ? `Your payment for ${orderRecord.plan.name} subscription has failed. Please try again.`
-        : `Your payment for ${orderRecord.plan.name} subscription was successful! Your plan has been upgraded.`;
-
-      await prisma.notification.create({
-        data: {
-          userId: orderRecord.user.clerkId,
-          type: 'payment',
-          message: notificationMessage,
-          read: false
-        }
-      });
-
-    } catch (err: any) {
-      logToFile('Error creating notification:');
-      logToFile(err.message || err.toString());
-    }
-
-    // Return success response to Netopia
-    logToFile('--- IPN DEBUG END ---');
-    return NextResponse.json({ 
-      success: true,
-      message: 'IPN processed successfully',
+    // Log the IPN details
+    console.log('[IPN_RECEIVED]', {
       orderId,
-      status: updatedOrder.status
+      status,
+      errorCode,
+      amount,
+      isRecurring,
+      recurringDetails
     });
 
-  } catch (error: any) {
-    logToFile('[NETOPIA_IPN_ERROR]');
-    logToFile(error.message || error.toString());
-    return new NextResponse("Internal Error", { status: 500 });
+    // Validate the payment
+    const { isValid, paymentStatus } = validatePayment(status, errorCode);
+    if (!isValid) {
+      console.error('[IPN_INVALID]', { orderId, status, errorCode, errorMessage });
+      return new NextResponse('Invalid payment', { status: 400 });
+    }
+
+    // Find the order
+    const order = await prisma.order.findUnique({
+      where: { orderId },
+      include: { user: true, plan: true }
+    });
+
+    if (!order) {
+      console.error('[IPN_ORDER_NOT_FOUND]', { orderId });
+      return new NextResponse('Order not found', { status: 404 });
+    }
+
+    // Update order status
+    const updatedOrder = await prisma.order.update({
+      where: { orderId },
+      data: {
+        status: paymentStatus === 'COMPLETED' ? OrderStatus.COMPLETED : OrderStatus.FAILED,
+        lastChargeAt: new Date(),
+        nextChargeAt: isRecurring ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) : null
+      }
+    });
+
+    // Handle recurring payment status
+    if (isRecurring) {
+      if (paymentStatus === 'COMPLETED') {
+        // Successful recurring payment
+        await prisma.user.update({
+          where: { id: order.userId },
+          data: {
+            planType: order.plan.name
+          }
+        });
+
+        // Send success notification
+        try {
+          await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/notifications/send`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId: order.userId,
+              type: 'RECURRING_PAYMENT_SUCCESS',
+              message: `Your subscription has been renewed successfully. Next payment will be on ${updatedOrder.nextChargeAt?.toLocaleDateString()}.`
+            })
+          });
+        } catch (error) {
+          console.error('[NOTIFICATION_ERROR]', error);
+        }
+      } else {
+        // Failed recurring payment
+        console.error('[RECURRING_PAYMENT_FAILED]', {
+          orderId,
+          user: order.user.email,
+          plan: order.plan.name,
+          amount: order.amount,
+          error: errorMessage
+        });
+
+        // Calculate next attempt date (3 days from now)
+        const nextAttemptDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+
+        // Send payment failed email if user has an email
+        if (order.user.email) {
+          try {
+            await sendPaymentFailedEmail({
+              name: order.user.firstName || 'User',
+              email: order.user.email,
+              planName: order.plan.name,
+              amount: order.amount,
+              currency: order.currency,
+              nextAttemptDate
+            });
+
+            console.log('[PAYMENT_FAILED_EMAIL_SENT]', {
+              user: order.user.email,
+              nextAttemptDate
+            });
+          } catch (error) {
+            console.error('[PAYMENT_FAILED_EMAIL_ERROR]', error);
+          }
+        } else {
+          console.warn('[PAYMENT_FAILED_NO_EMAIL]', {
+            userId: order.userId,
+            orderId
+          });
+        }
+
+        // Send notification
+        try {
+          await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/notifications/send`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId: order.userId,
+              type: 'RECURRING_PAYMENT_FAILED',
+              message: `Your subscription payment has failed. Please update your payment method to avoid service interruption.`
+            })
+          });
+        } catch (error) {
+          console.error('[NOTIFICATION_ERROR]', error);
+        }
+      }
+    }
+
+    // Log successful processing
+    console.log('[IPN_PROCESSED]', {
+      orderId,
+      status: updatedOrder.status,
+      nextChargeAt: updatedOrder.nextChargeAt
+    });
+
+    return new NextResponse('OK', { status: 200 });
+
+  } catch (error) {
+    console.error('[IPN_ERROR]', error);
+    return new NextResponse('Internal Error', { status: 500 });
   }
 }
 

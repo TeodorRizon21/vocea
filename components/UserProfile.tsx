@@ -19,7 +19,7 @@ interface UserProfileProps {
 interface UserData {
   firstName?: string;
   lastName?: string;
-  avatar?: string;
+  avatar?: string | null;
   university?: string;
   faculty?: string;
 }
@@ -29,7 +29,7 @@ export default function UserProfile({ className }: UserProfileProps) {
   const [mounted, setMounted] = useState(false);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [subscription, setSubscription] = useState("Basic");
-  const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
   const { getUniversityName, getFacultyName } = useUniversities();
   const { language, forceRefresh } = useLanguage();
@@ -59,96 +59,88 @@ export default function UserProfile({ className }: UserProfileProps) {
   useEffect(() => {
     setMounted(true);
 
-    // Fetch user data from your API
-    const fetchUserData = async () => {
+    const fetchData = async () => {
+      if (!user) return;
+      
+      setLoading(true);
       try {
-        const response = await fetch("/api/user");
-        if (response.ok) {
-          const data = await response.json();
+        const [userResponse, subscriptionResponse] = await Promise.all([
+          fetch("/api/user"),
+          fetch("/api/subscription")
+        ]);
+
+        if (userResponse.ok) {
+          const data = await userResponse.json();
           setUserData(data);
         } else {
-          // If API returns an error, use Clerk data as fallback
-          if (user) {
-            setUserData({
-              firstName: user.firstName || undefined,
-              lastName: user.lastName || undefined,
-              avatar: user.imageUrl || undefined,
-              university: t.universityNotSet,
-              faculty: t.facultyNotSet,
-            });
-          }
-          setError(true);
+          console.error("Failed to fetch user data:", await userResponse.text());
         }
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-        setError(true);
-        // Use Clerk data as fallback
-        if (user) {
-          setUserData({
-            firstName: user.firstName || undefined,
-            lastName: user.lastName || undefined,
-            avatar: user.imageUrl || undefined,
-            university: t.universityNotSet,
-            faculty: t.facultyNotSet,
-          });
-        }
-      }
-    };
 
-    // Fetch subscription data
-    const fetchSubscription = async () => {
-      try {
-        const response = await fetch("/api/subscription");
-        if (response.ok) {
-          const data = await response.json();
+        if (subscriptionResponse.ok) {
+          const data = await subscriptionResponse.json();
           setSubscription(data.plan || "Basic");
         }
       } catch (error) {
-        console.error("Error fetching subscription data:", error);
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchUserData();
-    fetchSubscription();
-  }, [user, t]);
+    if (isLoaded && user) {
+      fetchData();
+    }
+  }, [isLoaded, user]);
 
   // Don't render anything until the component is mounted and Clerk is loaded
-  if (!mounted || !isLoaded) {
-    return null;
+  if (!mounted || !isLoaded || loading) {
+    return (
+      <div className="animate-pulse flex items-center space-x-4">
+        <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+        <div className="space-y-2">
+          <div className="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded"></div>
+          <div className="h-3 w-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
+        </div>
+      </div>
+    );
   }
 
-  // If no user data is available, show the last available user data instead of "Guest User"
-  const displayUserData = userData || {
-    firstName: user?.firstName,
-    lastName: user?.lastName,
-    avatar: user?.imageUrl,
-    university: t.universityNotSet,
-    faculty: t.facultyNotSet,
-  };
+  // If no user data is available, show loading state
+  if (!userData) {
+    return (
+      <div className="flex items-center space-x-4">
+        <Avatar className="w-12 h-12 border-2 border-purple-600 dark:border-purple-400">
+          <AvatarImage src={undefined} alt="" />
+          <AvatarFallback>...</AvatarFallback>
+        </Avatar>
+        <div className="space-y-1">
+          <p className="font-semibold">Loading...</p>
+          <p className="text-sm text-gray-500">Please wait</p>
+        </div>
+      </div>
+    );
+  }
 
-  // Convert IDs to actual names
-  const universityName =
-    displayUserData.university &&
-    displayUserData.university !== t.universityNotSet
-      ? getUniversityName(displayUserData.university)
-      : t.universityNotSet;
+  // Convert IDs to actual names or use direct names
+  const universityName = userData?.university 
+    ? userData.university.startsWith('uni_') 
+      ? getUniversityName(userData.university) 
+      : userData.university
+    : t.universityNotSet;
 
-  const facultyName =
-    displayUserData.faculty && displayUserData.faculty !== t.facultyNotSet
-      ? getFacultyName(
-          displayUserData.university || "",
-          displayUserData.faculty
-        )
-      : t.facultyNotSet;
+  const facultyName = userData?.faculty
+    ? userData.faculty.startsWith('fac_')
+      ? getFacultyName(userData.university || "", userData.faculty)
+      : userData.faculty
+    : t.facultyNotSet;
 
-  const initials =
-    displayUserData.firstName && displayUserData.lastName
-      ? `${displayUserData.firstName[0]}${displayUserData.lastName[0]}`
-      : "?";
-  const displayName =
-    displayUserData.firstName && displayUserData.lastName
-      ? `${displayUserData.firstName} ${displayUserData.lastName}`
-      : t.profileIncomplete;
+  const initials = userData?.firstName && userData?.lastName
+    ? `${userData.firstName[0]}${userData.lastName[0]}`
+    : "?";
+    
+  const displayName = userData?.firstName && userData?.lastName
+    ? `${userData.firstName} ${userData.lastName}`
+    : t.profileIncomplete;
 
   return (
     <div
@@ -164,23 +156,17 @@ export default function UserProfile({ className }: UserProfileProps) {
       }}
     >
       <Avatar className="w-12 h-12 sm:w-8 sm:h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 border-2 border-purple-600 dark:border-purple-400 flex-shrink-0">
-        <AvatarImage src={displayUserData.avatar} alt={displayName} />
+        <AvatarImage src={userData?.avatar || undefined} alt={displayName} />
         <AvatarFallback>{initials}</AvatarFallback>
       </Avatar>
       <div className="flex flex-col min-w-0 flex-1 items-center sm:items-start">
         <p className="font-semibold text-sm md:text-base truncate w-full text-center sm:text-left">{displayName}</p>
         <p
           className="text-xs md:text-sm text-gray-500 dark:text-gray-400 truncate w-full text-center sm:text-left"
-          title={
-            facultyName && universityName
-              ? `${facultyName}, ${universityName}`
-              : t.universityNotSet
-          }
+          title={`${facultyName}, ${universityName}`}
         >
           {facultyName && universityName
-            ? `${generateAcronym(facultyName)}, ${generateAcronym(
-                universityName
-              )}`
+            ? `${generateAcronym(facultyName)}, ${generateAcronym(universityName)}`
             : t.universityNotSet}
         </p>
         <Badge

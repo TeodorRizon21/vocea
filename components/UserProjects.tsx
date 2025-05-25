@@ -15,6 +15,7 @@ import {
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/components/LanguageToggle";
+import { ProjectQuota } from "@/components/ProjectQuota";
 
 interface ProjectWithRating {
   id: string;
@@ -36,28 +37,25 @@ export default function UserProjects() {
   const router = useRouter();
   const { language, forceRefresh } = useLanguage();
 
-  // Traduceri pentru componenta
-  const translations = useMemo(() => {
-    return {
+  // Translations
+  const translations = useMemo(
+    () => ({
       myProjects: language === "ro" ? "Proiectele mele" : "My Projects",
-      addProject: language === "ro" ? "Adaugă proiect" : "Add Project",
       noProjects:
         language === "ro"
-          ? "Nu ai creat niciun proiect încă."
-          : "You haven't created any projects yet.",
-      createFirst:
-        language === "ro"
-          ? "Creează primul tău proiect"
-          : "Create your first project",
+          ? "Nu ai creat niciun proiect încă"
+          : "You haven't created any projects yet",
+      createProject:
+        language === "ro" ? "Creează un proiect" : "Create a project",
+      showMore: language === "ro" ? "Arată mai multe" : "Show more",
+      showLess: language === "ro" ? "Arată mai puține" : "Show less",
       deleteConfirm:
         language === "ro"
           ? "Ești sigur că vrei să ștergi acest proiect?"
           : "Are you sure you want to delete this project?",
-      showLess: language === "ro" ? "Arată mai puține" : "Show Less",
-      viewAll:
-        language === "ro" ? "Vezi toate proiectele" : "View All Projects",
-    };
-  }, [language, forceRefresh]);
+    }),
+    [language, forceRefresh]
+  );
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -125,10 +123,15 @@ export default function UserProjects() {
       <CardHeader>
         <div className="flex flex-col xs:flex-row xs:justify-between xs:items-center gap-2">
           <CardTitle>{translations.myProjects}</CardTitle>
-          <Button onClick={() => router.push("/projects/new")} size="sm">
-            <Plus className="h-4 w-4 mr-2" />
-            {translations.addProject}
-          </Button>
+          <div className="flex items-center gap-4">
+            <Button
+              onClick={() => router.push("/projects/new")}
+              className="bg-purple-600 hover:bg-purple-700 text-white"
+            >
+              {translations.createProject}
+            </Button>
+            <ProjectQuota />
+          </div>
         </div>
       </CardHeader>
       <CardContent>
@@ -140,7 +143,7 @@ export default function UserProjects() {
               className="mt-2"
               onClick={() => router.push("/projects/new")}
             >
-              {translations.createFirst}
+              {translations.createProject}
             </Button>
           </div>
         ) : (
@@ -165,7 +168,7 @@ export default function UserProjects() {
                       {project.type.charAt(0).toUpperCase() +
                         project.type.slice(1)}
                     </p>
-                    {project.reviewCount && project.reviewCount > 0 && (
+                    {project.reviewCount && project.reviewCount > 0 ? (
                       <div className="flex items-center mt-1">
                         <Badge
                           variant="secondary"
@@ -177,6 +180,12 @@ export default function UserProjects() {
                             ({project.reviewCount})
                           </span>
                         </Badge>
+                      </div>
+                    ) : (
+                      <div className="flex items-center mt-1">
+                        <span className="text-xs text-muted-foreground">
+                          {language === "ro" ? "Nicio recenzie încă" : "No reviews yet"}
+                        </span>
                       </div>
                     )}
                   </div>
@@ -234,7 +243,7 @@ export default function UserProjects() {
                     </>
                   ) : (
                     <>
-                      {translations.viewAll}{" "}
+                      {translations.showMore}{" "}
                       <ChevronDown className="h-4 w-4 ml-2" />
                     </>
                   )}

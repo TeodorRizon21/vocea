@@ -65,7 +65,11 @@ export const metadata: Metadata = {
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <ClerkProvider>
+    <ClerkProvider 
+      appearance={{
+        baseTheme: undefined
+      }}
+    >
       <html lang="en" suppressHydrationWarning>
         <body className={`${inter.className} min-h-screen bg-background antialiased`}>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>

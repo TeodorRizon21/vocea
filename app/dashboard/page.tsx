@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Check, Crown, Shield, Star } from "lucide-react";
 import { useLanguage } from "@/components/LanguageToggle";
+import { ProjectQuota } from "@/components/ProjectQuota";
 
 interface UserData extends User {
   firstName?: string;
@@ -384,76 +385,6 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
-      <ConfirmationDialog
-        isOpen={isDialogOpen}
-        onClose={() => setIsDialogOpen(false)}
-        onConfirm={confirmSubscriptionChange}
-        title={translations.changeSubscription}
-        message={translations.changeSubscriptionMessage}
-      />
-      <OnboardingDialog
-        isOpen={showOnboarding}
-        onClose={() => {
-          // Only allow closing if all required information is present
-          if (!checkRequiredInformation(userData)) {
-            setShowOnboarding(false);
-          }
-        }}
-        onSubmit={async (data) => {
-          try {
-            const response = await fetch(
-              `${window.location.origin}/api/user/onboard`,
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify(data),
-              }
-            );
-            if (response.ok) {
-              const updatedUser = await response.json();
-              setUserData(updatedUser);
-              setShowOnboarding(false);
-            }
-          } catch (error) {
-            console.error("Error submitting onboarding data:", error);
-          }
-        }}
-      />
-      <EditProfileDialog
-        isOpen={showEditProfile}
-        onClose={() => setShowEditProfile(false)}
-        initialData={userData}
-        onSave={async (data: EditProfileFormData) => {
-          try {
-            const response = await fetch("/api/user", {
-              method: "PATCH",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                firstName: userData?.firstName,
-                lastName: userData?.lastName,
-                university: data.universityId,
-                faculty: data.facultyId,
-                city: data.city,
-                year: data.year,
-              }),
-            });
-            if (response.ok) {
-              const updatedUser = await response.json();
-              setUserData({
-                ...userData,
-                ...updatedUser,
-              } as UserData);
-              setShowEditProfile(false);
-            }
-          } catch (error) {
-            console.error("Error updating profile:", error);
-          }
-        }}
-      />
     </div>
   );
 }

@@ -3,6 +3,7 @@ import AccountCreationEmail from '../emails/account-creation';
 import PlanUpdateEmail from '../emails/plan-update';
 import PlanCancellationEmail from '../emails/plan-cancellation';
 import { ContactFormEmail } from '../emails/contact-form';
+import PaymentFailedEmail from '../emails/payment-failed';
 
 // Check if Resend API key is available
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
@@ -169,6 +170,54 @@ export async function sendContactFormEmail({
     return { success: true, data };
   } catch (error) {
     console.error('[Email] Failed to send contact form email:', error);
+    return { success: false, error };
+  }
+}
+
+// Payment Failed Email
+export async function sendPaymentFailedEmail({
+  name,
+  email,
+  planName,
+  amount,
+  currency,
+  nextAttemptDate,
+}: {
+  name: string;
+  email: string;
+  planName: string;
+  amount: number;
+  currency: string;
+  nextAttemptDate?: Date;
+}) {
+  if (!isEmailServiceAvailable()) {
+    return { success: false, error: 'Email service not configured' };
+  }
+
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  const retryUrl = `${baseUrl}/dashboard/billing?retry=true`;
+
+  try {
+    const data = await resend!.emails.send({
+      from: 'Vocea Campusului <contact@voceacampusului.ro>',
+      to: email,
+      subject: 'Important: Payment Failed - Action Required',
+      react: PaymentFailedEmail({ 
+        name,
+        planName,
+        amount,
+        currency,
+        nextAttemptDate: nextAttemptDate?.toLocaleDateString(),
+        retryUrl
+      }),
+    });
+
+    if (data.error) {
+      throw data.error;
+    }
+    return { success: true, data };
+  } catch (error) {
+    console.error('[Email] Failed to send payment failed email:', error);
     return { success: false, error };
   }
 } 

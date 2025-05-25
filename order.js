@@ -36,7 +36,7 @@ var parser = new xml2js.Parser({
   explicitArray: false
 });
 
-const getPayment = (orderId, amount, currency, billingInfo, urlConfig) => {
+const getPayment = (orderId, amount, currency, billingInfo, urlConfig, isRecurring = false) => {
   if (!signature) {
     throw new Error('NETOPIA_SIGNATURE is not set in environment variables');
   }
@@ -54,7 +54,9 @@ const getPayment = (orderId, amount, currency, billingInfo, urlConfig) => {
   });
 
   let date = new Date();
-  let data = {
+
+  // Create the payment request XML
+  const order = {
     order: {
       $: {
         id: orderId,
@@ -64,57 +66,38 @@ const getPayment = (orderId, amount, currency, billingInfo, urlConfig) => {
       signature: signature,
       url: {
         return: urls.returnUrl,
-        confirm: urls.confirmUrl,
-        ipn: urls.ipnUrl
+        confirm: urls.confirmUrl
       },
       invoice: {
-        $: {
-          currency: currency,
-          amount: amount
-        },
-        details: 'Subscription payment',
-        contact_info: {
-          billing: {
-            $: {
-              type: 'person'
-            },
-            first_name: billingInfo.firstName,
-            last_name: billingInfo.lastName,
-            address: billingInfo.address,
-            email: billingInfo.email,
-            mobile_phone: billingInfo.phone
-          },
-          shipping: {
-            $: {
-              type: 'person'
-            },
-            first_name: billingInfo.firstName,
-            last_name: billingInfo.lastName,
-            address: billingInfo.address,
-            email: billingInfo.email,
-            mobile_phone: billingInfo.phone
-          }
-        }
+        currency: currency || 'RON',
+        amount: amount,
+        details: 'Payment for subscription'
       },
       params: {
-        recurring: {
-          expiration_date: new Date(date.setFullYear(date.getFullYear() + 1)).toISOString().split('T')[0],
-          frequency: {
-            days: 30
-          },
-          auto: true
-        }
+        recurring: isRecurring ? {
+          interval_day: '30',
+          payments_no: '0' // Unlimited payments
+        } : undefined
       },
-      ipn_cipher: 'aes-256-cbc'
+      bill: {
+        first_name: billingInfo.firstName,
+        last_name: billingInfo.lastName,
+        email: billingInfo.email,
+        phone: billingInfo.phone,
+        address: billingInfo.address
+      }
     }
   };
 
-  return { data, algorithm: 'aes-256-cbc' };
+  // Convert to XML
+  const xml = builder.buildObject(order);
+  
+  return { data: xml, algorithm: 'aes-256-cbc' };
 }
 
 function getRequest(orderId, amount = 1, billingInfo, urlConfig) {
   const result = getPayment(orderId, amount, 'RON', billingInfo, urlConfig)
-  let xml = builder.buildObject(result.data);
+  let xml = result.data;
   
   // Log the XML for debugging
   console.log('Generated XML:', xml);
