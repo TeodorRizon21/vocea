@@ -202,30 +202,35 @@ export default function ForumFilterDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] px-4 sm:px-6">
+      <DialogContent className="w-[95vw] max-w-[425px] px-3 sm:px-6">
         <DialogHeader>
           <DialogTitle>{translations.filterTopics}</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="university" className="text-right">
+          <div className="grid grid-cols-4 items-center gap-2">
+            <Label htmlFor="university" className="text-right text-sm">
               {translations.university}
             </Label>
             <Select
               value={selectedUniversity}
               onValueChange={handleUniversityChange}
             >
-              <SelectTrigger className="col-span-3">
-                <SelectValue placeholder={translations.selectUniversity} />
+              <SelectTrigger className="col-span-3 h-9">
+                <SelectValue placeholder={translations.selectUniversity} className="text-sm truncate max-w-[180px]" />
               </SelectTrigger>
-              <SelectContent className="w-[var(--radix-select-trigger-width)] max-w-[300px]">
+              <SelectContent 
+                className="w-[calc(100vw-2rem)] sm:w-auto sm:min-w-[var(--radix-select-trigger-width)] sm:max-w-[450px]"
+                position="popper"
+                side="bottom"
+                align="start"
+              >
                 <SelectItem value="all">
                   {translations.allUniversities}
                 </SelectItem>
                 {universities.map((university) => (
                   <SelectItem key={university.id} value={university.id} className="py-2">
                     <div className="flex flex-col">
-                      <span className="whitespace-normal break-words leading-snug">{university.name}</span>
+                      <span className="text-sm whitespace-normal">{university.name}</span>
                       <span className="text-xs text-muted-foreground">{university.city}</span>
                     </div>
                   </SelectItem>
@@ -233,8 +238,9 @@ export default function ForumFilterDialog({
               </SelectContent>
             </Select>
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="faculty" className="text-right">
+
+          <div className="grid grid-cols-4 items-center gap-2">
+            <Label htmlFor="faculty" className="text-right text-sm">
               {translations.faculty}
             </Label>
             <Select
@@ -242,64 +248,82 @@ export default function ForumFilterDialog({
               onValueChange={handleFacultyChange}
               disabled={!selectedUniversity || selectedUniversity === ""}
             >
-              <SelectTrigger className="col-span-3">
-                <SelectValue
+              <SelectTrigger className="col-span-3 h-9">
+                <SelectValue 
                   placeholder={
                     selectedUniversity
                       ? translations.selectFaculty
                       : translations.selectUniversityFirst
                   }
+                  className="text-sm"
                 />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent 
+                className="w-[calc(100vw-2rem)] sm:w-auto sm:min-w-[var(--radix-select-trigger-width)] sm:max-w-[450px]"
+                position="popper"
+                side="bottom"
+                align="start"
+              >
                 <SelectItem value="all">{translations.allFaculties}</SelectItem>
                 {availableFaculties.map((faculty) => (
                   <SelectItem key={faculty.id} value={faculty.id}>
-                    {faculty.name}
+                    <span className="text-sm whitespace-normal">{faculty.name}</span>
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="city" className="text-right">
+
+          <div className="grid grid-cols-4 items-center gap-2">
+            <Label htmlFor="city" className="text-right text-sm">
               {translations.city}
             </Label>
             <Select
               value={selectedCity}
               onValueChange={handleCityChange}
             >
-              <SelectTrigger className="col-span-3">
-                <SelectValue placeholder={translations.selectCity} />
+              <SelectTrigger className="col-span-3 h-9">
+                <SelectValue placeholder={translations.selectCity} className="text-sm" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent 
+                className="w-[calc(100vw-2rem)] sm:w-auto sm:min-w-[var(--radix-select-trigger-width)] sm:max-w-[450px]"
+                position="popper"
+                side="bottom"
+                align="start"
+              >
                 <SelectItem value="all">{translations.allCities}</SelectItem>
                 {availableCities.map((city) => (
                   <SelectItem key={city} value={city}>
-                    {city}
+                    <span className="text-sm">{city}</span>
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="category" className="text-right">
+
+          <div className="grid grid-cols-4 items-center gap-2">
+            <Label htmlFor="category" className="text-right text-sm">
               {translations.category}
             </Label>
             <Select
               value={selectedCategory}
               onValueChange={handleCategoryChange}
             >
-              <SelectTrigger className="col-span-3">
-                <SelectValue placeholder={translations.selectCategory} />
+              <SelectTrigger className="col-span-3 h-9">
+                <SelectValue placeholder={translations.selectCategory} className="text-sm" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent 
+                className="w-[calc(100vw-2rem)] sm:w-auto sm:min-w-[var(--radix-select-trigger-width)] sm:max-w-[450px]"
+                position="popper"
+                side="bottom"
+                align="start"
+              >
                 <SelectItem value="all">
                   {translations.allCategories}
                 </SelectItem>
                 {categories.map((category) => (
                   <SelectItem key={category.id} value={category.id}>
-                    {category.name}
+                    <span className="text-sm">{category.name}</span>
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -307,10 +331,12 @@ export default function ForumFilterDialog({
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={handleReset}>
+          <Button variant="outline" onClick={handleReset} size="sm">
             {translations.reset}
           </Button>
-          <Button onClick={handleApply}>{translations.apply}</Button>
+          <Button onClick={handleApply} size="sm">
+            {translations.apply}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

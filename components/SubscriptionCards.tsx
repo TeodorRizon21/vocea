@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast"
 import { useLanguage } from "@/components/LanguageToggle"
 import { Check } from "lucide-react"
 import { motion } from "framer-motion"
+import { PROJECT_LIMITS, type SubscriptionType } from "@/lib/constants"
 
 interface SubscriptionCardsProps {
   selectedSubscription: string
@@ -19,14 +20,6 @@ const PLAN_HIERARCHY = {
   Bronze: 2,
   Premium: 3,
   Gold: 4
-} as const;
-
-// Project limits per subscription type
-export const PROJECT_LIMITS = {
-  Basic: 0,
-  Bronze: 2,
-  Premium: 4,
-  Gold: Infinity
 } as const;
 
 export default function SubscriptionCards({
