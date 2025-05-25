@@ -24,6 +24,7 @@ import UserTooltip from "@/components/UserTooltip";
 import ReportButton from "@/components/ReportButton";
 import AccessDeniedDialog from "@/components/AccessDeniedDialog";
 import { useLanguage } from "@/components/LanguageToggle";
+import { censorText } from '@/lib/censor';
 
 interface Comment {
   id: string;
@@ -447,12 +448,13 @@ export default function TopicPage({ params }: { params: { id: string } }) {
 
     setIsSubmitting(true);
     try {
+      const censoredContent = censorText(newComment);
       const response = await fetch(`/api/forum/${params.id}/comment`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ content: newComment }),
+        body: JSON.stringify({ content: censoredContent }),
       });
 
       if (response.ok) {
@@ -474,13 +476,14 @@ export default function TopicPage({ params }: { params: { id: string } }) {
 
     setIsSubmitting(true);
     try {
+      const censoredContent = censorText(replyContent);
       const response = await fetch(`/api/forum/${params.id}/comment`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          content: replyContent,
+          content: censoredContent,
           parentId: commentId,
         }),
       });
