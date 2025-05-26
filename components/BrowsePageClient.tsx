@@ -43,6 +43,7 @@ interface ExtendedProject {
     avatar: string | null;
   };
   reviews: Array<{ score: number }>;
+  city?: string | null;
 }
 
 interface BrowsePageClientProps {
@@ -81,11 +82,18 @@ export default function BrowsePageClient({
   const { isLoaded, user } = useUser();
   const { language, forceRefresh } = useLanguage();
 
+  // Ensure all projects have a city property
+  const safeProjects = useMemo(() => projects.map(p => ({ ...p, city: p.city ?? '' })), [projects]);
+
   // Traduceri pentru pagina cu useMemo
   const translations = useMemo(() => {
     return {
       addNewProject:
         language === "ro" ? "Adaugă un proiect nou" : "Add a new project",
+      addNewRequest:
+        language === "ro" ? "Adaugă o cerere de proiect" : "Add a project request",
+      addNewAnnouncement:
+        language === "ro" ? "Adaugă un anunț nou" : "Add a new announcement",
       all: language === "ro" ? "Toate" : "All",
       jobOffers: language === "ro" ? "Oferte muncă" : "Job offers",
       objects: language === "ro" ? "Obiecte" : "Objects",
@@ -99,6 +107,19 @@ export default function BrowsePageClient({
         language === "ro"
           ? "Se încarcă mai multe proiecte..."
           : "Loading more projects...",
+      // New commercial descriptions
+      projectsDescription:
+        language === "ro"
+          ? "Descoperă proiecte gata de implementare pentru studenți. Perfecte pentru proiectele tale de licență, master sau doctorat. Găsește inspirație și modele pentru a-ți îmbunătăți notele și a-ți construi un portofoliu impresionant."
+          : "Discover ready-to-implement projects for students. Perfect for your bachelor's, master's, or PhD projects. Find inspiration and templates to improve your grades and build an impressive portfolio.",
+      projectRequestsDescription:
+        language === "ro"
+          ? "Ești student și ai nevoie de ajutor cu proiectul tău? Publică cererea ta și găsește alți studenți sau profesori care te pot ajuta. Ideal pentru proiecte de licență, master sau doctorat, cu suport personalizat pentru nevoile tale academice."
+          : "Are you a student needing help with your project? Post your request and find other students or professors who can help. Ideal for bachelor's, master's, or PhD projects, with personalized support for your academic needs.",
+      diverseDescription:
+        language === "ro"
+          ? "Tot ce ai nevoie ca student: oferte de muncă part-time, servicii de mentoring, cărți și materiale de studiu, și multe altele. O platformă dedicată exclusiv pentru studenți, cu tot ce necesită succesul tău academic."
+          : "Everything you need as a student: part-time job offers, mentoring services, books and study materials, and more. A platform dedicated exclusively to students, with everything required for your academic success.",
     };
   }, [language, forceRefresh]);
 
@@ -132,6 +153,7 @@ export default function BrowsePageClient({
     faculty: "",
     category: "",
     studyLevel: "",
+    city: "",
   });
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [showAccessDenied, setShowAccessDenied] = useState(false);
@@ -142,7 +164,7 @@ export default function BrowsePageClient({
   // Filter projects when tab, search, or filters change
   useEffect(() => {
     // First filter by tab
-    let result = projects.filter((project) => project.type === activeTab);
+    let result = safeProjects.filter((project) => project.type === activeTab);
 
     // Then apply subcategory filter for diverse items
     if (activeTab === "diverse" && diverseSubcategory !== "all") {
@@ -156,7 +178,7 @@ export default function BrowsePageClient({
       result = result.filter((project) => {
         const searchString = `${project.title} ${project.description} ${
           project.subject
-        } ${project.university || ""} ${project.faculty || ""}`.toLowerCase();
+        } ${project.university || ""} ${project.faculty || ""} ${project.city || ""}`.toLowerCase();
         return searchString.includes(searchQuery.toLowerCase());
       });
     }
@@ -194,6 +216,17 @@ export default function BrowsePageClient({
       );
     }
 
+    // Apply city filter if needed
+    if (filters.city && filters.city !== "_all") {
+      const selectedCity = filters.city.trim().toLowerCase();
+      result = result.filter((project) => {
+        console.log("Filtering by city:", selectedCity, "Project city:", project.city);
+        return (
+          project.city && project.city.trim().toLowerCase() === selectedCity
+        );
+      });
+    }
+
     // Apply sort order
     result = [...result].sort((a, b) => {
       const dateA = new Date(a.createdAt).getTime();
@@ -206,7 +239,7 @@ export default function BrowsePageClient({
   }, [
     activeTab,
     diverseSubcategory,
-    projects,
+    safeProjects,
     searchQuery,
     filters,
     sortOrder,
@@ -252,6 +285,7 @@ export default function BrowsePageClient({
     faculty: string;
     category: string;
     studyLevel: string;
+    city: string;
   }) => {
     setFilters(newFilters);
   };
@@ -282,8 +316,33 @@ export default function BrowsePageClient({
     router.push(`/project/${projectId}`);
   };
 
+  // Get the appropriate button text based on the active tab
+  const getAddButtonText = () => {
+    switch (activeTab) {
+      case "proiect":
+        return translations.addNewProject;
+      case "cerere":
+        return translations.addNewRequest;
+      case "diverse":
+        return translations.addNewAnnouncement;
+      default:
+        return translations.addNewProject;
+    }
+  };
+
   return (
     <>
+      {/* Description section in violet card */}
+      <div className="mb-6">
+        <div className="bg-gradient-to-r from-purple-600 to-purple-400 text-white p-8 pl-4 rounded-lg">
+          <p className="text-white text-base md:text-lg lg:text-xl max-w-3xl mx-auto text-justify">
+            {activeTab === "proiect" && translations.projectsDescription}
+            {activeTab === "cerere" && translations.projectRequestsDescription}
+            {activeTab === "diverse" && translations.diverseDescription}
+          </p>
+        </div>
+      </div>
+
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="w-full md:w-auto">
           <TabsSection
@@ -296,16 +355,9 @@ export default function BrowsePageClient({
           className="bg-purple-600 hover:bg-purple-700 text-white w-full md:w-auto text-sm md:text-base"
           onClick={handleNewProjectClick}
         >
-          {translations.addNewProject}
+          {getAddButtonText()}
         </Button>
       </div>
-
-      <HeroSection
-        title={tabsData.find((tab) => tab.id === activeTab)?.label || ""}
-        description={
-          tabsData.find((tab) => tab.id === activeTab)?.description || ""
-        }
-      />
 
       {/* Show subcategories only for diverse tab */}
       {activeTab === "diverse" && (

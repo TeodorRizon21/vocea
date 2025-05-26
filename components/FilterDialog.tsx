@@ -30,6 +30,7 @@ interface FilterDialogProps {
     faculty: string;
     category: string;
     studyLevel: string;
+    city: string;
   }) => void;
   showCategoryFilter?: boolean;
   currentFilters?: {
@@ -37,6 +38,7 @@ interface FilterDialogProps {
     faculty: string;
     category: string;
     studyLevel: string;
+    city: string;
   };
 }
 
@@ -60,11 +62,13 @@ export default function FilterDialog({
       faculty: language === "ro" ? "Facultate" : "Faculty",
       category: language === "ro" ? "Categorie" : "Category",
       studyLevel: language === "ro" ? "Nivel de studii" : "Study Level",
+      city: language === "ro" ? "Oraș" : "City",
       allUniversities:
         language === "ro" ? "Toate universitățile" : "All Universities",
       allFaculties: language === "ro" ? "Toate facultățile" : "All Faculties",
       allCategories: language === "ro" ? "Toate categoriile" : "All Categories",
       allStudyLevels: language === "ro" ? "Toate nivelele" : "All Levels",
+      allCities: language === "ro" ? "Toate orașele" : "All Cities",
       bachelors: language === "ro" ? "Licență" : "Bachelor's",
       masters: language === "ro" ? "Master" : "Master's",
       phd: language === "ro" ? "Doctorat" : "PhD",
@@ -79,6 +83,7 @@ export default function FilterDialog({
     faculty: "_all",
     category: "_all",
     studyLevel: "_all",
+    city: "_all",
   };
 
   const [filters, setFilters] = useState(currentFilters || defaultFilters);
@@ -92,7 +97,7 @@ export default function FilterDialog({
     }
   }, [isOpen, currentFilters]);
 
-  // When university changes, reset faculty selection only if not coming from currentFilters
+  // When university changes, reset faculty and city selection only if not coming from currentFilters
   useEffect(() => {
     // Skip this reset on initial render or if resetting to currentFilters
     const isInitialRender =
@@ -100,9 +105,19 @@ export default function FilterDialog({
       (currentFilters?.university || defaultFilters.university);
 
     if (!isInitialRender && filters.university !== "_all") {
-      setFilters((prev) => ({ ...prev, faculty: "_all" }));
+      setFilters((prev) => ({ ...prev, faculty: "_all", city: "_all" }));
     }
   }, [filters.university, currentFilters]);
+
+  // Compute available cities based on selected university
+  const availableCities = useMemo(() => {
+    if (filters.university && filters.university !== "_all") {
+      const selectedUni = universities.find((uni) => uni.id === filters.university);
+      return selectedUni && selectedUni.city ? [selectedUni.city] : [];
+    }
+    // If no university selected, show all unique cities
+    return [...new Set(universities.map((uni) => uni.city).filter(Boolean))].sort();
+  }, [filters.university, universities]);
 
   const handleApply = () => {
     console.log("Applying filters:", filters);
@@ -208,6 +223,37 @@ export default function FilterDialog({
                         <span className="text-sm whitespace-normal">{faculty.name}</span>
                       </SelectItem>
                     ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="grid grid-cols-4 items-center gap-2">
+            <Label htmlFor="city" className="text-right text-sm">
+              {translations.city}
+            </Label>
+            <Select
+              value={filters.city}
+              onValueChange={(value) =>
+                setFilters((prev) => ({ ...prev, city: value }))
+              }
+            >
+              <SelectTrigger id="city" className="col-span-3 h-9">
+                <SelectValue placeholder={translations.allCities} className="text-sm" />
+              </SelectTrigger>
+              <SelectContent 
+                className="w-[calc(100vw-2rem)] sm:w-auto sm:min-w-[var(--radix-select-trigger-width)] sm:max-w-[450px]"
+                position="popper"
+                side="bottom"
+                align="start"
+              >
+                <SelectItem value="_all">
+                  {translations.allCities}
+                </SelectItem>
+                {availableCities.map((city) => (
+                  <SelectItem key={city} value={city}>
+                    <span className="text-sm">{city}</span>
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
