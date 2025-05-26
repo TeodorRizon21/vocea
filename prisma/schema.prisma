@@ -184,6 +184,12 @@ model Plan {
   updatedAt DateTime @updatedAt
 }
 
+enum OrderStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
 model Order {
   id              String   @id @default(auto()) @map("_id") @db.ObjectId
   orderId         String   @unique
@@ -191,7 +197,7 @@ model Order {
   planId          String   @db.ObjectId
   amount          Float
   currency        String
-  status          String   // PENDING, COMPLETED, FAILED
+  status          OrderStatus  // Changed from String to OrderStatus
   subscriptionType String
   isRecurring     Boolean  @default(false)  // New field
   recurringStatus String?  // ACTIVE, EXPIRED, CANCELLED
