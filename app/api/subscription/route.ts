@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
       const pendingOrder = await prisma.order.findFirst({
         where: {
           userId: user.id,
-          status: "pending",
+          status: "PENDING",
           subscriptionType: subscription,
         },
         orderBy: {
