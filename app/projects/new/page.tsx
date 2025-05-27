@@ -25,6 +25,27 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { ACADEMIC_CATEGORIES, DIVERSE_CATEGORIES } from "@/lib/constants";
 import { useLanguage } from "@/components/LanguageToggle";
 
+interface ExtendedProject {
+  id: string;
+  type: string;
+  title: string;
+  description: string;
+  subject: string;
+  category: string;
+  university: string;
+  faculty: string;
+  phoneNumber: string;
+  images: string[];
+  userId: string;
+  authorName: string | null;
+  authorAvatar: string | null;
+  studyLevel: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  price?: number | null;
+  academicYear?: string | null;
+}
+
 export default function NewProjectPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -41,8 +62,10 @@ export default function NewProjectPage() {
     universityId: "",
     facultyId: "",
     phoneNumber: "",
-    city: "", // We'll keep this for display purposes only
-    studyLevel: "bachelors", // Default to bachelors
+    city: "",
+    studyLevel: "bachelors",
+    price: "",
+    academicYear: "",
   });
 
   const { universities, loading, getFacultiesForUniversity } =
@@ -75,10 +98,9 @@ export default function NewProjectPage() {
           ? "Introdu titlul proiectului"
           : "Enter project title",
       images: language === "ro" ? "Imagini" : "Images",
-      imagesOptional:
-        language === "ro"
-          ? "Imaginile sunt opționale pentru Cererile de Proiecte"
-          : "Images are optional for Project Requests",
+      imagesRequired: language === "ro" 
+        ? "Imaginile sunt obligatorii pentru toate tipurile de proiecte" 
+        : "Images are required for all project types",
       description: language === "ro" ? "Descriere" : "Description",
       descriptionPlaceholder:
         language === "ro"
@@ -142,10 +164,6 @@ export default function NewProjectPage() {
         language === "ro"
           ? "Numărul de telefon trebuie să aibă exact 10 cifre"
           : "Phone number must be exactly 10 digits",
-      imagesRequired:
-        language === "ro"
-          ? "Imaginile sunt obligatorii pentru proiecte și elemente diverse"
-          : "Images are required for Projects and Diverse submissions",
       selectUnivFac:
         language === "ro"
           ? "Te rugăm să selectezi o universitate și facultate"
@@ -202,6 +220,19 @@ export default function NewProjectPage() {
         "manuale-carti": language === "ro" ? "Manuale / Carti" : "Manuals / Books",
         "other": language === "ro" ? "Altele" : "Other",
       },
+      price: language === "ro" ? "Preț (RON)" : "Price (RON)",
+      pricePlaceholder: language === "ro" ? "Introdu prețul în RON" : "Enter price in RON",
+      priceOptional: language === "ro" ? "(opțional)" : "(optional)",
+      academicYear: language === "ro" ? "An Academic" : "Academic Year",
+      selectAcademicYear: language === "ro" ? "Selectează anul academic" : "Select academic year",
+      bachelorsYear1: language === "ro" ? "Licență: Anul 1" : "Bachelor's: Year 1",
+      bachelorsYear2: language === "ro" ? "Licență: Anul 2" : "Bachelor's: Year 2",
+      bachelorsYear3: language === "ro" ? "Licență: Anul 3" : "Bachelor's: Year 3",
+      bachelorsYear4: language === "ro" ? "Licență: Anul 4" : "Bachelor's: Year 4",
+      bachelorsYear5: language === "ro" ? "Licență: Anul 5" : "Bachelor's: Year 5",
+      bachelorsYear6: language === "ro" ? "Licență: Anul 6" : "Bachelor's: Year 6",
+      mastersYear1: language === "ro" ? "Master: Anul 1" : "Master's: Year 1",
+      mastersYear2: language === "ro" ? "Master: Anul 2" : "Master's: Year 2",
     };
   }, [language, forceRefresh]);
 
@@ -247,8 +278,8 @@ export default function NewProjectPage() {
       return;
     }
 
-    // Validate images for Proiect and Diverse types
-    if (projectType !== "cerere" && uploadedImages.length === 0) {
+    // Validate images for all project types
+    if (uploadedImages.length === 0) {
       setError(translations.imagesRequired);
       return;
     }
@@ -297,6 +328,11 @@ export default function NewProjectPage() {
         throw new Error("Selected university or faculty not found");
       }
 
+      // Format price to have exactly 2 decimal places if it exists
+      const formattedPrice = formData.price 
+        ? parseFloat(parseFloat(formData.price).toFixed(2))
+        : null;
+
       // Only include fields that exist in the Prisma schema
       const projectData = {
         title: formData.title,
@@ -309,6 +345,8 @@ export default function NewProjectPage() {
         type: projectType,
         images: uploadedImages,
         studyLevel: formData.studyLevel,
+        price: formattedPrice,
+        academicYear: formData.category === "manuale-carti" ? formData.academicYear : null,
       };
 
       console.log("Submitting project data:", projectData); // Debug log
@@ -393,31 +431,74 @@ export default function NewProjectPage() {
         {projectType === "diverse" && (
           <div className="space-y-4">
             <Label>{translations.diverseCategory}</Label>
-            <div className="flex flex-wrap gap-2">
-              {DIVERSE_CATEGORIES.map((category) => (
-                <Button
-                  key={category.id}
-                  type="button"
-                  variant={
-                    formData.category === category.id ? "default" : "outline"
+            <Select
+              value={formData.category}
+              onValueChange={(value) =>
+                setFormData((prev) => ({ ...prev, category: value }))
+              }
+              required
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={translations.selectCategoryPlaceholder} />
+              </SelectTrigger>
+              <SelectContent>
+                {DIVERSE_CATEGORIES.map((category) => (
+                  <SelectItem key={category.id} value={category.id}>
+                    {translations.diverseCategories[category.id as keyof typeof translations.diverseCategories] || category.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <div>
+              <Label htmlFor="price">
+                {translations.price} <span className="text-sm text-gray-500">{translations.priceOptional}</span>
+              </Label>
+              <div className="relative">
+                <Input
+                  id="price"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={formData.price}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, price: e.target.value }))
                   }
-                  className={
-                    formData.category === category.id
-                      ? "bg-purple-600 hover:bg-purple-700"
-                      : ""
-                  }
-                  onClick={() =>
-                    setFormData((prev) => ({ ...prev, category: category.id }))
-                  }
-                >
-                  {translations.diverseCategories[category.id as keyof typeof translations.diverseCategories] || category.label}
-                </Button>
-              ))}
+                  placeholder={translations.pricePlaceholder}
+                  className="pr-12"
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
+                  RON
+                </span>
+              </div>
             </div>
-            {!formData.category && (
-              <p className="text-sm text-amber-600">
-                {translations.selectCategory}
-              </p>
+
+            {formData.category === "manuale-carti" && (
+              <div>
+                <Label htmlFor="academicYear">{translations.academicYear}</Label>
+                <Select
+                  value={formData.academicYear}
+                  onValueChange={(value) =>
+                    setFormData((prev) => ({ ...prev, academicYear: value }))
+                  }
+                  required
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={translations.selectAcademicYear} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="bachelors-1">{translations.bachelorsYear1}</SelectItem>
+                    <SelectItem value="bachelors-2">{translations.bachelorsYear2}</SelectItem>
+                    <SelectItem value="bachelors-3">{translations.bachelorsYear3}</SelectItem>
+                    <SelectItem value="bachelors-4">{translations.bachelorsYear4}</SelectItem>
+                    <SelectItem value="bachelors-5">{translations.bachelorsYear5}</SelectItem>
+                    <SelectItem value="bachelors-6">{translations.bachelorsYear6}</SelectItem>
+                    <SelectItem value="masters-1">{translations.mastersYear1}</SelectItem>
+                    <SelectItem value="masters-2">{translations.mastersYear2}</SelectItem>
+                    <SelectItem value="phd">{translations.phd}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             )}
           </div>
         )}
@@ -435,28 +516,17 @@ export default function NewProjectPage() {
           />
         </div>
 
-        {projectType !== "cerere" && (
-          <div className="space-y-2">
-            <Label>
-              {translations.images}
-              <span className="text-red-500 ml-1">*</span>
-            </Label>
-            <ProjectImageUpload
-              onImagesUploaded={(urls) => setUploadedImages(urls)}
-              existingImages={uploadedImages}
-              maxImages={4}
-            />
-          </div>
-        )}
-
-        {projectType === "cerere" && (
-          <Alert className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
-            <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-            <AlertDescription className="text-blue-600 dark:text-blue-400">
-              {translations.imagesOptional}
-            </AlertDescription>
-          </Alert>
-        )}
+        <div className="space-y-2">
+          <Label>
+            {translations.images}
+            <span className="text-red-500 ml-1">*</span>
+          </Label>
+          <ProjectImageUpload
+            onImagesUploaded={(urls) => setUploadedImages(urls)}
+            existingImages={uploadedImages}
+            maxImages={4}
+          />
+        </div>
 
         <div>
           <Label htmlFor="description">{translations.description}</Label>
@@ -507,38 +577,6 @@ export default function NewProjectPage() {
                 ))}
               </SelectContent>
             </Select>
-          </div>
-        )}
-
-        {projectType === "diverse" && (
-          <div className="space-y-4">
-            <Label>{translations.diverseCategory}</Label>
-            <div className="flex flex-wrap gap-2">
-              {DIVERSE_CATEGORIES.map((category) => (
-                <Button
-                  key={category.id}
-                  type="button"
-                  variant={
-                    formData.category === category.id ? "default" : "outline"
-                  }
-                  className={
-                    formData.category === category.id
-                      ? "bg-purple-600 hover:bg-purple-700"
-                      : ""
-                  }
-                  onClick={() =>
-                    setFormData((prev) => ({ ...prev, category: category.id }))
-                  }
-                >
-                  {translations.diverseCategories[category.id as keyof typeof translations.diverseCategories] || category.label}
-                </Button>
-              ))}
-            </div>
-            {!formData.category && (
-              <p className="text-sm text-amber-600">
-                {translations.selectCategory}
-              </p>
-            )}
           </div>
         )}
 

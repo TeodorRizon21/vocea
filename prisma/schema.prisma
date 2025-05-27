@@ -47,6 +47,8 @@ model Project {
   authorName   String? // Will be formatted as "firstName lastName"
   authorAvatar String? // Will reference user's avatar URL
   studyLevel   String? // Will be one of: "Bachelors", "Masters", "PhD"
+  price        Float? // Price in RON for diverse items
+  academicYear String? // For manuale-carti category
   user         User     @relation("UserProjects", fields: [userId], references: [clerkId])
   reviews      Review[] @relation("ProjectReviews")
   reports      Report[] @relation("ProjectReports") // Added relation to reports

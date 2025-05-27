@@ -34,6 +34,17 @@ import Link from "next/link";
 import { useLanguage } from "@/components/LanguageToggle";
 import { useTheme } from "next-themes";
 import useEmblaCarousel from 'embla-carousel-react';
+import { useUniversities } from "@/hooks/useUniversities";
+import universitiesData from "@/data/universities.json";
+
+interface UniversityData {
+  institutie: string;
+  oras: string;
+  facultati: Array<{
+    nume: string;
+    specializari: string[];
+  }>;
+}
 
 interface ProjectDetailsProps {
   project: {
@@ -49,6 +60,8 @@ interface ProjectDetailsProps {
     images: string[];
     createdAt: Date;
     userId: string;
+    city?: string;
+    academicYear?: string;
     user: {
       firstName: string | null;
       lastName: string | null;
@@ -80,6 +93,7 @@ export default function ProjectDetails({ project }: ProjectDetailsProps) {
   const { language, forceRefresh } = useLanguage();
   const { theme } = useTheme();
   const [emblaRef, emblaApi] = useEmblaCarousel();
+  const { getUniversityCity } = useUniversities();
 
   // Traduceri pentru pagina
   const translations = useMemo(() => {
@@ -132,6 +146,28 @@ export default function ProjectDetails({ project }: ProjectDetailsProps) {
         language === "ro"
           ? "A apărut o eroare neașteptată"
           : "An unexpected error occurred",
+      city: language === "ro" ? "Oraș" : "City",
+      academicYear: language === "ro" ? "An academic" : "Academic Year",
+      academicYears: {
+        "licenta-1": language === "ro" ? "Licență- Anul 1" : "Bachelor's- Year 1",
+        "licenta-2": language === "ro" ? "Licență- Anul 2" : "Bachelor's- Year 2",
+        "licenta-3": language === "ro" ? "Licență- Anul 3" : "Bachelor's- Year 3",
+        "licenta-4": language === "ro" ? "Licență- Anul 4" : "Bachelor's- Year 4",
+        "licenta-5": language === "ro" ? "Licență- Anul 5" : "Bachelor's- Year 5",
+        "licenta-6": language === "ro" ? "Licență- Anul 6" : "Bachelor's- Year 6",
+        "bachelors-1": language === "ro" ? "Licență- Anul 1" : "Bachelor's- Year 1",
+        "bachelors-2": language === "ro" ? "Licență- Anul 2" : "Bachelor's- Year 2",
+        "bachelors-3": language === "ro" ? "Licență- Anul 3" : "Bachelor's- Year 3",
+        "bachelors-4": language === "ro" ? "Licență- Anul 4" : "Bachelor's- Year 4",
+        "bachelors-5": language === "ro" ? "Licență- Anul 5" : "Bachelor's- Year 5",
+        "bachelors-6": language === "ro" ? "Licență- Anul 6" : "Bachelor's- Year 6",
+        "master-1": language === "ro" ? "Master- Anul 1" : "Master's- Year 1",
+        "master-2": language === "ro" ? "Master- Anul 2" : "Master's- Year 2",
+        "masters-1": language === "ro" ? "Master- Anul 1" : "Master's- Year 1",
+        "masters-2": language === "ro" ? "Master- Anul 2" : "Master's- Year 2",
+        "doctorat": language === "ro" ? "Doctorat" : "PhD",
+        "phd": language === "ro" ? "Doctorat" : "PhD",
+      },
     };
   }, [language, forceRefresh]);
 
@@ -243,6 +279,42 @@ export default function ProjectDetails({ project }: ProjectDetailsProps) {
   const formattedRating =
     averageRating > 0 ? averageRating.toFixed(1) : translations.noRatingsYet;
 
+  // Get city based on university
+  const universityCity = useMemo(() => {
+    if (project.city) return project.city;
+    if (project.university) {
+      const university = universitiesData.find((uni: UniversityData) => uni.institutie === project.university);
+      return university?.oras || "";
+    }
+    return "";
+  }, [project.university, project.city]);
+
+  // Helper function to normalize academic year format
+  const getAcademicYearTranslation = (year: string | undefined) => {
+    if (!year) return "";
+    
+    // Convert the year to lowercase for case-insensitive comparison
+    const normalizedYear = year.toLowerCase();
+    
+    // Try to get the translation directly
+    const translation = translations.academicYears[normalizedYear as keyof typeof translations.academicYears];
+    if (translation) return translation;
+    
+    // If no direct match, try to normalize the format
+    if (normalizedYear.startsWith('bachelors-')) {
+      const licentaYear = normalizedYear.replace('bachelors-', 'licenta-');
+      return translations.academicYears[licentaYear as keyof typeof translations.academicYears] || year;
+    }
+    
+    if (normalizedYear.startsWith('masters-')) {
+      const masterYear = normalizedYear.replace('masters-', 'master-');
+      return translations.academicYears[masterYear as keyof typeof translations.academicYears] || year;
+    }
+    
+    // If no match found, return the original value
+    return year;
+  };
+
   return (
     <div className="max-w-6xl mx-auto space-y-8">
       <div className="flex justify-between items-center">
@@ -314,7 +386,7 @@ export default function ProjectDetails({ project }: ProjectDetailsProps) {
                 {project.images.map((image, index) => (
                   <div key={index} className="flex-[0_0_100%] min-w-0">
                     <div className="p-1">
-                      <div className="relative w-full aspect-video">
+                      <div className="relative w-full max-w-3xl mx-auto aspect-video">
                         <Image
                           src={image || "/placeholder.svg"}
                           alt={`Image ${index + 1}`}
@@ -392,7 +464,7 @@ export default function ProjectDetails({ project }: ProjectDetailsProps) {
             <h2 className="text-xl font-semibold mb-4">
               {translations.description}
             </h2>
-            <p className="text-white">{project.description}</p>
+            <p className="text-gray-900 dark:text-white">{project.description}</p>
           </div>
         </CardContent>
       </Card>
@@ -421,6 +493,18 @@ export default function ProjectDetails({ project }: ProjectDetailsProps) {
                 <School className="h-4 w-4 text-gray-500" />
                 {translations.faculty}: {project.faculty}
               </p>
+              {(project.type === "diverse" || project.category === "manuale-carti") && universityCity && (
+                <p className="flex items-center gap-2">
+                  <School className="h-4 w-4 text-gray-500" />
+                  {translations.city}: {universityCity}
+                </p>
+              )}
+              {project.category === "manuale-carti" && project.academicYear && (
+                <p className="flex items-center gap-2">
+                  <Book className="h-4 w-4 text-gray-500" />
+                  {translations.academicYear}: {getAcademicYearTranslation(project.academicYear)}
+                </p>
+              )}
             </div>
             <div className="space-y-3">
               <p className="flex items-center gap-2">

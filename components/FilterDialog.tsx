@@ -33,6 +33,7 @@ interface FilterDialogProps {
     city: string;
   }) => void;
   showCategoryFilter?: boolean;
+  showCityFilter?: boolean;
   currentFilters?: {
     university: string;
     faculty: string;
@@ -40,6 +41,7 @@ interface FilterDialogProps {
     studyLevel: string;
     city: string;
   };
+  availableCities?: string[];
 }
 
 export default function FilterDialog({
@@ -47,7 +49,9 @@ export default function FilterDialog({
   onClose,
   onApplyFilters,
   showCategoryFilter = true,
+  showCityFilter = false,
   currentFilters,
+  availableCities = [],
 }: FilterDialogProps) {
   const { universities, faculties, getUniversityName, getFacultyName } =
     useUniversities();
@@ -75,6 +79,19 @@ export default function FilterDialog({
       reset: language === "ro" ? "Resetează" : "Reset",
       cancel: language === "ro" ? "Anulează" : "Cancel",
       apply: language === "ro" ? "Aplică" : "Apply Filters",
+      academicCategories: {
+        "Mathematics": language === "ro" ? "Matematică" : "Mathematics",
+        "Physics": language === "ro" ? "Fizică" : "Physics",
+        "Computer Science": language === "ro" ? "Informatică" : "Computer Science",
+        "Engineering": language === "ro" ? "Inginerie" : "Engineering",
+        "Chemistry": language === "ro" ? "Chimie" : "Chemistry",
+        "Economics": language === "ro" ? "Economie" : "Economics",
+        "Medicine": language === "ro" ? "Medicină" : "Medicine",
+        "Law": language === "ro" ? "Drept" : "Law",
+        "Social Sciences": language === "ro" ? "Științe Sociale" : "Social Sciences",
+        "Arts and Humanities": language === "ro" ? "Arte și Științe Umaniste" : "Arts and Humanities",
+        "Business and Management": language === "ro" ? "Business și Management" : "Business and Management"
+      }
     };
   }, [language, forceRefresh]);
 
@@ -97,27 +114,12 @@ export default function FilterDialog({
     }
   }, [isOpen, currentFilters]);
 
-  // When university changes, reset faculty and city selection only if not coming from currentFilters
+  // Reset faculty when university changes
   useEffect(() => {
-    // Skip this reset on initial render or if resetting to currentFilters
-    const isInitialRender =
-      filters.university ===
-      (currentFilters?.university || defaultFilters.university);
-
-    if (!isInitialRender && filters.university !== "_all") {
-      setFilters((prev) => ({ ...prev, faculty: "_all", city: "_all" }));
+    if (filters.university === "_all") {
+      setFilters(prev => ({ ...prev, faculty: "_all" }));
     }
-  }, [filters.university, currentFilters]);
-
-  // Compute available cities based on selected university
-  const availableCities = useMemo(() => {
-    if (filters.university && filters.university !== "_all") {
-      const selectedUni = universities.find((uni) => uni.id === filters.university);
-      return selectedUni && selectedUni.city ? [selectedUni.city] : [];
-    }
-    // If no university selected, show all unique cities
-    return [...new Set(universities.map((uni) => uni.city).filter(Boolean))].sort();
-  }, [filters.university, universities]);
+  }, [filters.university]);
 
   const handleApply = () => {
     console.log("Applying filters:", filters);
@@ -156,121 +158,20 @@ export default function FilterDialog({
           <DialogTitle>{translations.filterProjects}</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-2">
-            <Label htmlFor="university" className="text-right text-sm">
-              {translations.university}
-            </Label>
-            <Select
-              value={filters.university}
-              onValueChange={(value) =>
-                setFilters((prev) => ({ ...prev, university: value }))
-              }
-            >
-              <SelectTrigger id="university" className="col-span-3 h-9">
-                <SelectValue placeholder={translations.allUniversities} className="text-sm truncate max-w-[180px]" />
-              </SelectTrigger>
-              <SelectContent 
-                className="w-[calc(100vw-2rem)] sm:w-auto sm:min-w-[var(--radix-select-trigger-width)] sm:max-w-[450px]"
-                position="popper"
-                side="bottom"
-                align="start"
-              >
-                <SelectItem value="_all">
-                  {translations.allUniversities}
-                </SelectItem>
-                {universities.map((uni) => (
-                  <SelectItem key={uni.id} value={uni.id} className="py-2">
-                    <div className="flex flex-col">
-                      <span className="text-sm whitespace-normal">{uni.name}</span>
-                      <span className="text-xs text-muted-foreground">{uni.city}</span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="grid grid-cols-4 items-center gap-2">
-            <Label htmlFor="faculty" className="text-right text-sm">
-              {translations.faculty}
-            </Label>
-            <Select
-              value={filters.faculty}
-              onValueChange={(value) =>
-                setFilters((prev) => ({ ...prev, faculty: value }))
-              }
-              disabled={filters.university === "_all"}
-            >
-              <SelectTrigger id="faculty" className="col-span-3 h-9">
-                <SelectValue placeholder={translations.allFaculties} className="text-sm" />
-              </SelectTrigger>
-              <SelectContent 
-                className="w-[calc(100vw-2rem)] sm:w-auto sm:min-w-[var(--radix-select-trigger-width)] sm:max-w-[450px]"
-                position="popper"
-                side="bottom"
-                align="start"
-              >
-                <SelectItem value="_all">
-                  {translations.allFaculties}
-                </SelectItem>
-                {filters.university !== "_all" &&
-                  faculties
-                    .filter(
-                      (faculty) => faculty.universityId === filters.university
-                    )
-                    .map((faculty) => (
-                      <SelectItem key={faculty.id} value={faculty.id}>
-                        <span className="text-sm whitespace-normal">{faculty.name}</span>
-                      </SelectItem>
-                    ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="grid grid-cols-4 items-center gap-2">
-            <Label htmlFor="city" className="text-right text-sm">
-              {translations.city}
-            </Label>
-            <Select
-              value={filters.city}
-              onValueChange={(value) =>
-                setFilters((prev) => ({ ...prev, city: value }))
-              }
-            >
-              <SelectTrigger id="city" className="col-span-3 h-9">
-                <SelectValue placeholder={translations.allCities} className="text-sm" />
-              </SelectTrigger>
-              <SelectContent 
-                className="w-[calc(100vw-2rem)] sm:w-auto sm:min-w-[var(--radix-select-trigger-width)] sm:max-w-[450px]"
-                position="popper"
-                side="bottom"
-                align="start"
-              >
-                <SelectItem value="_all">
-                  {translations.allCities}
-                </SelectItem>
-                {availableCities.map((city) => (
-                  <SelectItem key={city} value={city}>
-                    <span className="text-sm">{city}</span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {showCategoryFilter && (
+          {/* University and Faculty Selection Group */}
+          <div className="space-y-4 border-b pb-4">
             <div className="grid grid-cols-4 items-center gap-2">
-              <Label htmlFor="category" className="text-right text-sm">
-                {translations.category}
+              <Label htmlFor="university" className="text-right text-sm">
+                {translations.university}
               </Label>
               <Select
-                value={filters.category}
+                value={filters.university}
                 onValueChange={(value) =>
-                  setFilters((prev) => ({ ...prev, category: value }))
+                  setFilters((prev) => ({ ...prev, university: value }))
                 }
               >
-                <SelectTrigger id="category" className="col-span-3 h-9">
-                  <SelectValue placeholder={translations.allCategories} className="text-sm" />
+                <SelectTrigger id="university" className="col-span-3 h-9">
+                  <SelectValue placeholder={translations.allUniversities} className="text-sm truncate max-w-[180px]" />
                 </SelectTrigger>
                 <SelectContent 
                   className="w-[calc(100vw-2rem)] sm:w-auto sm:min-w-[var(--radix-select-trigger-width)] sm:max-w-[450px]"
@@ -279,51 +180,159 @@ export default function FilterDialog({
                   align="start"
                 >
                   <SelectItem value="_all">
-                    {translations.allCategories}
+                    {translations.allUniversities}
                   </SelectItem>
-                  {ACADEMIC_CATEGORIES.map((category) => (
-                    <SelectItem key={category} value={category}>
-                      <span className="text-sm">{category}</span>
+                  {universities.map((uni) => (
+                    <SelectItem key={uni.id} value={uni.id} className="py-2">
+                      <div className="flex flex-col">
+                        <span className="text-[13px] leading-tight whitespace-normal">{uni.name}</span>
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-          )}
 
-          <div className="grid grid-cols-4 items-center gap-2">
-            <Label htmlFor="studyLevel" className="text-right text-sm">
-              {translations.studyLevel}
-            </Label>
-            <Select
-              value={filters.studyLevel}
-              onValueChange={(value) =>
-                setFilters((prev) => ({ ...prev, studyLevel: value }))
-              }
-            >
-              <SelectTrigger id="studyLevel" className="col-span-3 h-9">
-                <SelectValue placeholder={translations.allStudyLevels} className="text-sm" />
-              </SelectTrigger>
-              <SelectContent 
-                className="w-[calc(100vw-2rem)] sm:w-auto sm:min-w-[var(--radix-select-trigger-width)] sm:max-w-[450px]"
-                position="popper"
-                side="bottom"
-                align="start"
+            <div className="grid grid-cols-4 items-center gap-2">
+              <Label htmlFor="faculty" className="text-right text-sm">
+                {translations.faculty}
+              </Label>
+              <Select
+                value={filters.faculty}
+                onValueChange={(value) =>
+                  setFilters((prev) => ({ ...prev, faculty: value }))
+                }
+                disabled={filters.university === "_all"}
               >
-                <SelectItem value="_all">
-                  {translations.allStudyLevels}
-                </SelectItem>
-                <SelectItem value="bachelors">
-                  <span className="text-sm">{translations.bachelors}</span>
-                </SelectItem>
-                <SelectItem value="masters">
-                  <span className="text-sm">{translations.masters}</span>
-                </SelectItem>
-                <SelectItem value="phd">
-                  <span className="text-sm">{translations.phd}</span>
-                </SelectItem>
-              </SelectContent>
-            </Select>
+                <SelectTrigger id="faculty" className="col-span-3 h-9">
+                  <SelectValue placeholder={translations.allFaculties} className="text-sm" />
+                </SelectTrigger>
+                <SelectContent 
+                  className="w-[calc(100vw-2rem)] sm:w-auto sm:min-w-[var(--radix-select-trigger-width)] sm:max-w-[450px]"
+                  position="popper"
+                  side="bottom"
+                  align="start"
+                >
+                  <SelectItem value="_all">
+                    {translations.allFaculties}
+                  </SelectItem>
+                  {filters.university !== "_all" &&
+                    faculties
+                      .filter(
+                        (faculty) => faculty.universityId === filters.university
+                      )
+                      .map((faculty) => (
+                        <SelectItem key={faculty.id} value={faculty.id}>
+                          <span className="text-sm whitespace-normal">{faculty.name}</span>
+                        </SelectItem>
+                      ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Other Filters Group */}
+          <div className="space-y-4">
+            {showCityFilter && (
+              <div className="grid grid-cols-4 items-center gap-2">
+                <Label htmlFor="city" className="text-right text-sm">
+                  {translations.city}
+                </Label>
+                <Select
+                  value={filters.city}
+                  onValueChange={(value) =>
+                    setFilters((prev) => ({ ...prev, city: value }))
+                  }
+                >
+                  <SelectTrigger id="city" className="col-span-3 h-9">
+                    <SelectValue placeholder={translations.allCities} className="text-sm" />
+                  </SelectTrigger>
+                  <SelectContent 
+                    className="w-[calc(100vw-2rem)] sm:w-auto sm:min-w-[var(--radix-select-trigger-width)] sm:max-w-[450px]"
+                    position="popper"
+                    side="bottom"
+                    align="start"
+                  >
+                    <SelectItem value="_all">
+                      {translations.allCities}
+                    </SelectItem>
+                    {[...new Set(universities.map(uni => uni.city))].sort().map((city) => (
+                      <SelectItem key={city} value={city}>
+                        <span className="text-sm">{city}</span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            {showCategoryFilter && (
+              <div className="grid grid-cols-4 items-center gap-2">
+                <Label htmlFor="category" className="text-right text-sm">
+                  {translations.category}
+                </Label>
+                <Select
+                  value={filters.category}
+                  onValueChange={(value) =>
+                    setFilters((prev) => ({ ...prev, category: value }))
+                  }
+                >
+                  <SelectTrigger id="category" className="col-span-3 h-9">
+                    <SelectValue placeholder={translations.allCategories} className="text-sm" />
+                  </SelectTrigger>
+                  <SelectContent 
+                    className="w-[calc(100vw-2rem)] sm:w-auto sm:min-w-[var(--radix-select-trigger-width)] sm:max-w-[450px]"
+                    position="popper"
+                    side="bottom"
+                    align="start"
+                  >
+                    <SelectItem value="_all">
+                      {translations.allCategories}
+                    </SelectItem>
+                    {ACADEMIC_CATEGORIES.map((category) => (
+                      <SelectItem key={category} value={category}>
+                        <span className="text-sm">{translations.academicCategories[category as keyof typeof translations.academicCategories] || category}</span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            <div className="grid grid-cols-4 items-center gap-2">
+              <Label htmlFor="studyLevel" className="text-right text-sm">
+                {translations.studyLevel}
+              </Label>
+              <Select
+                value={filters.studyLevel}
+                onValueChange={(value) =>
+                  setFilters((prev) => ({ ...prev, studyLevel: value }))
+                }
+              >
+                <SelectTrigger id="studyLevel" className="col-span-3 h-9">
+                  <SelectValue placeholder={translations.allStudyLevels} className="text-sm" />
+                </SelectTrigger>
+                <SelectContent 
+                  className="w-[calc(100vw-2rem)] sm:w-auto sm:min-w-[var(--radix-select-trigger-width)] sm:max-w-[450px]"
+                  position="popper"
+                  side="bottom"
+                  align="start"
+                >
+                  <SelectItem value="_all">
+                    {translations.allStudyLevels}
+                  </SelectItem>
+                  <SelectItem value="bachelors">
+                    <span className="text-sm">{translations.bachelors}</span>
+                  </SelectItem>
+                  <SelectItem value="masters">
+                    <span className="text-sm">{translations.masters}</span>
+                  </SelectItem>
+                  <SelectItem value="phd">
+                    <span className="text-sm">{translations.phd}</span>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
         <DialogFooter className="flex justify-between sm:justify-between">

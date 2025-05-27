@@ -27,7 +27,10 @@ interface ProductCardProps {
   category?: string;
   studyLevel?: string;
   reviews: Array<{ score: number }>;
-  userId: string; // Added userId prop
+  userId: string;
+  type?: string;
+  city?: string;
+  academicYear?: string;
 }
 
 export default function ProductCard({
@@ -42,7 +45,10 @@ export default function ProductCard({
   category,
   studyLevel,
   reviews,
-  userId, // Added userId parameter
+  userId,
+  type,
+  city,
+  academicYear,
 }: ProductCardProps) {
   const { language, forceRefresh } = useLanguage();
 
@@ -54,8 +60,56 @@ export default function ProductCard({
         masters: language === "ro" ? "Master" : "Master's",
         phd: language === "ro" ? "Doctorat" : "PhD",
       },
+      city: language === "ro" ? "Oraș" : "City",
+      academicYear: language === "ro" ? "An academic" : "Academic Year",
+      academicYears: {
+        "licenta-1": language === "ro" ? "Licență- Anul 1" : "Bachelor's- Year 1",
+        "licenta-2": language === "ro" ? "Licență- Anul 2" : "Bachelor's- Year 2",
+        "licenta-3": language === "ro" ? "Licență- Anul 3" : "Bachelor's- Year 3",
+        "licenta-4": language === "ro" ? "Licență- Anul 4" : "Bachelor's- Year 4",
+        "licenta-5": language === "ro" ? "Licență- Anul 5" : "Bachelor's- Year 5",
+        "licenta-6": language === "ro" ? "Licență- Anul 6" : "Bachelor's- Year 6",
+        "bachelors-1": language === "ro" ? "Licență- Anul 1" : "Bachelor's- Year 1",
+        "bachelors-2": language === "ro" ? "Licență- Anul 2" : "Bachelor's- Year 2",
+        "bachelors-3": language === "ro" ? "Licență- Anul 3" : "Bachelor's- Year 3",
+        "bachelors-4": language === "ro" ? "Licență- Anul 4" : "Bachelor's- Year 4",
+        "bachelors-5": language === "ro" ? "Licență- Anul 5" : "Bachelor's- Year 5",
+        "bachelors-6": language === "ro" ? "Licență- Anul 6" : "Bachelor's- Year 6",
+        "master-1": language === "ro" ? "Master- Anul 1" : "Master's- Year 1",
+        "master-2": language === "ro" ? "Master- Anul 2" : "Master's- Year 2",
+        "masters-1": language === "ro" ? "Master- Anul 1" : "Master's- Year 1",
+        "masters-2": language === "ro" ? "Master- Anul 2" : "Master's- Year 2",
+        "doctorat": language === "ro" ? "Doctorat" : "PhD",
+        "phd": language === "ro" ? "Doctorat" : "PhD",
+      },
     };
   }, [language, forceRefresh]);
+
+  // Helper function to normalize academic year format
+  const getAcademicYearTranslation = (year: string | undefined) => {
+    if (!year) return "";
+    
+    // Convert the year to lowercase for case-insensitive comparison
+    const normalizedYear = year.toLowerCase();
+    
+    // Try to get the translation directly
+    const translation = translations.academicYears[normalizedYear as keyof typeof translations.academicYears];
+    if (translation) return translation;
+    
+    // If no direct match, try to normalize the format
+    if (normalizedYear.startsWith('bachelors-')) {
+      const licentaYear = normalizedYear.replace('bachelors-', 'licenta-');
+      return translations.academicYears[licentaYear as keyof typeof translations.academicYears] || year;
+    }
+    
+    if (normalizedYear.startsWith('masters-')) {
+      const masterYear = normalizedYear.replace('masters-', 'master-');
+      return translations.academicYears[masterYear as keyof typeof translations.academicYears] || year;
+    }
+    
+    // If no match found, return the original value
+    return year;
+  };
 
   const averageRating = reviews.reduce((acc, review) => acc + review.score, 0) / reviews.length || 0;
   const displayName = `${authorFirstName || ""} ${authorLastName || ""}`.trim() || "Anonymous";
@@ -99,6 +153,18 @@ export default function ProductCard({
               <BookOpen className="h-3 w-3 mr-1" />
               <span className="line-clamp-1">{faculty}</span>
             </div>
+            {type === "diverse" && city && (
+              <div className="flex items-center text-xs text-muted-foreground">
+                <Tag className="h-3 w-3 mr-1" />
+                <span className="line-clamp-1">{translations.city}: {city}</span>
+              </div>
+            )}
+            {category === "manuale-carti" && academicYear && (
+              <div className="flex items-center text-xs text-muted-foreground">
+                <Scroll className="h-3 w-3 mr-1" />
+                <span className="line-clamp-1">{getAcademicYearTranslation(academicYear)}</span>
+              </div>
+            )}
           </div>
 
           <div className="flex items-center justify-between text-xs md:text-sm">

@@ -44,6 +44,7 @@ interface ExtendedProject {
   };
   reviews: Array<{ score: number }>;
   city?: string | null;
+  academicYear?: string | null;
 }
 
 interface BrowsePageClientProps {
@@ -169,14 +170,22 @@ export default function BrowsePageClient({
 
   // Filter projects when tab, search, or filters change
   useEffect(() => {
+    console.log("Starting filtering with:", {
+      activeTab,
+      filters,
+      projectsCount: safeProjects.length
+    });
+
     // First filter by tab
     let result = safeProjects.filter((project) => project.type === activeTab);
+    console.log("After tab filter:", result.length, "projects");
 
     // Then apply subcategory filter for diverse items
     if (activeTab === "diverse" && diverseSubcategory !== "all") {
       result = result.filter(
         (project) => project.category === diverseSubcategory
       );
+      console.log("After subcategory filter:", result.length, "projects");
     }
 
     // Then apply search filter if needed
@@ -187,6 +196,7 @@ export default function BrowsePageClient({
         } ${project.university || ""} ${project.faculty || ""} ${project.city || ""}`.toLowerCase();
         return searchString.includes(searchQuery.toLowerCase());
       });
+      console.log("After search filter:", result.length, "projects");
     }
 
     // Then apply university filter if needed
@@ -194,43 +204,55 @@ export default function BrowsePageClient({
       const universityName = getUniversityName(filters.university);
       result = result.filter(
         (project) =>
-          project.university && project.university.includes(universityName)
+          project.university && project.university === universityName
       );
+      console.log("After university filter:", result.length, "projects");
     }
 
     // Then apply faculty filter if needed
     if (filters.university && filters.faculty) {
       const facultyName = getFacultyName(filters.university, filters.faculty);
       result = result.filter(
-        (project) => project.faculty && project.faculty.includes(facultyName)
+        (project) => project.faculty && project.faculty === facultyName
       );
+      console.log("After faculty filter:", result.length, "projects");
+    }
+
+    // Apply city filter if needed
+    if (filters.city) {
+      console.log("Applying city filter:", filters.city);
+      console.log("Projects before city filter:", result.map(p => ({ id: p.id, title: p.title, city: p.city })));
+      
+      result = result.filter((project) => {
+        const projectCity = project.city?.trim() || "";
+        console.log(`Comparing city for project ${project.id} - ${project.title}:`, {
+          filterCity: filters.city,
+          projectCity,
+          match: projectCity === filters.city
+        });
+        
+        return projectCity === filters.city;
+      });
+      console.log("After city filter:", result.length, "projects");
+      console.log("Remaining projects:", result.map(p => ({ id: p.id, title: p.title, city: p.city })));
     }
 
     // Apply category filter if needed
-    if (filters.category && filters.category !== "_all") {
+    if (filters.category) {
       result = result.filter(
         (project) => 
           (project.category && project.category === filters.category) || 
           (project.subject && project.subject === filters.category)
       );
+      console.log("After category filter:", result.length, "projects");
     }
 
     // Apply study level filter if needed
-    if (filters.studyLevel && filters.studyLevel !== "_all") {
+    if (filters.studyLevel) {
       result = result.filter(
         (project) => project.studyLevel === filters.studyLevel
       );
-    }
-
-    // Apply city filter if needed
-    if (filters.city && filters.city !== "_all") {
-      const selectedCity = filters.city.trim().toLowerCase();
-      result = result.filter((project) => {
-        console.log("Filtering by city:", selectedCity, "Project city:", project.city);
-        return (
-          project.city && project.city.trim().toLowerCase() === selectedCity
-        );
-      });
+      console.log("After study level filter:", result.length, "projects");
     }
 
     // Apply sort order
@@ -293,7 +315,15 @@ export default function BrowsePageClient({
     studyLevel: string;
     city: string;
   }) => {
-    setFilters(newFilters);
+    // Convert "_all" to empty strings for cleaner filtering
+    const cleanFilters = {
+      university: newFilters.university === "_all" ? "" : newFilters.university,
+      faculty: newFilters.faculty === "_all" ? "" : newFilters.faculty,
+      category: newFilters.category === "_all" ? "" : newFilters.category,
+      studyLevel: newFilters.studyLevel === "_all" ? "" : newFilters.studyLevel,
+      city: newFilters.city === "_all" ? "" : newFilters.city,
+    };
+    setFilters(cleanFilters);
   };
 
   const handleNewProjectClick = (e: React.MouseEvent) => {
@@ -336,17 +366,19 @@ export default function BrowsePageClient({
     }
   };
 
+  // Get unique cities from projects
+  const projectCities = useMemo(() => {
+    return safeProjects
+      .map(project => project.city)
+      .filter((city): city is string => Boolean(city));
+  }, [safeProjects]);
+
   return (
     <>
       {/* Description section with new layout */}
       <div className="mb-6">
         <div className="bg-gradient-to-r from-purple-600 to-purple-400 text-white p-8 rounded-lg">
           <div className="max-w-3xl mx-auto">
-            <h2 className="text-2xl md:text-3xl font-bold mb-4">
-              {activeTab === "proiect" && translations.projectsTitle}
-              {activeTab === "cerere" && translations.projectRequestsTitle}
-              {activeTab === "diverse" && translations.diverseTitle}
-            </h2>
             <div className="space-y-4">
               <p className="text-base md:text-lg lg:text-xl">
                 {activeTab === "proiect" && translations.projectsDescription}
@@ -506,6 +538,9 @@ export default function BrowsePageClient({
                   reviews={project.reviews}
                   userId={project.userId}
                   studyLevel={project.studyLevel || undefined}
+                  type={project.type}
+                  city={project.city || undefined}
+                  academicYear={project.academicYear || undefined}
                 />
               </a>
             ))}
@@ -525,6 +560,7 @@ export default function BrowsePageClient({
         onApplyFilters={handleApplyFilters}
         currentFilters={filters}
         showCategoryFilter={activeTab !== "diverse"}
+        showCityFilter={activeTab === "diverse"}
       />
 
       <AccessDeniedDialog

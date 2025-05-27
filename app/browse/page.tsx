@@ -24,8 +24,11 @@ export default function BrowsePage() {
   // Traduceri pentru pagina cu useMemo
   const translations = useMemo(() => {
     return {
-      browseTitle:
-        language === "ro" ? "Explorează proiecte" : "Browse projects",
+      browseTitle: {
+        proiect: language === "ro" ? "Proiecte Academice" : "Academic Projects",
+        cerere: language === "ro" ? "Cereri de Proiecte" : "Project Requests",
+        diverse: language === "ro" ? "Anunțuri Diverse" : "Various Announcements",
+      },
       projects: language === "ro" ? "Proiecte" : "Projects",
       projectRequests:
         language === "ro" ? "Cereri de proiecte" : "Project requests",
@@ -121,7 +124,7 @@ export default function BrowsePage() {
       <div className="flex flex-col sm:flex-row justify-between items-center sm:items-center gap-4">
         <div className="flex flex-col items-center sm:items-start w-full sm:w-auto order-2 sm:order-1">
           <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-purple-600 text-center sm:text-left">
-            {translations.browseTitle}
+            {translations.browseTitle[activeTab as keyof typeof translations.browseTitle]}
           </h1>
           <Button
             onClick={() => {
