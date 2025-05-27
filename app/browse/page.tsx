@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import UserProfile from "@/components/UserProfile";
 import BrowsePageClient from "@/components/BrowsePageClient";
 import AccessDeniedDialog from "@/components/AccessDeniedDialog";
 import { useUser } from "@clerk/nextjs";
 import { useLanguage } from "@/components/LanguageToggle";
+import { Button } from "@/components/ui/button";
 
 export default function BrowsePage() {
   const searchParams = useSearchParams();
@@ -18,6 +19,7 @@ export default function BrowsePage() {
   const [userPlan, setUserPlan] = useState("Basic");
   const { user, isLoaded } = useUser();
   const { language, forceRefresh } = useLanguage();
+  const router = useRouter();
 
   // Traduceri pentru pagina cu useMemo
   const translations = useMemo(() => {
@@ -121,6 +123,23 @@ export default function BrowsePage() {
           <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-purple-600 text-center sm:text-left">
             {translations.browseTitle}
           </h1>
+          <Button
+            onClick={() => {
+              if (userPlan === "Basic") {
+                setShowAccessDenied(true);
+                return;
+              }
+              router.push("/projects/new");
+            }}
+            className="mt-4 bg-purple-600 hover:bg-purple-700 text-white w-full sm:w-auto md:hidden"
+          >
+            {activeTab === "proiect"
+              ? (language === "ro" ? "Adaugă un proiect nou" : "Add a new project")
+              : activeTab === "cerere"
+              ? (language === "ro" ? "Adaugă o cerere de proiect" : "Add a project request")
+              : (language === "ro" ? "Adaugă un anunț nou" : "Add a new announcement")
+            }
+          </Button>
         </div>
         <div className="w-full sm:w-auto order-1 sm:order-2">
           <UserProfile />

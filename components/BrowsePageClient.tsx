@@ -120,6 +120,12 @@ export default function BrowsePageClient({
         language === "ro"
           ? "Tot ce ai nevoie ca student: oferte de muncă part-time, servicii de mentoring, cărți și materiale de studiu, și multe altele. O platformă dedicată exclusiv pentru studenți, cu tot ce necesită succesul tău academic."
           : "Everything you need as a student: part-time job offers, mentoring services, books and study materials, and more. A platform dedicated exclusively to students, with everything required for your academic success.",
+      projectsTitle:
+        language === "ro" ? "Proiecte Academice" : "Academic Projects",
+      projectRequestsTitle:
+        language === "ro" ? "Cereri de Proiecte" : "Project Requests",
+      diverseTitle:
+        language === "ro" ? "Anunțuri Diverse" : "Various Announcements",
     };
   }, [language, forceRefresh]);
 
@@ -332,14 +338,93 @@ export default function BrowsePageClient({
 
   return (
     <>
-      {/* Description section in violet card */}
+      {/* Description section with new layout */}
       <div className="mb-6">
-        <div className="bg-gradient-to-r from-purple-600 to-purple-400 text-white p-8 pl-4 rounded-lg">
-          <p className="text-white text-base md:text-lg lg:text-xl max-w-3xl mx-auto text-justify">
-            {activeTab === "proiect" && translations.projectsDescription}
-            {activeTab === "cerere" && translations.projectRequestsDescription}
-            {activeTab === "diverse" && translations.diverseDescription}
-          </p>
+        <div className="bg-gradient-to-r from-purple-600 to-purple-400 text-white p-8 rounded-lg">
+          <div className="max-w-3xl mx-auto">
+            <h2 className="text-2xl md:text-3xl font-bold mb-4">
+              {activeTab === "proiect" && translations.projectsTitle}
+              {activeTab === "cerere" && translations.projectRequestsTitle}
+              {activeTab === "diverse" && translations.diverseTitle}
+            </h2>
+            <div className="space-y-4">
+              <p className="text-base md:text-lg lg:text-xl">
+                {activeTab === "proiect" && translations.projectsDescription}
+                {activeTab === "cerere" && translations.projectRequestsDescription}
+                {activeTab === "diverse" && translations.diverseDescription}
+              </p>
+              <div className="pt-4 border-t border-white/20">
+                <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm md:text-base">
+                  {activeTab === "proiect" && (
+                    <>
+                      <li className="flex items-center gap-2">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        {language === "ro" ? "Proiecte verificate" : "Verified projects"}
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        {language === "ro" ? "Suport academic" : "Academic support"}
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        {language === "ro" ? "Resurse de calitate" : "Quality resources"}
+                      </li>
+                    </>
+                  )}
+                  {activeTab === "cerere" && (
+                    <>
+                      <li className="flex items-center gap-2">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        {language === "ro" ? "Asistență personalizată" : "Personalized assistance"}
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        {language === "ro" ? "Experți verificați" : "Verified experts"}
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        {language === "ro" ? "Răspuns rapid" : "Quick response"}
+                      </li>
+                    </>
+                  )}
+                  {activeTab === "diverse" && (
+                    <>
+                      <li className="flex items-center gap-2">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        {language === "ro" ? "Oportunități diverse" : "Various opportunities"}
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        {language === "ro" ? "Comunitate activă" : "Active community"}
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        {language === "ro" ? "Anunțuri verificate" : "Verified announcements"}
+                      </li>
+                    </>
+                  )}
+                </ul>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -352,7 +437,7 @@ export default function BrowsePageClient({
           />
         </div>
         <Button
-          className="bg-purple-600 hover:bg-purple-700 text-white w-full md:w-auto text-sm md:text-base"
+          className="bg-purple-600 hover:bg-purple-700 text-white w-full md:w-auto text-sm md:text-base hidden md:block"
           onClick={handleNewProjectClick}
         >
           {getAddButtonText()}
