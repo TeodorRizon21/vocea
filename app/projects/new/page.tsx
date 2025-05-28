@@ -442,7 +442,7 @@ export default function NewProjectPage() {
                 <SelectValue placeholder={translations.selectCategoryPlaceholder} />
               </SelectTrigger>
               <SelectContent>
-                {DIVERSE_CATEGORIES.map((category) => (
+              {DIVERSE_CATEGORIES.map((category) => (
                   <SelectItem key={category.id} value={category.id}>
                     {translations.diverseCategories[category.id as keyof typeof translations.diverseCategories] || category.label}
                   </SelectItem>
@@ -498,7 +498,7 @@ export default function NewProjectPage() {
                     <SelectItem value="phd">{translations.phd}</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
+            </div>
             )}
           </div>
         )}
@@ -516,17 +516,17 @@ export default function NewProjectPage() {
           />
         </div>
 
-        <div className="space-y-2">
-          <Label>
-            {translations.images}
-            <span className="text-red-500 ml-1">*</span>
-          </Label>
-          <ProjectImageUpload
-            onImagesUploaded={(urls) => setUploadedImages(urls)}
-            existingImages={uploadedImages}
-            maxImages={4}
-          />
-        </div>
+          <div className="space-y-2">
+            <Label>
+              {translations.images}
+              <span className="text-red-500 ml-1">*</span>
+            </Label>
+            <ProjectImageUpload
+              onImagesUploaded={(urls) => setUploadedImages(urls)}
+              existingImages={uploadedImages}
+              maxImages={4}
+            />
+          </div>
 
         <div>
           <Label htmlFor="description">{translations.description}</Label>

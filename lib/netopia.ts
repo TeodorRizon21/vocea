@@ -1,4 +1,5 @@
 import { decodeResponse } from '@/order';
+import crypto from 'crypto';
 
 export interface IpnResponse {
   orderId: string;
@@ -8,6 +9,7 @@ export interface IpnResponse {
   amount: string;
   isRecurring: boolean;
   recurringDetails: any;
+  crc?: string;
 }
 
 export async function decodeIpnResponse(req: Request): Promise<IpnResponse> {
@@ -32,15 +34,34 @@ export async function decodeIpnResponse(req: Request): Promise<IpnResponse> {
 
   // Extract transaction information
   const { order } = decodedResponse;
-  const { 
-    $: { id: orderId, timestamp },
-    mobilpay: {
-      action: status,
-      original_amount: amount,
-      error
-    },
-    params
-  } = order;
+  
+  // Handle both old and new response formats
+  const orderId = order.$.id;
+  const timestamp = order.$.timestamp;
+  const status = order.mobilpay?.action || order.status;
+  const amount = order.invoice.$.amount || order.mobilpay?.original_amount;
+  const error = order.mobilpay?.error || order.error;
+  const params = order.params;
+  const crc = order.$.crc;
+
+  // Verify CRC if present
+  if (crc) {
+    const calculatedCrc = crypto
+      .createHash('md5')
+      .update(`${orderId}${timestamp}${order.signature}${amount}`)
+      .digest('hex');
+    
+    if (calculatedCrc !== crc) {
+      console.error('CRC Mismatch', {
+        received: crc,
+        calculated: calculatedCrc,
+        orderId,
+        timestamp,
+        amount
+      });
+      throw new Error('Invalid CRC');
+    }
+  }
 
   // Check if this is a recurring payment
   const isRecurring = !!(params && params.recurring);
@@ -53,7 +74,8 @@ export async function decodeIpnResponse(req: Request): Promise<IpnResponse> {
     errorMessage: error?._ || '',
     amount,
     isRecurring,
-    recurringDetails
+    recurringDetails,
+    crc
   };
 }
 

@@ -16,6 +16,7 @@ export async function POST(req: Request) {
     });
 
     if (!originalOrder) {
+      console.error('[RECURRING_PAYMENT_ERROR] Original order not found:', originalOrderId);
       return new NextResponse("Original order not found", { status: 404 });
     }
 
@@ -25,11 +26,22 @@ export async function POST(req: Request) {
     });
 
     if (!newOrder) {
+      console.error('[RECURRING_PAYMENT_ERROR] New order not found:', orderId);
       return new NextResponse("New order not found", { status: 404 });
     }
 
     // Create payment request with recurring token
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    
+    // Log the recurring payment attempt
+    console.log('[RECURRING_PAYMENT_ATTEMPT]', {
+      orderId,
+      originalOrderId,
+      amount: newOrder.amount,
+      plan: originalOrder.plan.name,
+      user: originalOrder.user.email
+    });
+
     const paymentRequest = getRequest(
       orderId,
       newOrder.amount,
@@ -37,45 +49,35 @@ export async function POST(req: Request) {
         firstName: originalOrder.user.firstName || 'Test',
         lastName: originalOrder.user.lastName || 'User',
         email: originalOrder.user.email || '',
-        phone: '1234567890', // Default phone
-        address: 'Test Address' // Default address
+        phone: '1234567890', // Default phone since not in user model
+        address: 'Test Address' // Default address since not in user model
       },
       {
-        returnUrl: `${baseUrl}/api/mobilpay/return`,
+        returnUrl: `${baseUrl}/payment/verify?orderId=${orderId}`,
         confirmUrl: `${baseUrl}/api/mobilpay/ipn`,
         ipnUrl: `${baseUrl}/api/mobilpay/ipn`
       }
     );
 
-    // Add recurring payment parameters
-    paymentRequest.data = paymentRequest.data.replace(
-      '<params/>',
-      `<params>
-        <recurring>
-          <initial_order>${originalOrderId}</initial_order>
-        </recurring>
-      </params>`
-    );
-
-    // Send the payment request to Netopia
-    const netopiaResponse = await fetch('https://sandboxsecure.mobilpay.ro', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: new URLSearchParams({
-        env_key: paymentRequest.env_key,
-        data: paymentRequest.data,
-        iv: paymentRequest.iv,
-        cipher: paymentRequest.cipher
-      })
+    // Update order status
+    await prisma.order.update({
+      where: { orderId },
+      data: {
+        status: 'PENDING',
+        isRecurring: true,
+        recurringStatus: 'PROCESSING',
+        lastChargeAt: new Date()
+      }
     });
 
-    if (!netopiaResponse.ok) {
-      return new NextResponse("Failed to process recurring payment", { status: 500 });
-    }
-
-    return new NextResponse("Recurring payment initiated", { status: 200 });
+    // Return the payment request data
+    return NextResponse.json({
+      success: true,
+      env_key: paymentRequest.env_key,
+      data: paymentRequest.data,
+      iv: paymentRequest.iv,
+      cipher: paymentRequest.cipher
+    });
 
   } catch (error) {
     console.error('[RECURRING_PAYMENT_ERROR]', error);

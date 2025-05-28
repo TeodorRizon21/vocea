@@ -36,27 +36,28 @@ var parser = new xml2js.Parser({
   explicitArray: false
 });
 
-const getPayment = (orderId, amount, currency, billingInfo, urlConfig, isRecurring = false) => {
+const getPayment = (orderId, amount, currency, billingInfo, isRecurring = false, originalOrderId = null) => {
   if (!signature) {
     throw new Error('NETOPIA_SIGNATURE is not set in environment variables');
   }
-
-  // Use provided URL config or fallback to environment variables
-  const urls = {
-    returnUrl: urlConfig?.returnUrl || returnUrl,
-    confirmUrl: urlConfig?.confirmUrl || confirmUrl,
-    ipnUrl: urlConfig?.ipnUrl || process.env.NEXT_PUBLIC_APP_URL + '/api/mobilpay/ipn'
-  };
+  if (!returnUrl) {
+    throw new Error('NETOPIA_RETURN_URL is not set in environment variables');
+  }
+  if (!confirmUrl) {
+    throw new Error('NETOPIA_CONFIRM_URL is not set in environment variables');
+  }
 
   console.log('Creating payment request with URLs:', {
-    ...urls,
-    appUrl: process.env.NEXT_PUBLIC_APP_URL
+    returnUrl,
+    confirmUrl,
+    ipnUrl: process.env.NEXT_PUBLIC_APP_URL + '/api/mobilpay/ipn',
+    appUrl: process.env.NEXT_PUBLIC_APP_URL,
+    isRecurring,
+    originalOrderId
   });
 
   let date = new Date();
-
-  // Create the payment request XML
-  const order = {
+  const data = {
     order: {
       $: {
         id: orderId,
@@ -65,39 +66,64 @@ const getPayment = (orderId, amount, currency, billingInfo, urlConfig, isRecurri
       },
       signature: signature,
       url: {
-        return: urls.returnUrl,
-        confirm: urls.confirmUrl
+        return: `${process.env.NEXT_PUBLIC_APP_URL}/api/mobilpay/return`,
+        confirm: `${process.env.NEXT_PUBLIC_APP_URL}/api/mobilpay/ipn`,
+        ipn: `${process.env.NEXT_PUBLIC_APP_URL}/api/mobilpay/ipn`
       },
       invoice: {
-        currency: currency || 'RON',
-        amount: amount,
-        details: 'Payment for subscription'
+        $: {
+          currency: currency,
+          amount: amount
+        },
+        details: 'Subscription payment',
+        contact_info: {
+          billing: {
+            $: {
+              type: 'person'
+            },
+            first_name: billingInfo.firstName,
+            last_name: billingInfo.lastName,
+            address: billingInfo.address,
+            email: billingInfo.email,
+            mobile_phone: billingInfo.phone
+          },
+          shipping: {
+            $: {
+              type: 'person'
+            },
+            first_name: billingInfo.firstName,
+            last_name: billingInfo.lastName,
+            address: billingInfo.address,
+            email: billingInfo.email,
+            mobile_phone: billingInfo.phone
+          }
+        }
       },
-      params: {
-        recurring: isRecurring ? {
-          interval_day: '30',
-          payments_no: '0' // Unlimited payments
-        } : undefined
-      },
-      bill: {
-        first_name: billingInfo.firstName,
-        last_name: billingInfo.lastName,
-        email: billingInfo.email,
-        phone: billingInfo.phone,
-        address: billingInfo.address
-      }
+      params: isRecurring ? {
+        recurring: originalOrderId ? {
+          initial_order: originalOrderId
+        } : {
+          expiration_date: (() => {
+            // Set expiration date to 1 year from now
+            const expDate = new Date();
+            expDate.setFullYear(expDate.getFullYear() + 1);
+            return expDate.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+          })(),
+          frequency: {
+            days: 30 // Billing frequency in days (monthly)
+          },
+          auto: 'true' // Enable automatic recurring billing
+        }
+      } : {},
+      ipn_cipher: 'aes-256-cbc'
     }
-  };
-
-  // Convert to XML
-  const xml = builder.buildObject(order);
-  
-  return { data: xml, algorithm: 'aes-256-cbc' };
+  }
+  return { data, algorithm: 'aes-256-cbc' };
 }
 
-function getRequest(orderId, amount = 1, billingInfo, urlConfig) {
-  const result = getPayment(orderId, amount, 'RON', billingInfo, urlConfig)
-  let xml = result.data;
+function getRequest(orderId, amount = 1, billingInfo, urlConfig, currency = 'RON', isRecurring = false, originalOrderId = null) {
+  const result = getPayment(orderId, amount, currency, billingInfo, isRecurring, originalOrderId);
+  let xml = builder.buildObject(result.data);
   
   // Log the XML for debugging
   console.log('Generated XML:', xml);

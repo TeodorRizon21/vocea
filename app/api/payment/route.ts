@@ -102,19 +102,17 @@ export async function POST(req: Request) {
     // Calculate amount based on subscription type and current plan
     let amount = PLAN_PRICES[subscriptionType as PlanType];
     
-    // If upgrading from an active plan, calculate the price difference
-    if (currentSubscription?.status === 'active' && currentSubscription.plan && currentSubscription.endDate) {
+    // If upgrading from an active plan, just charge the difference
+    if (currentSubscription?.status === 'active' && currentSubscription.plan) {
       const currentPlanPrice = PLAN_PRICES[currentSubscription.plan as PlanType];
-      const remainingDays = Math.ceil(
-        (new Date(currentSubscription.endDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
-      );
-      const totalDays = 30; // Assuming 30-day subscription periods
+      amount = Math.round((amount - currentPlanPrice) * 100) / 100;
       
-      // Calculate prorated refund for current plan
-      const proratedRefund = (currentPlanPrice * remainingDays) / totalDays;
-      
-      // Calculate final amount (new plan price - prorated refund)
-      amount = Math.max(0, amount - proratedRefund);
+      // Log the calculation details
+      console.log('Price Calculation:', {
+        newPlanPrice: PLAN_PRICES[subscriptionType as PlanType],
+        currentPlanPrice,
+        priceDifference: amount
+      });
     }
 
     // Generate a unique order ID
@@ -129,7 +127,7 @@ export async function POST(req: Request) {
       amount,
       currentPlan: currentSubscription?.plan,
       newPlan: subscriptionType,
-      returnUrl: `${baseUrl}/api/mobilpay/return`,
+      returnUrl: `${baseUrl}/payment/verify?orderId=${orderId}`,
       confirmUrl: `${baseUrl}/api/mobilpay/ipn`,
       ipnUrl: `${baseUrl}/api/mobilpay/ipn`,
       appUrl: baseUrl
@@ -141,10 +139,12 @@ export async function POST(req: Request) {
       amount, 
       billingInfo,
       {
-        returnUrl: `${baseUrl}/api/mobilpay/return`,
+        returnUrl: `${baseUrl}/payment/verify?orderId=${orderId}`,
         confirmUrl: `${baseUrl}/api/mobilpay/ipn`,
         ipnUrl: `${baseUrl}/api/mobilpay/ipn`
-      }
+      },
+      'RON',  // Explicitly pass the currency
+      true    // Enable recurring payments
     );
 
     // Find or create the plan

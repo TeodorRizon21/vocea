@@ -381,10 +381,10 @@ export default function BrowsePageClient({
           <div className="max-w-3xl mx-auto">
             <div className="space-y-4">
               <p className="text-base md:text-lg lg:text-xl">
-                {activeTab === "proiect" && translations.projectsDescription}
-                {activeTab === "cerere" && translations.projectRequestsDescription}
-                {activeTab === "diverse" && translations.diverseDescription}
-              </p>
+            {activeTab === "proiect" && translations.projectsDescription}
+            {activeTab === "cerere" && translations.projectRequestsDescription}
+            {activeTab === "diverse" && translations.diverseDescription}
+          </p>
               <div className="pt-4 border-t border-white/20">
                 <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm md:text-base">
                   {activeTab === "proiect" && (
