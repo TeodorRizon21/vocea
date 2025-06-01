@@ -14,6 +14,7 @@ import {
   Trash2,
   Heart,
   User,
+  Tag,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -62,6 +63,7 @@ interface ProjectDetailsProps {
     userId: string;
     city?: string;
     academicYear?: string;
+    price?: number | null;
     user: {
       firstName: string | null;
       lastName: string | null;
@@ -148,6 +150,7 @@ export default function ProjectDetails({ project }: ProjectDetailsProps) {
           : "An unexpected error occurred",
       city: language === "ro" ? "Oraș" : "City",
       academicYear: language === "ro" ? "An academic" : "Academic Year",
+      price: language === "ro" ? "Preț" : "Price",
       academicYears: {
         "licenta-1": language === "ro" ? "Licență- Anul 1" : "Bachelor's- Year 1",
         "licenta-2": language === "ro" ? "Licență- Anul 2" : "Bachelor's- Year 2",
@@ -547,6 +550,12 @@ export default function ProjectDetails({ project }: ProjectDetailsProps) {
                   </>
                 )}
               </div>
+              {project.type === "diverse" && project.price !== null && project.price !== undefined && (
+                <p className="flex items-center gap-2">
+                  <Tag className="h-4 w-4 text-gray-500" />
+                  {translations.price}: {project.price.toFixed(2)} RON
+                </p>
+              )}
             </div>
           </div>
         </CardContent>

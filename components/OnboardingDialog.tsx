@@ -323,6 +323,8 @@ export default function OnboardingDialog({ isOpen, onClose, onSubmit }: Onboardi
                 <SelectItem value="2">2nd Year</SelectItem>
                 <SelectItem value="3">3rd Year</SelectItem>
                 <SelectItem value="4">4th Year</SelectItem>
+                <SelectItem value="5">5th Year</SelectItem>
+                <SelectItem value="6">6th Year</SelectItem>
                 <SelectItem value="masters">Masters</SelectItem>
                 <SelectItem value="phd">PhD</SelectItem>
               </SelectContent>

@@ -161,6 +161,7 @@ export default function BrowsePageClient({
     category: "",
     studyLevel: "",
     city: "",
+    academicYear: "",
   });
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [showAccessDenied, setShowAccessDenied] = useState(false);
@@ -255,6 +256,14 @@ export default function BrowsePageClient({
       console.log("After study level filter:", result.length, "projects");
     }
 
+    // Apply academic year filter if needed
+    if (filters.academicYear && filters.academicYear !== "_all") {
+      result = result.filter(
+        (project) => project.academicYear === filters.academicYear
+      );
+      console.log("After academic year filter:", result.length, "projects");
+    }
+
     // Apply sort order
     result = [...result].sort((a, b) => {
       const dateA = new Date(a.createdAt).getTime();
@@ -278,20 +287,18 @@ export default function BrowsePageClient({
     setActiveTab(value);
     setDiverseSubcategory("all"); // Reset subcategory when changing tabs
     
-    // Reset category and study level filters when switching tabs, especially to diverse
-    if (value === "diverse") {
-      setFilters(prev => ({
-        ...prev,
-        category: "",
-        studyLevel: ""
-      }));
-    } else {
-      // Just reset the category to ensure it's appropriate for the new tab
-      setFilters(prev => ({
-        ...prev,
-        category: ""
-      }));
-    }
+    // Reset all filters when changing tabs
+    setFilters({
+      university: "",
+      faculty: "",
+      category: "",
+      studyLevel: "",
+      city: "",
+      academicYear: "",
+    });
+    
+    // Reset search query
+    setSearchQuery("");
     
     router.push(`/browse?tab=${value}`);
   };
@@ -314,6 +321,7 @@ export default function BrowsePageClient({
     category: string;
     studyLevel: string;
     city: string;
+    academicYear: string;
   }) => {
     // Convert "_all" to empty strings for cleaner filtering
     const cleanFilters = {
@@ -322,6 +330,7 @@ export default function BrowsePageClient({
       category: newFilters.category === "_all" ? "" : newFilters.category,
       studyLevel: newFilters.studyLevel === "_all" ? "" : newFilters.studyLevel,
       city: newFilters.city === "_all" ? "" : newFilters.city,
+      academicYear: newFilters.academicYear === "_all" ? "" : newFilters.academicYear,
     };
     setFilters(cleanFilters);
   };
@@ -561,6 +570,8 @@ export default function BrowsePageClient({
         currentFilters={filters}
         showCategoryFilter={activeTab !== "diverse"}
         showCityFilter={activeTab === "diverse"}
+        showAcademicYearFilter={activeTab === "diverse" && diverseSubcategory === "manuale-carti"}
+        showStudyLevelFilter={activeTab !== "diverse"}
       />
 
       <AccessDeniedDialog

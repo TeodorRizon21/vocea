@@ -62,6 +62,7 @@ export default function ProductCard({
       },
       city: language === "ro" ? "Oraș" : "City",
       academicYear: language === "ro" ? "An academic" : "Academic Year",
+      noReviews: language === "ro" ? "0 recenzii" : "0 reviews",
       academicYears: {
         "licenta-1": language === "ro" ? "Licență- Anul 1" : "Bachelor's- Year 1",
         "licenta-2": language === "ro" ? "Licență- Anul 2" : "Bachelor's- Year 2",
@@ -111,7 +112,9 @@ export default function ProductCard({
     return year;
   };
 
-  const averageRating = reviews.reduce((acc, review) => acc + review.score, 0) / reviews.length || 0;
+  const averageRating = reviews.length > 0 
+    ? reviews.reduce((acc, review) => acc + review.score, 0) / reviews.length 
+    : null;
   const displayName = `${authorFirstName || ""} ${authorLastName || ""}`.trim() || "Anonymous";
 
   return (
@@ -144,24 +147,24 @@ export default function ProductCard({
             <span className="text-xs md:text-sm text-muted-foreground line-clamp-1">{displayName}</span>
           </div>
 
-          <div className="space-y-1">
+          <div className="space-y-2">
             <div className="flex items-center text-xs text-muted-foreground">
-              <GraduationCap className="h-3 w-3 mr-1" />
+              <GraduationCap className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0 mr-2" />
               <span className="line-clamp-1">{university}</span>
             </div>
             <div className="flex items-center text-xs text-muted-foreground">
-              <BookOpen className="h-3 w-3 mr-1" />
+              <BookOpen className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0 mr-2" />
               <span className="line-clamp-1">{faculty}</span>
             </div>
             {type === "diverse" && city && (
               <div className="flex items-center text-xs text-muted-foreground">
-                <Tag className="h-3 w-3 mr-1" />
+                <Tag className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0 mr-2" />
                 <span className="line-clamp-1">{translations.city}: {city}</span>
               </div>
             )}
             {category === "manuale-carti" && academicYear && (
               <div className="flex items-center text-xs text-muted-foreground">
-                <Scroll className="h-3 w-3 mr-1" />
+                <Scroll className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0 mr-2" />
                 <span className="line-clamp-1">{getAcademicYearTranslation(academicYear)}</span>
               </div>
             )}
@@ -170,7 +173,7 @@ export default function ProductCard({
           <div className="flex items-center justify-between text-xs md:text-sm">
             <div className="flex items-center space-x-1">
               <Star className="h-3 w-3 md:h-4 md:w-4 text-yellow-400" />
-              <span>{averageRating.toFixed(1)}</span>
+              <span>{averageRating !== null ? averageRating.toFixed(1) : translations.noReviews}</span>
             </div>
             <Badge variant="secondary" className="text-xs">
               {category}

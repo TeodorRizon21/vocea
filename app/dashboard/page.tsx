@@ -286,6 +286,34 @@ export default function DashboardPage() {
 
   const subscriptionData = getSubscriptionData();
 
+  const handleSaveProfile = async (data: EditProfileFormData) => {
+    try {
+      const response = await fetch("/api/user", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update profile");
+      }
+
+      // Refresh user data
+      const updatedUserResponse = await fetch("/api/user");
+      if (updatedUserResponse.ok) {
+        const updatedUserData = await updatedUserResponse.json();
+        setUserData(updatedUserData);
+      }
+
+      setShowEditProfile(false);
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      throw error;
+    }
+  };
+
   return (
     <div className="space-y-6 sm:px-4 md:px-6">
       <div className="flex flex-col sm:flex-row justify-between items-center sm:items-center gap-4">
@@ -385,6 +413,48 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+
+      <EditProfileDialog
+        isOpen={showEditProfile}
+        onClose={() => setShowEditProfile(false)}
+        initialData={userData}
+        onSave={handleSaveProfile}
+      />
+
+      <ConfirmationDialog
+        isOpen={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+        onConfirm={confirmSubscriptionChange}
+        title={translations.changeSubscription}
+        message={translations.changeSubscriptionMessage}
+      />
+
+      <OnboardingDialog
+        isOpen={showOnboarding}
+        onClose={() => setShowOnboarding(false)}
+        onSubmit={async (data) => {
+          try {
+            const response = await fetch("/api/user", {
+              method: "PATCH",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(data),
+            });
+
+            if (!response.ok) {
+              throw new Error("Failed to save user data");
+            }
+
+            const updatedUser = await response.json();
+            setUserData(updatedUser);
+            setShowOnboarding(false);
+          } catch (error) {
+            console.error("Error saving user data:", error);
+            throw error;
+          }
+        }}
+      />
     </div>
   );
 }

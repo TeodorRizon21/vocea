@@ -31,15 +31,19 @@ interface FilterDialogProps {
     category: string;
     studyLevel: string;
     city: string;
+    academicYear: string;
   }) => void;
   showCategoryFilter?: boolean;
   showCityFilter?: boolean;
+  showAcademicYearFilter?: boolean;
+  showStudyLevelFilter?: boolean;
   currentFilters?: {
     university: string;
     faculty: string;
     category: string;
     studyLevel: string;
     city: string;
+    academicYear: string;
   };
   availableCities?: string[];
 }
@@ -50,6 +54,8 @@ export default function FilterDialog({
   onApplyFilters,
   showCategoryFilter = true,
   showCityFilter = false,
+  showAcademicYearFilter = false,
+  showStudyLevelFilter = true,
   currentFilters,
   availableCities = [],
 }: FilterDialogProps) {
@@ -67,12 +73,14 @@ export default function FilterDialog({
       category: language === "ro" ? "Categorie" : "Category",
       studyLevel: language === "ro" ? "Nivel de studii" : "Study Level",
       city: language === "ro" ? "Oraș" : "City",
+      academicYear: language === "ro" ? "An academic" : "Academic Year",
       allUniversities:
         language === "ro" ? "Toate universitățile" : "All Universities",
       allFaculties: language === "ro" ? "Toate facultățile" : "All Faculties",
       allCategories: language === "ro" ? "Toate categoriile" : "All Categories",
       allStudyLevels: language === "ro" ? "Toate nivelele" : "All Levels",
       allCities: language === "ro" ? "Toate orașele" : "All Cities",
+      allAcademicYears: language === "ro" ? "Toți anii" : "All Years",
       bachelors: language === "ro" ? "Licență" : "Bachelor's",
       masters: language === "ro" ? "Master" : "Master's",
       phd: language === "ro" ? "Doctorat" : "PhD",
@@ -91,6 +99,17 @@ export default function FilterDialog({
         "Social Sciences": language === "ro" ? "Științe Sociale" : "Social Sciences",
         "Arts and Humanities": language === "ro" ? "Arte și Științe Umaniste" : "Arts and Humanities",
         "Business and Management": language === "ro" ? "Business și Management" : "Business and Management"
+      },
+      academicYears: {
+        "bachelors-1": language === "ro" ? "Licență- Anul 1" : "Bachelor's- Year 1",
+        "bachelors-2": language === "ro" ? "Licență- Anul 2" : "Bachelor's- Year 2",
+        "bachelors-3": language === "ro" ? "Licență- Anul 3" : "Bachelor's- Year 3",
+        "bachelors-4": language === "ro" ? "Licență- Anul 4" : "Bachelor's- Year 4",
+        "bachelors-5": language === "ro" ? "Licență- Anul 5" : "Bachelor's- Year 5",
+        "bachelors-6": language === "ro" ? "Licență- Anul 6" : "Bachelor's- Year 6",
+        "masters-1": language === "ro" ? "Master- Anul 1" : "Master's- Year 1",
+        "masters-2": language === "ro" ? "Master- Anul 2" : "Master's- Year 2",
+        "phd": language === "ro" ? "Doctorat" : "PhD",
       }
     };
   }, [language, forceRefresh]);
@@ -101,6 +120,7 @@ export default function FilterDialog({
     category: "_all",
     studyLevel: "_all",
     city: "_all",
+    academicYear: "_all",
   };
 
   const [filters, setFilters] = useState(currentFilters || defaultFilters);
@@ -120,6 +140,13 @@ export default function FilterDialog({
       setFilters(prev => ({ ...prev, faculty: "_all" }));
     }
   }, [filters.university]);
+
+  // Reset study level when it shouldn't be shown
+  useEffect(() => {
+    if (!showStudyLevelFilter) {
+      setFilters(prev => ({ ...prev, studyLevel: "_all" }));
+    }
+  }, [showStudyLevelFilter]);
 
   const handleApply = () => {
     console.log("Applying filters:", filters);
@@ -266,73 +293,112 @@ export default function FilterDialog({
           </div>
             )}
 
-          {showCategoryFilter && (
-            <div className="grid grid-cols-4 items-center gap-2">
-              <Label htmlFor="category" className="text-right text-sm">
-                {translations.category}
-              </Label>
-              <Select
-                value={filters.category}
-                onValueChange={(value) =>
-                  setFilters((prev) => ({ ...prev, category: value }))
-                }
-              >
-                <SelectTrigger id="category" className="col-span-3 h-9">
-                  <SelectValue placeholder={translations.allCategories} className="text-sm" />
-                </SelectTrigger>
-                <SelectContent 
-                  className="w-[calc(100vw-2rem)] sm:w-auto sm:min-w-[var(--radix-select-trigger-width)] sm:max-w-[450px]"
-                  position="popper"
-                  side="bottom"
-                  align="start"
+            {showCategoryFilter && (
+              <div className="grid grid-cols-4 items-center gap-2">
+                <Label htmlFor="category" className="text-right text-sm">
+                  {translations.category}
+                </Label>
+                <Select
+                  value={filters.category}
+                  onValueChange={(value) =>
+                    setFilters((prev) => ({ ...prev, category: value }))
+                  }
                 >
-                  <SelectItem value="_all">
-                    {translations.allCategories}
-                  </SelectItem>
-                  {ACADEMIC_CATEGORIES.map((category) => (
-                    <SelectItem key={category} value={category}>
-                        <span className="text-sm">{translations.academicCategories[category as keyof typeof translations.academicCategories] || category}</span>
+                  <SelectTrigger id="category" className="col-span-3 h-9">
+                    <SelectValue placeholder={translations.allCategories} className="text-sm" />
+                  </SelectTrigger>
+                  <SelectContent 
+                    className="w-[calc(100vw-2rem)] sm:w-auto sm:min-w-[var(--radix-select-trigger-width)] sm:max-w-[450px]"
+                    position="popper"
+                    side="bottom"
+                    align="start"
+                  >
+                    <SelectItem value="_all">
+                      {translations.allCategories}
                     </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
+                    {ACADEMIC_CATEGORIES.map((category) => (
+                      <SelectItem key={category} value={category}>
+                          <span className="text-sm">{translations.academicCategories[category as keyof typeof translations.academicCategories] || category}</span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
-          <div className="grid grid-cols-4 items-center gap-2">
-            <Label htmlFor="studyLevel" className="text-right text-sm">
-              {translations.studyLevel}
-            </Label>
-            <Select
-              value={filters.studyLevel}
-              onValueChange={(value) =>
-                setFilters((prev) => ({ ...prev, studyLevel: value }))
-              }
-            >
-              <SelectTrigger id="studyLevel" className="col-span-3 h-9">
-                <SelectValue placeholder={translations.allStudyLevels} className="text-sm" />
-              </SelectTrigger>
-              <SelectContent 
-                className="w-[calc(100vw-2rem)] sm:w-auto sm:min-w-[var(--radix-select-trigger-width)] sm:max-w-[450px]"
-                position="popper"
-                side="bottom"
-                align="start"
-              >
-                <SelectItem value="_all">
-                  {translations.allStudyLevels}
-                </SelectItem>
-                <SelectItem value="bachelors">
-                  <span className="text-sm">{translations.bachelors}</span>
-                </SelectItem>
-                <SelectItem value="masters">
-                  <span className="text-sm">{translations.masters}</span>
-                </SelectItem>
-                <SelectItem value="phd">
-                  <span className="text-sm">{translations.phd}</span>
-                </SelectItem>
-              </SelectContent>
-            </Select>
-            </div>
+            {showAcademicYearFilter && (
+              <div className="grid grid-cols-4 items-center gap-2">
+                <Label htmlFor="academicYear" className="text-right text-sm">
+                  {translations.academicYear}
+                </Label>
+                <Select
+                  value={filters.academicYear}
+                  onValueChange={(value) =>
+                    setFilters((prev) => ({ ...prev, academicYear: value }))
+                  }
+                >
+                  <SelectTrigger id="academicYear" className="col-span-3 h-9">
+                    <SelectValue placeholder={translations.allAcademicYears} className="text-sm" />
+                  </SelectTrigger>
+                  <SelectContent 
+                    className="w-[calc(100vw-2rem)] sm:w-auto sm:min-w-[var(--radix-select-trigger-width)] sm:max-w-[450px]"
+                    position="popper"
+                    side="bottom"
+                    align="start"
+                  >
+                    <SelectItem value="_all">
+                      {translations.allAcademicYears}
+                    </SelectItem>
+                    <SelectItem value="bachelors-1">{translations.academicYears["bachelors-1"]}</SelectItem>
+                    <SelectItem value="bachelors-2">{translations.academicYears["bachelors-2"]}</SelectItem>
+                    <SelectItem value="bachelors-3">{translations.academicYears["bachelors-3"]}</SelectItem>
+                    <SelectItem value="bachelors-4">{translations.academicYears["bachelors-4"]}</SelectItem>
+                    <SelectItem value="bachelors-5">{translations.academicYears["bachelors-5"]}</SelectItem>
+                    <SelectItem value="bachelors-6">{translations.academicYears["bachelors-6"]}</SelectItem>
+                    <SelectItem value="masters-1">{translations.academicYears["masters-1"]}</SelectItem>
+                    <SelectItem value="masters-2">{translations.academicYears["masters-2"]}</SelectItem>
+                    <SelectItem value="phd">{translations.academicYears["phd"]}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            {showStudyLevelFilter && (
+              <div className="grid grid-cols-4 items-center gap-2">
+                <Label htmlFor="studyLevel" className="text-right text-sm">
+                  {translations.studyLevel}
+                </Label>
+                <Select
+                  value={filters.studyLevel}
+                  onValueChange={(value) =>
+                    setFilters((prev) => ({ ...prev, studyLevel: value }))
+                  }
+                >
+                  <SelectTrigger id="studyLevel" className="col-span-3 h-9">
+                    <SelectValue placeholder={translations.allStudyLevels} className="text-sm" />
+                  </SelectTrigger>
+                  <SelectContent 
+                    className="w-[calc(100vw-2rem)] sm:w-auto sm:min-w-[var(--radix-select-trigger-width)] sm:max-w-[450px]"
+                    position="popper"
+                    side="bottom"
+                    align="start"
+                  >
+                    <SelectItem value="_all">
+                      {translations.allStudyLevels}
+                    </SelectItem>
+                    <SelectItem value="bachelors">
+                      <span className="text-sm">{translations.bachelors}</span>
+                    </SelectItem>
+                    <SelectItem value="masters">
+                      <span className="text-sm">{translations.masters}</span>
+                    </SelectItem>
+                    <SelectItem value="phd">
+                      <span className="text-sm">{translations.phd}</span>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
         </div>
         <DialogFooter className="flex justify-between sm:justify-between">
