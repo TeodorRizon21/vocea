@@ -38,8 +38,10 @@ export function ProjectQuota() {
         const response = await fetch("/api/projects/check-limit")
         if (!response.ok) throw new Error("Failed to fetch quota")
         const data = await response.json()
+        console.log("Quota data received:", data)
         setQuotaData(data)
       } catch (error) {
+        console.error("Error fetching quota:", error)
         toast({
           title: t.error,
           variant: "destructive"
@@ -57,10 +59,16 @@ export function ProjectQuota() {
   }
 
   const { remaining, limit } = quotaData
+  console.log("Current quota values:", { remaining, limit })
+  console.log("Limit type:", typeof limit)
+
+  // Check if either value is infinite (could be number Infinity or string "Infinity")
+  const isUnlimited = !Number.isFinite(limit) || !Number.isFinite(remaining)
+  console.log("Is unlimited?", isUnlimited)
 
   return (
     <div className="text-sm text-gray-600 dark:text-gray-400">
-      {limit === Infinity ? (
+      {isUnlimited ? (
         <span>{t.unlimited}</span>
       ) : (
         <span>

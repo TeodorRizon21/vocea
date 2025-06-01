@@ -39,12 +39,22 @@ export async function GET(req: NextRequest) {
     // Get the limit based on subscription
     const subscriptionType = (user.planType || "Basic") as SubscriptionType;
     const limit = PROJECT_LIMITS[subscriptionType];
+    
+    // For Gold plan (or any plan with Infinity limit), explicitly set remaining to Infinity
+    const remaining = limit === Infinity ? Infinity : limit - projectCount;
+    
+    console.log("Sending quota data:", {
+      projectCount,
+      limit,
+      canCreateProject: limit === Infinity ? true : projectCount < limit,
+      remaining
+    });
 
     return NextResponse.json({
       projectCount,
       limit,
-      canCreateProject: projectCount < limit,
-      remaining: limit === Infinity ? Infinity : limit - projectCount
+      canCreateProject: limit === Infinity ? true : projectCount < limit,
+      remaining
     });
   } catch (error) {
     console.error("Error checking project limit:", error);
