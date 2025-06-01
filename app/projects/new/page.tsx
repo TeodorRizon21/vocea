@@ -76,16 +76,26 @@ export default function NewProjectPage() {
   // Translations for the page
   const translations = useMemo(() => {
     return {
-      pageTitle:
-        language === "ro" ? "Creează Proiect Nou" : "Create New Project",
-      pageSubtitle:
-        language === "ro"
-          ? "Distribuie proiectul tău comunității"
-          : "Share your project with the community",
-      projectType: language === "ro" ? "Tipul Proiectului" : "Project Type",
-      projectLabel: language === "ro" ? "Proiect" : "Project",
-      requestLabel: language === "ro" ? "Cerere Proiect" : "Project Request",
-      diverseLabel: language === "ro" ? "Diverse" : "Diverse",
+      pageTitle: {
+        proiect: language === "ro" ? "Creează Proiect Nou" : "Create New Project",
+        cerere: language === "ro" ? "Creează Cerere de Proiect" : "Create Project Request",
+        diverse: language === "ro" ? "Creează Anunț Nou" : "Create New Announcement"
+      },
+      pageSubtitle: {
+        proiect: language === "ro" 
+          ? "Distribuie proiectul tău comunității și ajută alți studenți să învețe din experiența ta"
+          : "Share your project with the community and help other students learn from your experience",
+        cerere: language === "ro"
+          ? "Solicită ajutor pentru proiectul tău și găsește experți care te pot ghida"
+          : "Request help for your project and find experts who can guide you",
+        diverse: language === "ro"
+          ? "Publică un anunț pentru comunitatea studenților - oferte de muncă, servicii, produse și multe altele"
+          : "Post an announcement for the student community - job offers, services, products, and more"
+      },
+      projectType: language === "ro" ? "Tipul Anunțului" : "Announcement Type",
+      projectLabel: language === "ro" ? "Proiect" : "Academic Project",
+      requestLabel: language === "ro" ? "Cerere de Proiect" : "Project Request",
+      diverseLabel: language === "ro" ? "Anunț Diverse" : "Various Announcement",
       diverseCategory:
         language === "ro" ? "Categorie Diverse" : "Diverse Category",
       selectCategory:
@@ -347,6 +357,7 @@ export default function NewProjectPage() {
         studyLevel: formData.studyLevel,
         price: formattedPrice,
         academicYear: formData.category === "manuale-carti" ? formData.academicYear : null,
+        city: selectedUniversity.city,
       };
 
       console.log("Submitting project data:", projectData); // Debug log
@@ -393,9 +404,9 @@ export default function NewProjectPage() {
     <div className="max-w-2xl mx-auto space-y-8">
       <div>
         <h1 className="text-4xl font-bold text-purple-600">
-          {translations.pageTitle}
+          {translations.pageTitle[projectType]}
         </h1>
-        <p className="text-gray-600 mt-2">{translations.pageSubtitle}</p>
+        <p className="text-gray-600 mt-2">{translations.pageSubtitle[projectType]}</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">

@@ -220,22 +220,12 @@ export default function BrowsePageClient({
     }
 
     // Apply city filter if needed
-    if (filters.city) {
-      console.log("Applying city filter:", filters.city);
-      console.log("Projects before city filter:", result.map(p => ({ id: p.id, title: p.title, city: p.city })));
-      
+    if (filters.city && filters.city !== "_all") {
       result = result.filter((project) => {
-        const projectCity = project.city?.trim() || "";
-        console.log(`Comparing city for project ${project.id} - ${project.title}:`, {
-          filterCity: filters.city,
-          projectCity,
-          match: projectCity === filters.city
-        });
-        
-        return projectCity === filters.city;
+        const projectCity = (project.city || "").trim().toLowerCase();
+        const filterCity = filters.city.trim().toLowerCase();
+        return projectCity === filterCity;
       });
-      console.log("After city filter:", result.length, "projects");
-      console.log("Remaining projects:", result.map(p => ({ id: p.id, title: p.title, city: p.city })));
     }
 
     // Apply category filter if needed
