@@ -18,8 +18,8 @@ interface ExtendedProject extends Project {
   };
   reviews: Array<{ score: number }>;
   studyLevel: string | null;
-  city?: string | null;
-  academicYear?: string | null;
+  city: string | null;
+  academicYear: string | null;
 }
 
 interface ProductGridProps {
