@@ -49,6 +49,7 @@ model Project {
   studyLevel   String? // Will be one of: "Bachelors", "Masters", "PhD"
   price        Float? // Price in RON for diverse items
   academicYear String? // For manuale-carti category
+  city         String? // City where the project is located
   user         User     @relation("UserProjects", fields: [userId], references: [clerkId])
   reviews      Review[] @relation("ProjectReviews")
   reports      Report[] @relation("ProjectReports") // Added relation to reports
