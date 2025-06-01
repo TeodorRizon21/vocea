@@ -83,17 +83,16 @@ export default function ProfileInfo({
   const yearDisplay = useMemo(() => {
     if (year === "Not set") return translations.notSet;
     
+    if (year === "masters") return language === "ro" ? "Masterat" : "Masters";
+    if (year === "phd") return language === "ro" ? "Doctorat" : "PhD";
+    
     const yearNum = parseInt(year);
     if (isNaN(yearNum)) return year;
 
     if (language === "ro") {
-      if (yearNum <= 4) return `Licență anul ${year}`;
-      if (yearNum === 5) return `Masterat`;
-      return `Doctorat`;
+      return `Licență anul ${year}`;
     } else {
-      if (yearNum <= 4) return `Bachelor's Year ${year}`;
-      if (yearNum === 5) return `Masters`;
-      return `PhD`;
+      return `Bachelor's Year ${year}`;
     }
   }, [year, language, translations.notSet]);
 

@@ -54,6 +54,8 @@ export default function EditProfileDialog({ isOpen, onClose, initialData, onSave
       year2: language === "ro" ? "Anul 2" : "2nd Year",
       year3: language === "ro" ? "Anul 3" : "3rd Year",
       year4: language === "ro" ? "Anul 4" : "4th Year",
+      year5: language === "ro" ? "Anul 5" : "5th Year",
+      year6: language === "ro" ? "Anul 6" : "6th Year",
       masters: language === "ro" ? "Masterat" : "Masters",
       phd: language === "ro" ? "Doctorat" : "PhD",
       cancel: language === "ro" ? "Anulează" : "Cancel",
@@ -296,6 +298,8 @@ export default function EditProfileDialog({ isOpen, onClose, initialData, onSave
                 <SelectItem value="2">{translations.year2}</SelectItem>
                 <SelectItem value="3">{translations.year3}</SelectItem>
                 <SelectItem value="4">{translations.year4}</SelectItem>
+                <SelectItem value="5">{translations.year5}</SelectItem>
+                <SelectItem value="6">{translations.year6}</SelectItem>
                 <SelectItem value="masters">{translations.masters}</SelectItem>
                 <SelectItem value="phd">{translations.phd}</SelectItem>
               </SelectContent>
