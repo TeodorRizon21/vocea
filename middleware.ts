@@ -25,6 +25,10 @@ const isPublicRoute = createRouteMatcher([
   "/sign-in(.*)",
   "/sign-up(.*)",
   "/settings(.*)",
+  // Add public legal and sitemap routes
+  "/terms",
+  "/gdpr",
+  "/sitemap.xml"
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
