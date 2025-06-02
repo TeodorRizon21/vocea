@@ -28,6 +28,7 @@ const isPublicRoute = createRouteMatcher([
   // Add public legal and sitemap routes
   "/terms",
   "/gdpr",
+  "/contact",
   "/sitemap.xml"
 ]);
 
