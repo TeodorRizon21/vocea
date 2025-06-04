@@ -41,12 +41,24 @@ export default function UserProfile({ className }: UserProfileProps) {
       facultyNotSet: "Facultate nesetată",
       profileIncomplete: "Profil incomplet",
       plan: "abonament",
+      subscriptionNames: {
+        Basic: "Abonament Basic",
+        Bronze: "Abonament Bronz",
+        Premium: "Abonament Premium",
+        Gold: "Abonament Gold"
+      }
     },
     en: {
       universityNotSet: "University not set",
       facultyNotSet: "Faculty not set",
       profileIncomplete: "Profile Incomplete",
       plan: "plan",
+      subscriptionNames: {
+        Basic: "Basic",
+        Bronze: "Bronze",
+        Premium: "Premium",
+        Gold: "Gold"
+      }
     },
   };
 
@@ -181,7 +193,7 @@ export default function UserProfile({ className }: UserProfileProps) {
               : ""
           }`}
         >
-          {subscription} {t.plan}
+          {language === "ro" ? t.subscriptionNames[subscription as keyof typeof t.subscriptionNames] : subscription}
         </Badge>
       </div>
     </div>

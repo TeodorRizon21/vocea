@@ -105,34 +105,21 @@ export default function DashboardPage() {
         language === "ro"
           ? "Acces la funcționalități de bază"
           : "Access to basic features",
-      // Traduceri pentru caracteristici
-      accessAll:
-        language === "ro"
-          ? "Acces la toate proiectele"
-          : "Access to all projects",
-      accessAllTopics:
-        language === "ro"
-          ? "Acces la toate topicurile"
-          : "Access to all topics",
-      createProjects:
-        language === "ro"
-          ? "Creare proiecte (max 4)"
-          : "Create projects (max 4)",
-      createUnlimited:
-        language === "ro"
-          ? "Creare proiecte nelimitate"
-          : "Create unlimited projects",
+      // Access levels
+      accessAll: language === "ro" ? "Acces la toate proiectele" : "Access to all projects",
+      accessAllTopics: language === "ro" ? "Acces la toate topicurile" : "Access to all topics",
+      createProjects: language === "ro" ? "Creare proiecte" : "Create projects",
+      createUnlimited: language === "ro" ? "Creare proiecte nelimitat" : "Create unlimited projects",
       limitedAccess: language === "ro" ? "Acces limitat" : "Limited access",
-      viewOnly: language === "ro" ? "Doar vizualizare listă" : "View list only",
-      noIndividual:
-        language === "ro"
-          ? "Fără acces la conținut individual"
-          : "No access to individual content",
-      // Traduceri pentru badge-uri
+      viewOnly: language === "ro" ? "Doar vizualizare" : "View only",
+      noIndividual: language === "ro" ? "Fără acces individual" : "No individual access",
+      // Badges
       popular: language === "ro" ? "Popular" : "Popular",
       unlimited: language === "ro" ? "Nelimitat" : "Unlimited",
+      free: language === "ro" ? "Gratuit" : "Free",
+      basicPlus: language === "ro" ? "Basic+" : "Basic+"
     };
-  }, [language, forceRefresh, pendingSubscription]);
+  }, [language, pendingSubscription]);
 
   const checkRequiredInformation = useCallback((data: UserData | null) => {
     return (
@@ -233,6 +220,21 @@ export default function DashboardPage() {
   // Funcție pentru a obține datele despre plan
   const getSubscriptionData = () => {
     switch (selectedSubscription) {
+      case "Bronze":
+        return {
+          name: "Bronze",
+          icon: <Star className="h-6 w-6 text-amber-500" />,
+          description: language === "ro" ? "Acces la funcționalități de bază plus" : "Access to basic plus features",
+          features: [
+            translations.accessAll,
+            translations.accessAllTopics,
+            translations.createProjects,
+          ],
+          color: "bg-gradient-to-r from-amber-50 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30",
+          borderColor: "border-amber-200 dark:border-amber-800",
+          iconBg: "bg-amber-100 dark:bg-amber-900/50",
+          badge: translations.basicPlus,
+        };
       case "Premium":
         return {
           name: translations.premium,
@@ -243,8 +245,7 @@ export default function DashboardPage() {
             translations.accessAllTopics,
             translations.createProjects,
           ],
-          color:
-            "bg-gradient-to-r from-purple-100 to-indigo-100 dark:from-purple-900/30 dark:to-indigo-900/30",
+          color: "bg-gradient-to-r from-purple-100 to-indigo-100 dark:from-purple-900/30 dark:to-indigo-900/30",
           borderColor: "border-purple-200 dark:border-purple-800",
           iconBg: "bg-purple-100 dark:bg-purple-900/50",
           badge: translations.popular,
@@ -259,8 +260,7 @@ export default function DashboardPage() {
             translations.accessAllTopics,
             translations.createUnlimited,
           ],
-          color:
-            "bg-gradient-to-r from-amber-50 to-yellow-100 dark:from-amber-900/30 dark:to-yellow-900/30",
+          color: "bg-gradient-to-r from-amber-50 to-yellow-100 dark:from-amber-900/30 dark:to-yellow-900/30",
           borderColor: "border-amber-200 dark:border-amber-800",
           iconBg: "bg-amber-100 dark:bg-amber-900/50",
           badge: translations.unlimited,
@@ -275,11 +275,10 @@ export default function DashboardPage() {
             translations.viewOnly,
             translations.noIndividual,
           ],
-          color:
-            "bg-gradient-to-r from-gray-50 to-white dark:from-gray-900 dark:to-black",
-          borderColor: "border-gray-200 dark:border-gray-800",
-          iconBg: "bg-gray-100 dark:bg-gray-900/50",
-          badge: null,
+          color: "bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-900/30 dark:to-gray-800/30",
+          borderColor: "border-gray-200 dark:border-gray-700",
+          iconBg: "bg-gray-100 dark:bg-gray-800",
+          badge: translations.free,
         };
     }
   };

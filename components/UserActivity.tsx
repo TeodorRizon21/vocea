@@ -35,7 +35,7 @@ export default function UserActivity({
   // Traduceri pentru componenta
   const translations = useMemo(() => {
     return {
-      yourActivity: language === "ro" ? "Activitatea ta" : "Your Activity",
+      yourActivity: language === "ro" ? "Activitate" : "Activity",
       projectsCreated:
         language === "ro" ? "Proiecte create" : "Projects Created",
       commentsPosted:

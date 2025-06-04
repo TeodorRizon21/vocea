@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
     const { subscription } = await req.json()
     console.log("Subscription data received:", subscription)
 
-    if (!subscription || !["Basic", "Premium", "Gold"].includes(subscription)) {
+    if (!subscription || !["Bronze", "Basic", "Premium", "Gold"].includes(subscription)) {
       return NextResponse.json({ error: "Invalid subscription plan" }, { status: 400 })
     }
 
@@ -216,7 +216,7 @@ export async function GET(req: NextRequest) {
     // If no current subscription, default to Basic plan
     if (!currentSubscription) {
       return NextResponse.json({
-        plan: 'Basic', // Basic plan never expires
+        plan: user.planType || 'Basic', // Use user's planType if available, otherwise default to Basic
         status: 'active',
         endDate: null
       });
@@ -235,19 +235,21 @@ export async function GET(req: NextRequest) {
         }
       });
       
-      // Update user to Basic plan
-      await prisma.user.update({
-        where: {
-          id: user.id
-        },
-        data: {
-          planType: 'Basic'
-        }
-      });
+      // Update user to Basic plan only if they don't have a Bronze plan
+      if (user.planType !== 'Bronze') {
+        await prisma.user.update({
+          where: {
+            id: user.id
+          },
+          data: {
+            planType: 'Basic'
+          }
+        });
+      }
       
-      // Return Basic plan
+      // Return current plan (either Basic or Bronze)
       return NextResponse.json({
-        plan: 'Basic',
+        plan: user.planType || 'Basic',
         status: 'active',
         endDate: null
       });

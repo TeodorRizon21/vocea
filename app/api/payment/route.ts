@@ -18,16 +18,18 @@ console.log('Payment API Environment Variables:', {
   hasPrivateKey: !!process.env.NETOPIA_PRIVATE_KEY
 });
 
-type PlanType = 'Basic' | 'Premium' | 'Gold';
+type PlanType = 'Bronze' | 'Basic' | 'Premium' | 'Gold';
 
 // Plan hierarchy and prices
 const PLAN_HIERARCHY: Record<PlanType, number> = {
-  Basic: 1,
-  Premium: 2,
-  Gold: 3
+  Bronze: 1,
+  Basic: 2,
+  Premium: 3,
+  Gold: 4
 };
 
 const PLAN_PRICES: Record<PlanType, number> = {
+  Bronze: 3.8,
   Basic: 0,
   Premium: 8,
   Gold: 28
@@ -35,39 +37,60 @@ const PLAN_PRICES: Record<PlanType, number> = {
 
 export async function POST(req: Request) {
   try {
+    console.log('[PAYMENT_START] Initiating payment request');
+    
     const session = await auth();
     if (!session?.userId) {
+      console.log('[PAYMENT_ERROR] No user session found');
       return new NextResponse("Unauthorized", { status: 401 });
     }
+    console.log('[PAYMENT_AUTH] User authenticated:', session.userId);
 
     const body = await req.json();
+    console.log('[PAYMENT_BODY] Request body:', {
+      ...body,
+      billingInfo: body.billingInfo ? {
+        ...body.billingInfo,
+        email: body.billingInfo.email ? '***@***' : undefined, // Mask sensitive data
+        phone: body.billingInfo.phone ? '***' : undefined
+      } : undefined
+    });
+
     const { subscriptionType, billingInfo } = body;
 
     // Validate subscription type
     if (!subscriptionType || !Object.keys(PLAN_HIERARCHY).includes(subscriptionType)) {
+      console.log('[PAYMENT_ERROR] Invalid subscription type:', subscriptionType);
       return new NextResponse("Invalid subscription type", { status: 400 });
     }
 
-    // Validate billing info
-    if (!billingInfo || 
-        typeof billingInfo !== 'object' ||
-        !billingInfo.firstName ||
-        !billingInfo.lastName ||
-        !billingInfo.email ||
-        !billingInfo.phone ||
-        !billingInfo.address) {
-      return new NextResponse("Invalid billing information. Required fields: firstName, lastName, email, phone, address", { status: 400 });
+    // Validate billing info with detailed logging
+    const missingFields = [];
+    if (!billingInfo) missingFields.push('billingInfo');
+    else {
+      if (!billingInfo.firstName) missingFields.push('firstName');
+      if (!billingInfo.lastName) missingFields.push('lastName');
+      if (!billingInfo.email) missingFields.push('email');
+      if (!billingInfo.phone) missingFields.push('phone');
+      if (!billingInfo.address) missingFields.push('address');
+    }
+
+    if (missingFields.length > 0) {
+      console.log('[PAYMENT_ERROR] Missing billing fields:', missingFields);
+      return new NextResponse(`Invalid billing information. Missing fields: ${missingFields.join(', ')}`, { status: 400 });
     }
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(billingInfo.email)) {
+      console.log('[PAYMENT_ERROR] Invalid email format:', billingInfo.email);
       return new NextResponse("Invalid email format", { status: 400 });
     }
 
-    // Validate phone format (allow only digits and optional + prefix)
+    // Validate phone format
     const phoneRegex = /^\+?\d{10,}$/;
     if (!phoneRegex.test(billingInfo.phone.replace(/\s+/g, ''))) {
+      console.log('[PAYMENT_ERROR] Invalid phone format:', billingInfo.phone);
       return new NextResponse("Invalid phone number format", { status: 400 });
     }
 
@@ -152,70 +175,88 @@ export async function POST(req: Request) {
       appUrl: baseUrl
     });
 
-    // Create the payment request with consistent URLs
-    const paymentRequest = getRequest(
-      orderId, 
-      amount, 
-      billingInfo,
-      {
-        returnUrl: `${baseUrl}/payment/verify?orderId=${orderId}`,
+    // Log payment request details before sending
+    console.log('[PAYMENT_REQUEST] Preparing payment request:', {
+      orderId,
+      amount,
+      subscriptionType,
+      urls: {
+        returnUrl: `${baseUrl}/api/mobilpay/return`,
         confirmUrl: `${baseUrl}/api/mobilpay/ipn`,
         ipnUrl: `${baseUrl}/api/mobilpay/ipn`
-      },
-      'RON',  // Explicitly pass the currency
-      true    // Enable recurring payments
-    );
-
-    // Find or create the plan
-    const plan = await prisma.plan.upsert({
-      where: {
-        name: subscriptionType
-      },
-      create: {
-        name: subscriptionType,
-        price: PLAN_PRICES[subscriptionType as PlanType],
-        currency: 'RON',
-        features: subscriptionType === 'Premium' 
-          ? ['Unlimited projects', 'Priority support'] 
-          : ['Unlimited projects', 'Priority support', 'Advanced features']
-      },
-      update: {
-        price: PLAN_PRICES[subscriptionType as PlanType],
-        currency: 'RON'
       }
     });
-    
-    // Store the order in the database
-    await prisma.order.create({
-      data: {
-        orderId,
-        amount,
-        currency: 'RON',
-        status: 'PENDING',
-        subscriptionType,
-        user: {
-          connect: {
-            id: user.id
-          }
+
+    try {
+      const paymentRequest = getRequest(
+        orderId, 
+        amount, 
+        billingInfo,
+        {
+          returnUrl: `${baseUrl}/api/mobilpay/return`,
+          confirmUrl: `${baseUrl}/api/mobilpay/ipn`,
+          ipnUrl: `${baseUrl}/api/mobilpay/ipn`
         },
-        plan: {
-          connect: {
-            id: plan.id
+        'RON',
+        true
+      );
+      
+      console.log('[PAYMENT_REQUEST_SUCCESS] Payment request generated successfully');
+      
+      // Find or create the plan
+      const plan = await prisma.plan.upsert({
+        where: {
+          name: subscriptionType
+        },
+        create: {
+          name: subscriptionType,
+          price: PLAN_PRICES[subscriptionType as PlanType],
+          currency: 'RON',
+          features: subscriptionType === 'Premium' 
+            ? ['Unlimited projects', 'Priority support'] 
+            : ['Unlimited projects', 'Priority support', 'Advanced features']
+        },
+        update: {
+          price: PLAN_PRICES[subscriptionType as PlanType],
+          currency: 'RON'
+        }
+      });
+      
+      // Store the order in the database
+      await prisma.order.create({
+        data: {
+          orderId,
+          amount,
+          currency: 'RON',
+          status: 'PENDING',
+          subscriptionType,
+          user: {
+            connect: {
+              id: user.id
+            }
+          },
+          plan: {
+            connect: {
+              id: plan.id
+            }
           }
         }
-      }
-    });
-    
-    return NextResponse.json({
-      success: true,
-      env_key: paymentRequest.env_key,
-      data: paymentRequest.data,
-      iv: paymentRequest.iv,
-      cipher: paymentRequest.cipher
-    });
+      });
+      
+      return NextResponse.json({
+        success: true,
+        env_key: paymentRequest.env_key,
+        data: paymentRequest.data,
+        iv: paymentRequest.iv,
+        cipher: paymentRequest.cipher
+      });
+    } catch (error) {
+      console.error('[PAYMENT_REQUEST_ERROR] Error generating payment request:', error);
+      return new NextResponse("Error generating payment request", { status: 500 });
+    }
 
   } catch (error) {
-    console.error('[PAYMENT_ERROR]', error);
+    console.error('[PAYMENT_ERROR] Unexpected error:', error);
     return new NextResponse("Internal Error", { status: 500 });
   }
 } 
