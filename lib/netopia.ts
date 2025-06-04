@@ -82,11 +82,15 @@ export async function decodeIpnResponse(req: Request): Promise<IpnResponse> {
 export function validatePayment(status: string, errorCode: string) {
   // Error code '0' means success, any other code means failure
   const isErrorCode = errorCode && errorCode !== '0';
-  const isSuccessStatus = status === 'confirmed' || status === 'paid';
-  const paymentStatus = (!isErrorCode && isSuccessStatus) ? 'COMPLETED' : 'FAILED';
-
+  
+  // Consider a payment successful only if:
+  // 1. Status is 'confirmed' or 'paid'
+  // 2. AND error code is '0' (success)
+  const isSuccessStatus = (status === 'confirmed' || status === 'paid');
+  const isSuccess = isSuccessStatus && !isErrorCode;
+  
   return {
-    isValid: !isErrorCode && isSuccessStatus,
-    paymentStatus
+    isValid: isSuccess,
+    paymentStatus: isSuccess ? 'COMPLETED' : 'FAILED'
   };
 } 

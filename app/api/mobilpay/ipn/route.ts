@@ -64,7 +64,47 @@ export async function POST(req: Request) {
     const { isValid, paymentStatus } = validatePayment(status, errorCode);
     if (!isValid) {
       console.error('[IPN_INVALID]', { orderId, status, errorCode, errorMessage });
-      return new NextResponse('Invalid payment', { status: 400 });
+      
+      // Update order status to FAILED
+      try {
+        const order = await prisma.order.findUnique({
+          where: { orderId },
+          include: { user: true, plan: true }
+        });
+
+        if (order) {
+          await prisma.order.update({
+            where: { orderId },
+            data: {
+              status: OrderStatus.FAILED,
+              lastChargeAt: new Date(),
+              failureCount: {
+                increment: 1
+              }
+            }
+          });
+
+          // Send notification about failed payment
+          try {
+            await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/notifications/send`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                userId: order.userId,
+                type: 'PAYMENT_FAILED',
+                message: `Payment failed: ${errorMessage}. Please try again or update your payment method.`
+              })
+            });
+          } catch (error) {
+            console.error('[NOTIFICATION_ERROR]', error);
+          }
+        }
+      } catch (error) {
+        console.error('[ORDER_UPDATE_ERROR]', error);
+      }
+
+      // Return 200 to acknowledge receipt of the IPN, even though payment failed
+      return new NextResponse('IPN Received - Payment Invalid', { status: 200 });
     }
 
     // Find the order
