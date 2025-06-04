@@ -48,8 +48,27 @@ export async function POST(req: Request) {
       return new NextResponse("Invalid subscription type", { status: 400 });
     }
 
-    if (!billingInfo) {
-      return new NextResponse("Billing information is required", { status: 400 });
+    // Validate billing info
+    if (!billingInfo || 
+        typeof billingInfo !== 'object' ||
+        !billingInfo.firstName ||
+        !billingInfo.lastName ||
+        !billingInfo.email ||
+        !billingInfo.phone ||
+        !billingInfo.address) {
+      return new NextResponse("Invalid billing information. Required fields: firstName, lastName, email, phone, address", { status: 400 });
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(billingInfo.email)) {
+      return new NextResponse("Invalid email format", { status: 400 });
+    }
+
+    // Validate phone format (allow only digits and optional + prefix)
+    const phoneRegex = /^\+?\d{10,}$/;
+    if (!phoneRegex.test(billingInfo.phone.replace(/\s+/g, ''))) {
+      return new NextResponse("Invalid phone number format", { status: 400 });
     }
 
     // Get the user and their current subscription

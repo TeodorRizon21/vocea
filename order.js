@@ -36,7 +36,7 @@ var parser = new xml2js.Parser({
   explicitArray: false
 });
 
-const getPayment = (orderId, amount, currency, billingInfo, isRecurring = false, originalOrderId = null) => {
+const getPayment = (orderId, amount, currency, billingInfo, urlConfig, isRecurring = false, originalOrderId = null) => {
   if (!signature) {
     throw new Error('NETOPIA_SIGNATURE is not set in environment variables');
   }
@@ -48,9 +48,9 @@ const getPayment = (orderId, amount, currency, billingInfo, isRecurring = false,
   }
 
   console.log('Creating payment request with URLs:', {
-    returnUrl,
-    confirmUrl,
-    ipnUrl: process.env.NEXT_PUBLIC_APP_URL + '/api/mobilpay/ipn',
+    returnUrl: urlConfig.returnUrl,
+    confirmUrl: urlConfig.confirmUrl,
+    ipnUrl: urlConfig.ipnUrl,
     appUrl: process.env.NEXT_PUBLIC_APP_URL,
     isRecurring,
     originalOrderId
@@ -66,9 +66,9 @@ const getPayment = (orderId, amount, currency, billingInfo, isRecurring = false,
       },
       signature: signature,
       url: {
-        return: `${process.env.NEXT_PUBLIC_APP_URL}/api/mobilpay/return`,
-        confirm: `${process.env.NEXT_PUBLIC_APP_URL}/api/mobilpay/ipn`,
-        ipn: `${process.env.NEXT_PUBLIC_APP_URL}/api/mobilpay/ipn`
+        return: urlConfig.returnUrl,
+        confirm: urlConfig.confirmUrl,
+        ipn: urlConfig.ipnUrl
       },
       invoice: {
         $: {
@@ -122,7 +122,7 @@ const getPayment = (orderId, amount, currency, billingInfo, isRecurring = false,
 }
 
 function getRequest(orderId, amount = 1, billingInfo, urlConfig, currency = 'RON', isRecurring = false, originalOrderId = null) {
-  const result = getPayment(orderId, amount, currency, billingInfo, isRecurring, originalOrderId);
+  const result = getPayment(orderId, amount, currency, billingInfo, urlConfig, isRecurring, originalOrderId);
   let xml = builder.buildObject(result.data);
   
   // Log the XML for debugging
