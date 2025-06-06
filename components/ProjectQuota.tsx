@@ -67,13 +67,23 @@ export function ProjectQuota() {
   console.log("Is unlimited?", isUnlimited)
 
   return (
-    <div className="text-sm text-gray-600 dark:text-gray-400">
-      {isUnlimited ? (
-        <span>{t.unlimited}</span>
+    <div className="text-sm text-gray-500 dark:text-gray-400">
+      {language === "ro" ? (
+        <>
+          <span className="font-medium">{quotaData.projectCount}</span> din{" "}
+          <span className="font-medium">
+            {limit === Infinity ? "∞" : limit}
+          </span>{" "}
+          proiecte active
+        </>
       ) : (
-        <span>
-          {remaining} {t.remaining}
-        </span>
+        <>
+          You've used <span className="font-medium">{quotaData.projectCount}</span> of{" "}
+          <span className="font-medium">
+            {limit === Infinity ? "∞" : limit}
+          </span>{" "}
+          active projects allowed this month
+        </>
       )}
     </div>
   )

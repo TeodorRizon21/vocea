@@ -11,15 +11,37 @@ export async function GET(req: NextRequest) {
     
     console.log("Fetching projects with type:", type);
     
-    // Allow public access to browse page without authentication
+    // First, update any expired projects
+    const now = new Date();
+    await prisma.project.updateMany({
+      where: {
+        expiresAt: {
+          lt: now
+        },
+        isActive: true
+      },
+      data: {
+        isActive: false
+      }
+    });
+    
+    // Then fetch projects
     const projects = await prisma.project.findMany({
       where: type
         ? {
             type: type,
             isActive: true,
+            OR: [
+              { expiresAt: null },
+              { expiresAt: { gt: now } }
+            ]
           }
         : {
             isActive: true,
+            OR: [
+              { expiresAt: null },
+              { expiresAt: { gt: now } }
+            ]
           },
       include: {
         user: {
@@ -38,7 +60,7 @@ export async function GET(req: NextRequest) {
       },
     })
     
-    console.log(`Found ${projects.length} projects`);
+    console.log(`Found ${projects.length} active projects`);
     return NextResponse.json(projects)
   } catch (error) {
     console.error("Error fetching projects:", error)
@@ -76,7 +98,8 @@ export async function POST(req: NextRequest) {
         userId: userId,
         createdAt: {
           gte: startOfMonth
-        }
+        },
+        isActive: true // Only count active projects
       }
     })
 
@@ -86,7 +109,7 @@ export async function POST(req: NextRequest) {
     if (projectCount >= limit) {
       return NextResponse.json(
         { 
-          error: "Monthly project limit reached for your subscription",
+          error: "Monthly active project limit reached for your subscription",
           projectCount,
           limit
         }, 
@@ -100,6 +123,7 @@ export async function POST(req: NextRequest) {
         ...data,
         userId,
         isActive: true,
+        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
       }
     })
 

@@ -57,6 +57,15 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       return NextResponse.json({ error: "Project not found" }, { status: 404 })
     }
 
+    // Check if project has expired and update if necessary
+    if (project.expiresAt && project.expiresAt < new Date() && project.isActive) {
+      await prisma.project.update({
+        where: { id: params.id },
+        data: { isActive: false }
+      });
+      project.isActive = false;
+    }
+
     return NextResponse.json(project)
   } catch (error) {
     console.error("Error fetching project:", error)
@@ -101,24 +110,18 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       ...updateData 
     } = data
 
+    // If setting a custom expiration date for testing
+    if (updateData.expiresAt) {
+      updateData.expiresAt = new Date(updateData.expiresAt);
+    }
+
     // If isActive is being toggled, check if the project is older than 30 days
     if (updateData.isActive !== undefined) {
-      const project = await prisma.project.findUnique({
-        where: { id: params.id },
-        select: { createdAt: true }
-      });
-
-      if (project) {
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-        // Only allow reactivating if project is older than 30 days
-        if (project.createdAt > thirtyDaysAgo && updateData.isActive === true) {
-          return new NextResponse(
-            JSON.stringify({ error: "Project cannot be reactivated before 30 days from creation" }), 
-            { status: 400 }
-          );
-        }
+      // If we're reactivating the project, set a new expiration date
+      if (updateData.isActive === true && !updateData.expiresAt) {
+        const newExpiresAt = new Date();
+        newExpiresAt.setDate(newExpiresAt.getDate() + 30);
+        updateData.expiresAt = newExpiresAt;
       }
     }
 

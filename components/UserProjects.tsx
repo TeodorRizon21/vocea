@@ -123,24 +123,36 @@ export default function UserProjects() {
 
   const handleReactivate = async (projectId: string) => {
     try {
+      // Set a new expiration date 30 days from now
+      const newExpiresAt = new Date();
+      newExpiresAt.setDate(newExpiresAt.getDate() + 30);
+
       const response = await fetch(`/api/projects/${projectId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ isActive: true }),
+        body: JSON.stringify({ 
+          isActive: true,
+          expiresAt: newExpiresAt.toISOString()
+        }),
       });
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || "Failed to reactivate project");
+        console.error("Failed to reactivate project:", error);
+        // You might want to show an error message to the user here
+        return;
       }
 
-      // Refresh the projects list
+      console.log("Project reactivated successfully");
+      // Force a refresh of the projects list
       router.refresh();
+      // Optional: You could also refresh the current page
+      window.location.reload();
     } catch (error) {
       console.error("Error reactivating project:", error);
-      // You might want to show an error toast here
+      // You might want to show an error message to the user here
     }
   };
 
@@ -199,7 +211,7 @@ export default function UserProjects() {
                     {!project.isActive && (
                       <Badge variant="secondary" className="mr-2">
                         Inactive
-                      </Badge>
+                        </Badge>
                     )}
                     <div className="flex items-center">
                       {project.averageRating !== undefined && (
@@ -213,35 +225,36 @@ export default function UserProjects() {
                           ({project.reviewCount} {language === "ro" ? "recenzii" : "reviews"})
                         </span>
                       )}
-                    </div>
+                      </div>
                     {!project.isActive && (
                       <Button
                         variant="outline"
                         size="sm"
+                        className="text-xs px-2 py-1 h-7"
                         onClick={() => handleReactivate(project.id)}
                       >
-                        Reactivate
+                        {language === "ro" ? "Reactivează" : "Reactivate"}
                       </Button>
                     )}
-                    <Button
+                  <Button
                       variant="ghost"
-                      size="icon"
-                      onClick={() => router.push(`/projects/edit/${project.id}`)}
-                    >
+                    size="icon"
+                    onClick={() => router.push(`/projects/edit/${project.id}`)}
+                  >
                       <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
+                  </Button>
+                  <Button
                       variant="ghost"
-                      size="icon"
+                    size="icon"
                       onClick={() => {
-                        if (confirm(translations.deleteConfirm)) {
+                      if (confirm(translations.deleteConfirm)) {
                           handleDelete(project.id);
-                        }
-                      }}
-                    >
+                      }
+                    }}
+                  >
                       <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  </Button>
+                </div>
                 </CardHeader>
               </Card>
             ))}

@@ -6,13 +6,27 @@ export const revalidate = 0;
 
 export async function GET(req: Request) {
   try {
-    // Check for authorization
-    const authHeader = req.headers.get('authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ') || authHeader.split(' ')[1] !== process.env.CRON_SECRET) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // Only allow in development
+    if (process.env.NODE_ENV !== 'development') {
+      return NextResponse.json({ error: 'This endpoint is only available in development mode' }, { status: 403 });
     }
 
     const now = new Date();
+    console.log('Current time:', now);
+
+    // Find all active projects and their expiration dates for debugging
+    const activeProjects = await prisma.project.findMany({
+      where: {
+        isActive: true
+      },
+      select: {
+        id: true,
+        title: true,
+        expiresAt: true
+      }
+    });
+
+    console.log('Active projects:', activeProjects);
 
     // Find and deactivate all active projects that have expired
     const deactivatedProjects = await prisma.project.updateMany({
@@ -31,7 +45,8 @@ export async function GET(req: Request) {
 
     return NextResponse.json({
       success: true,
-      deactivatedCount: deactivatedProjects.count
+      deactivatedCount: deactivatedProjects.count,
+      activeProjects: activeProjects
     });
   } catch (error) {
     console.error("Error deactivating old projects:", error);

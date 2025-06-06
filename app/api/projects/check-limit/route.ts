@@ -32,7 +32,8 @@ export async function GET(req: NextRequest) {
         userId: userId,
         createdAt: {
           gte: startOfMonth
-        }
+        },
+        isActive: true // Only count active projects
       }
     });
 
@@ -54,7 +55,11 @@ export async function GET(req: NextRequest) {
       projectCount,
       limit,
       canCreateProject: limit === Infinity ? true : projectCount < limit,
-      remaining
+      remaining,
+      message: {
+        ro: `Poți crea încă ${remaining === Infinity ? "∞" : remaining} proiecte active luna aceasta`,
+        en: `You can create ${remaining === Infinity ? "∞" : remaining} more active projects this month`
+      }
     });
   } catch (error) {
     console.error("Error checking project limit:", error);
