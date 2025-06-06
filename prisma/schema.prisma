@@ -55,6 +55,7 @@ model Project {
   reports      Report[] @relation("ProjectReports") // Added relation to reports
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+  isActive     Boolean  @default(true) // Projects are active by default for 30 days
 }
 
 model Review {

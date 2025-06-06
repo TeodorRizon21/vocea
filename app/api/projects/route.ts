@@ -16,8 +16,11 @@ export async function GET(req: NextRequest) {
       where: type
         ? {
             type: type,
+            isActive: true,
           }
-        : undefined,
+        : {
+            isActive: true,
+          },
       include: {
         user: {
           select: {
@@ -95,7 +98,8 @@ export async function POST(req: NextRequest) {
     const project = await prisma.project.create({
       data: {
         ...data,
-        userId
+        userId,
+        isActive: true,
       }
     })
 

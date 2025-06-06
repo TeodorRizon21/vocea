@@ -101,6 +101,27 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       ...updateData 
     } = data
 
+    // If isActive is being toggled, check if the project is older than 30 days
+    if (updateData.isActive !== undefined) {
+      const project = await prisma.project.findUnique({
+        where: { id: params.id },
+        select: { createdAt: true }
+      });
+
+      if (project) {
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+        // Only allow reactivating if project is older than 30 days
+        if (project.createdAt > thirtyDaysAgo && updateData.isActive === true) {
+          return new NextResponse(
+            JSON.stringify({ error: "Project cannot be reactivated before 30 days from creation" }), 
+            { status: 400 }
+          );
+        }
+      }
+    }
+
     const updatedProject = await prisma.project.update({
       where: { id: params.id },
       data: updateData,

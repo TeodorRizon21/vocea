@@ -14,6 +14,7 @@ export interface Project {
   userId: string
   createdAt: Date
   updatedAt: Date
+  isActive: boolean
 }
 
 export interface CreateProjectInput {

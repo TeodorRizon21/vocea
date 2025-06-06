@@ -28,6 +28,8 @@ interface ProjectWithRating {
   }>;
   averageRating?: number;
   reviewCount?: number;
+  isActive: boolean;
+  createdAt: Date;
 }
 
 export default function UserProjects() {
@@ -101,6 +103,47 @@ export default function UserProjects() {
   const displayedProjects = showAll ? projects : projects.slice(0, 4);
   const hasMoreProjects = projects.length > 4;
 
+  const handleDelete = async (projectId: string) => {
+    try {
+      const response = await fetch(`/api/projects/${projectId}`, {
+        method: "DELETE",
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to delete project");
+      }
+
+      // Remove the project from the local state
+      setProjects(projects.filter((p) => p.id !== projectId));
+    } catch (error) {
+      console.error("Error deleting project:", error);
+      // You might want to show an error toast here
+    }
+  };
+
+  const handleReactivate = async (projectId: string) => {
+    try {
+      const response = await fetch(`/api/projects/${projectId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ isActive: true }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to reactivate project");
+      }
+
+      // Refresh the projects list
+      router.refresh();
+    } catch (error) {
+      console.error("Error reactivating project:", error);
+      // You might want to show an error toast here
+    }
+  };
+
   if (loading) {
     return (
       <Card>
@@ -149,84 +192,58 @@ export default function UserProjects() {
         ) : (
           <div className="space-y-4">
             {displayedProjects.map((project) => (
-              <div
-                key={project.id}
-                className="flex flex-col xs:flex-row xs:items-center justify-between p-4 border rounded-lg hover:bg-accent transition-colors"
-              >
-                <div className="flex items-center space-x-4 mb-2 xs:mb-0">
-                  <div className="relative w-16 h-16 rounded-md overflow-hidden">
-                    <Image
-                      src={project.images[0] || "/placeholder.svg"}
-                      alt={project.title}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  <div>
-                    <h3 className="font-medium">{project.title}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {project.type.charAt(0).toUpperCase() +
-                        project.type.slice(1)}
-                    </p>
-                    {project.reviewCount && project.reviewCount > 0 ? (
-                      <div className="flex items-center mt-1">
-                        <Badge
-                          variant="secondary"
-                          className="flex items-center gap-1"
-                        >
-                          <Star className="h-3 w-3 text-yellow-500" />
-                          <span>{project.averageRating?.toFixed(1) || 0}</span>
-                          <span className="text-xs">
-                            ({project.reviewCount})
-                          </span>
-                        </Badge>
-                      </div>
-                    ) : (
-                      <div className="flex items-center mt-1">
-                        <span className="text-xs text-muted-foreground">
-                          {language === "ro" ? "Nicio recenzie încă" : "No reviews yet"}
-                        </span>
-                      </div>
+              <Card key={project.id} className="mb-4">
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle className="text-xl font-bold">{project.title}</CardTitle>
+                  <div className="flex items-center gap-2">
+                    {!project.isActive && (
+                      <Badge variant="secondary" className="mr-2">
+                        Inactive
+                      </Badge>
                     )}
-                  </div>
-                </div>
-                <div className="flex space-x-1 justify-end xs:justify-start">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={() => router.push(`/projects/edit/${project.id}`)}
-                  >
-                    <Pencil className="h-3 w-3" />
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={async () => {
-                      if (confirm(translations.deleteConfirm)) {
-                        try {
-                          const response = await fetch(
-                            `/api/projects/${project.id}`,
-                            {
-                              method: "DELETE",
-                            }
-                          );
-                          if (response.ok) {
-                            setProjects(
-                              projects.filter((p) => p.id !== project.id)
-                            );
-                          }
-                        } catch (error) {
-                          console.error("Error deleting project:", error);
+                    <div className="flex items-center">
+                      {project.averageRating !== undefined && (
+                        <>
+                          <Star className="w-4 h-4 text-yellow-400 mr-1" />
+                          <span className="mr-2">{project.averageRating.toFixed(1)}</span>
+                        </>
+                      )}
+                      {project.reviewCount !== undefined && (
+                        <span className="text-sm text-gray-500">
+                          ({project.reviewCount} {language === "ro" ? "recenzii" : "reviews"})
+                        </span>
+                      )}
+                    </div>
+                    {!project.isActive && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleReactivate(project.id)}
+                      >
+                        Reactivate
+                      </Button>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => router.push(`/projects/edit/${project.id}`)}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        if (confirm(translations.deleteConfirm)) {
+                          handleDelete(project.id);
                         }
-                      }
-                    }}
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </Button>
-                </div>
-              </div>
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardHeader>
+              </Card>
             ))}
 
             {hasMoreProjects && (
