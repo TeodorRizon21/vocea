@@ -156,17 +156,29 @@ export async function POST(req: Request) {
       console.error('DB error creating notification:', err);
     }
 
-    // Return success response to Netopia
+    // Return success response to Netopia in their requested format
     console.log('--- WEBHOOK DEBUG END ---');
-    return NextResponse.json({ 
-      success: true,
-      message: 'Webhook processed successfully',
-      orderId,
-      status: updatedOrder.status
+    
+    // Set the Content-Type header to application/json as requested by Netopia
+    const headers = new Headers();
+    headers.set('Content-Type', 'application/json');
+
+    // Return the exact format requested by Netopia
+    return new NextResponse(JSON.stringify({ errorCode: 0 }), {
+      status: 200,
+      headers
     });
 
   } catch (error) {
     console.error('[NETOPIA_WEBHOOK_ERROR]', error);
-    return new NextResponse("Internal Error", { status: 500 });
+    
+    // Even in case of error, return the same format but with an error code
+    const headers = new Headers();
+    headers.set('Content-Type', 'application/json');
+    
+    return new NextResponse(JSON.stringify({ errorCode: 1 }), {
+      status: 500,
+      headers
+    });
   }
 } 

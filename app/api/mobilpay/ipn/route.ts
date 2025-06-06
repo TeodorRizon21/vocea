@@ -103,8 +103,13 @@ export async function POST(req: Request) {
         console.error('[ORDER_UPDATE_ERROR]', error);
       }
 
-      // Return 200 to acknowledge receipt of the IPN, even though payment failed
-      return new NextResponse('IPN Received - Payment Invalid', { status: 200 });
+      // Return error response in Netopia's format
+      const headers = new Headers();
+      headers.set('Content-Type', 'application/json');
+      return new NextResponse(JSON.stringify({ errorCode: 1 }), {
+        status: 200, // Still return 200 to acknowledge receipt
+        headers
+      });
     }
 
     // Find the order
@@ -216,11 +221,24 @@ export async function POST(req: Request) {
       nextChargeAt: updatedOrder.nextChargeAt
     });
 
-    return new NextResponse('OK', { status: 200 });
+    // At the end, return success response in Netopia's format
+    const headers = new Headers();
+    headers.set('Content-Type', 'application/json');
+    return new NextResponse(JSON.stringify({ errorCode: 0 }), {
+      status: 200,
+      headers
+    });
 
   } catch (error) {
     console.error('[IPN_ERROR]', error);
-    return new NextResponse('Internal Error', { status: 500 });
+    
+    // Return error response in Netopia's format
+    const headers = new Headers();
+    headers.set('Content-Type', 'application/json');
+    return new NextResponse(JSON.stringify({ errorCode: 1 }), {
+      status: 200, // Use 200 even for errors to acknowledge receipt
+      headers
+    });
   }
 }
 
