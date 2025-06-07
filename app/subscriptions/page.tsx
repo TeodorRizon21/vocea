@@ -25,7 +25,7 @@ export default function SubscriptionsPage() {
   const [pendingSubscription, setPendingSubscription] = useState("");
   const [loading, setLoading] = useState(true);
   const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
-  const [netopiaFields, setNetopiaFields] = useState<null | { env_key: string; data: string; iv: string; cipher: string }>(null);
+  const [netopiaPayment, setNetopiaPayment] = useState<null | { redirectUrl: string; formData: Record<string, string>; orderId: string }>(null);
   const [subscription, setSubscription] = useState<{
     plan: string;
     status: string;
@@ -317,12 +317,11 @@ export default function SubscriptionsPage() {
         cancelText={content.no}
       />
 
-      {netopiaFields && (
+      {netopiaPayment && (
         <NetopiaPaymentForm
-          envKey={netopiaFields.env_key}
-          data={netopiaFields.data}
-          iv={netopiaFields.iv}
-          cipher={netopiaFields.cipher}
+          redirectUrl={netopiaPayment.redirectUrl}
+          formData={netopiaPayment.formData}
+          orderId={netopiaPayment.orderId}
         />
       )}
     </div>

@@ -1,263 +1,66 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { decodeIpnResponse, validatePayment } from '@/lib/netopia';
-import crypto from 'crypto';
-import { sendPlanUpdateEmail, sendPaymentFailedEmail } from '@/lib/email';
-import type { Prisma } from '@prisma/client';
 import { OrderStatus } from '@prisma/client';
-
-import fs from 'fs';
-import path from 'path';
-
-// Setup logging
-const LOG_FILE = path.join(process.cwd(), 'ipn-debug.log');
-
-function logToFile(message: string) {
-  const timestamp = new Date().toISOString();
-  const logMessage = `[${timestamp}] ${message}`;
-  console.log(`IPN DEBUG: ${logMessage}`);
-}
-
-// Add global error handler for unhandled rejections
-process.on('unhandledRejection', (reason, promise) => {
-  logToFile(`[IPN_UNHANDLED_REJECTION] ${reason}`);
-});
 
 // Keep track of processed IPNs to avoid duplicates
 const processedIpns = new Set<string>();
 
 export async function POST(req: Request) {
   try {
+    console.log('[IPN_START] Processing IPN notification');
+    
     // Decode and validate the IPN response
     const ipnResponse = await decodeIpnResponse(req);
-    const { orderId, status, errorCode, errorMessage, amount, isRecurring, recurringDetails } = ipnResponse;
+    console.log('[IPN_DECODED]', ipnResponse);
 
-    // Generate a unique IPN ID
-    const ipnId = `${orderId}_${Date.now()}`;
-    
-    // Check if we've already processed this IPN
-    if (processedIpns.has(ipnId)) {
-      console.log('[IPN_DUPLICATE]', { ipnId });
-      return new NextResponse('Already processed', { status: 200 });
-    }
+    // Validate payment status
+    const { isValid, paymentStatus } = validatePayment(
+      ipnResponse.status,
+      ipnResponse.errorCode
+    );
 
-    // Add to processed set
-    processedIpns.add(ipnId);
-    
-    // Clean up old IPN IDs (keep last 1000)
-    if (processedIpns.size > 1000) {
-      const idsArray = Array.from(processedIpns);
-      idsArray.slice(0, idsArray.length - 1000).forEach(id => processedIpns.delete(id));
-    }
-
-    // Log the IPN details
-    console.log('[IPN_RECEIVED]', {
-      orderId,
-      status,
-      errorCode,
-      amount,
-      isRecurring,
-      recurringDetails
-    });
-
-    // Validate the payment
-    const { isValid, paymentStatus } = validatePayment(status, errorCode);
-    if (!isValid) {
-      console.error('[IPN_INVALID]', { orderId, status, errorCode, errorMessage });
-      
-      // Update order status to FAILED
-      try {
-        const order = await prisma.order.findUnique({
-          where: { orderId },
-          include: { user: true, plan: true }
-        });
-
-        if (order) {
-          await prisma.order.update({
-            where: { orderId },
-            data: {
-              status: OrderStatus.FAILED,
-              lastChargeAt: new Date(),
-              failureCount: {
-                increment: 1
-              }
-            }
-          });
-
-          // Send notification about failed payment
-          try {
-            await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/notifications/send`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                userId: order.userId,
-                type: 'PAYMENT_FAILED',
-                message: `Payment failed: ${errorMessage}. Please try again or update your payment method.`
-              })
-            });
-          } catch (error) {
-            console.error('[NOTIFICATION_ERROR]', error);
-          }
-        }
-      } catch (error) {
-        console.error('[ORDER_UPDATE_ERROR]', error);
-      }
-
-      // Return error response in Netopia's format
-      const headers = new Headers();
-      headers.set('Content-Type', 'application/json');
-      return new NextResponse(JSON.stringify({ errorCode: 1 }), {
-        status: 200, // Still return 200 to acknowledge receipt
-        headers
-      });
-    }
-
-    // Find the order
-    const order = await prisma.order.findUnique({
-      where: { orderId },
-      include: { user: true, plan: true }
-    });
-
-    if (!order) {
-      console.error('[IPN_ORDER_NOT_FOUND]', { orderId });
-      return new NextResponse('Order not found', { status: 404 });
-    }
-
-    // Update order status
+    // Update order status in database
     const updatedOrder = await prisma.order.update({
-      where: { orderId },
-      data: {
-        status: paymentStatus === 'COMPLETED' ? OrderStatus.COMPLETED : OrderStatus.FAILED,
-        lastChargeAt: new Date(),
-        nextChargeAt: isRecurring ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) : null
+      where: { orderId: ipnResponse.orderId },
+      data: { 
+        status: paymentStatus as OrderStatus,
+        ...(ipnResponse.errorCode && {
+          failureReason: ipnResponse.errorMessage
+        }),
+        // Update recurring fields if this is a recurring payment
+        ...(isValid && ipnResponse.isRecurring && {
+          lastChargeAt: new Date(),
+          nextChargeAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
+        })
       }
     });
 
-    // Handle recurring payment status
-    if (isRecurring) {
-      if (paymentStatus === 'COMPLETED') {
-        // Successful recurring payment
-        await prisma.user.update({
-          where: { id: order.userId },
+    // If payment is valid and this is a recurring payment, update subscription
+    if (isValid && ipnResponse.isRecurring) {
+      // Get the order with user info to find the correct subscription
+      const orderWithUser = await prisma.order.findUnique({
+        where: { orderId: ipnResponse.orderId },
+        include: { user: true }
+      });
+
+      if (orderWithUser) {
+        // Update subscription status (only fields that exist in the Subscription model)
+        await prisma.subscription.updateMany({
+          where: {
+            userId: orderWithUser.user.clerkId,
+            status: { in: ['active', 'cancelled'] }
+          },
           data: {
-            planType: order.plan.name
+            status: 'active'
           }
         });
-
-        // Send success notification
-        try {
-          await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/notifications/send`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              userId: order.userId,
-              type: 'RECURRING_PAYMENT_SUCCESS',
-              message: `Your subscription has been renewed successfully. Next payment will be on ${updatedOrder.nextChargeAt?.toLocaleDateString()}.`
-            })
-          });
-        } catch (error) {
-          console.error('[NOTIFICATION_ERROR]', error);
-        }
-      } else {
-        // Failed recurring payment
-        console.error('[RECURRING_PAYMENT_FAILED]', {
-          orderId,
-          user: order.user.email,
-          plan: order.plan.name,
-          amount: order.amount,
-          error: errorMessage
-        });
-
-        // Calculate next attempt date (3 days from now)
-        const nextAttemptDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
-
-        // Send payment failed email if user has an email
-        if (order.user.email) {
-          try {
-            await sendPaymentFailedEmail({
-              name: order.user.firstName || 'User',
-              email: order.user.email,
-              planName: order.plan.name,
-              amount: order.amount,
-              currency: order.currency,
-              nextAttemptDate
-            });
-
-            console.log('[PAYMENT_FAILED_EMAIL_SENT]', {
-              user: order.user.email,
-              nextAttemptDate
-            });
-          } catch (error) {
-            console.error('[PAYMENT_FAILED_EMAIL_ERROR]', error);
-          }
-        } else {
-          console.warn('[PAYMENT_FAILED_NO_EMAIL]', {
-            userId: order.userId,
-            orderId
-          });
-        }
-
-        // Send notification
-        try {
-          await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/notifications/send`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              userId: order.userId,
-              type: 'RECURRING_PAYMENT_FAILED',
-              message: `Your subscription payment has failed. Please update your payment method to avoid service interruption.`
-            })
-          });
-        } catch (error) {
-          console.error('[NOTIFICATION_ERROR]', error);
-        }
       }
     }
 
-    // Log successful processing
-    console.log('[IPN_PROCESSED]', {
-      orderId,
-      status: updatedOrder.status,
-      nextChargeAt: updatedOrder.nextChargeAt
-    });
-
-    // At the end, return success response in Netopia's format
-    const headers = new Headers();
-    headers.set('Content-Type', 'application/json');
-    return new NextResponse(JSON.stringify({ errorCode: 0 }), {
-      status: 200,
-      headers
-    });
-
+    return new NextResponse('OK', { status: 200 });
   } catch (error) {
     console.error('[IPN_ERROR]', error);
-    
-    // Return error response in Netopia's format
-    const headers = new Headers();
-    headers.set('Content-Type', 'application/json');
-    return new NextResponse(JSON.stringify({ errorCode: 1 }), {
-      status: 200, // Use 200 even for errors to acknowledge receipt
-      headers
-    });
-  }
-}
-
-function verifySignature(body: any, signature: string, privateKey: string): boolean {
-  try {
-    // Create a string from the body in a consistent format
-    const bodyString = JSON.stringify(body);
-    
-    // Create a hash of the body
-    const hash = crypto.createHash('sha256').update(bodyString).digest('hex');
-    
-    // Verify the signature using the private key
-    const verifier = crypto.createVerify('RSA-SHA256');
-    verifier.update(hash);
-    
-    return verifier.verify(privateKey, Buffer.from(signature, 'base64'));
-  } catch (error: any) {
-    logToFile('Error verifying signature:');
-    logToFile(error.message || error.toString());
-    return false;
+    return new NextResponse('Error processing IPN', { status: 500 });
   }
 } 

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import { getRequest } from '@/order';
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
+import { NetopiaV2, formatBillingInfo } from '@/lib/netopia-v2';
 
 // Add SSL bypass for development
 if (process.env.NODE_ENV === 'development') {
@@ -10,12 +10,11 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 // Log environment variables for debugging
-console.log('Payment API Environment Variables:', {
-  hasSignature: !!process.env.NETOPIA_SIGNATURE,
+console.log('Payment API Environment Variables (v2.x):', {
+  hasPosSignature: !!process.env.NETOPIA_POS_SIGNATURE,
   hasReturnUrl: !!process.env.NETOPIA_RETURN_URL,
-  hasConfirmUrl: !!process.env.NETOPIA_CONFIRM_URL,
-  hasPublicKey: !!process.env.NETOPIA_PUBLIC_KEY,
-  hasPrivateKey: !!process.env.NETOPIA_PRIVATE_KEY
+  hasNotifyUrl: !!process.env.NETOPIA_NOTIFY_URL,
+  environment: process.env.NODE_ENV
 });
 
 type PlanType = 'Bronze' | 'Basic' | 'Premium' | 'Gold';
@@ -37,7 +36,7 @@ const PLAN_PRICES: Record<PlanType, number> = {
 
 export async function POST(req: Request) {
   try {
-    console.log('[PAYMENT_START] Initiating payment request');
+    console.log('[PAYMENT_START] Initiating payment request with Netopia v2.x');
     
     const session = await auth();
     if (!session?.userId) {
@@ -51,7 +50,7 @@ export async function POST(req: Request) {
       ...body,
       billingInfo: body.billingInfo ? {
         ...body.billingInfo,
-        email: body.billingInfo.email ? '***@***' : undefined, // Mask sensitive data
+        email: body.billingInfo.email ? '***@***' : undefined,
         phone: body.billingInfo.phone ? '***' : undefined
       } : undefined
     });
@@ -64,7 +63,7 @@ export async function POST(req: Request) {
       return new NextResponse("Invalid subscription type", { status: 400 });
     }
 
-    // Validate billing info with detailed logging
+    // Validate billing info
     const missingFields = [];
     if (!billingInfo) missingFields.push('billingInfo');
     else {
@@ -73,6 +72,8 @@ export async function POST(req: Request) {
       if (!billingInfo.email) missingFields.push('email');
       if (!billingInfo.phone) missingFields.push('phone');
       if (!billingInfo.address) missingFields.push('address');
+      if (!billingInfo.city) missingFields.push('city');
+      if (!billingInfo.postalCode) missingFields.push('postalCode');
     }
 
     if (missingFields.length > 0) {
@@ -92,6 +93,12 @@ export async function POST(req: Request) {
     if (!phoneRegex.test(billingInfo.phone.replace(/\s+/g, ''))) {
       console.log('[PAYMENT_ERROR] Invalid phone format:', billingInfo.phone);
       return new NextResponse("Invalid phone number format", { status: 400 });
+    }
+
+    // Check required environment variables
+    if (!process.env.NETOPIA_POS_SIGNATURE) {
+      console.error('[PAYMENT_ERROR] NETOPIA_POS_SIGNATURE not configured');
+      return new NextResponse("Payment configuration error", { status: 500 });
     }
 
     // Get the user and their current subscription
@@ -149,7 +156,6 @@ export async function POST(req: Request) {
       const currentPlanPrice = PLAN_PRICES[currentSubscription.plan as PlanType];
       amount = Math.round((amount - currentPlanPrice) * 100) / 100;
       
-      // Log the calculation details
       console.log('Price Calculation:', {
         newPlanPrice: PLAN_PRICES[subscriptionType as PlanType],
         currentPlanPrice,
@@ -160,48 +166,46 @@ export async function POST(req: Request) {
     // Generate a unique order ID
     const orderId = `SUB_${Date.now()}`;
 
-    // Get encrypted payment request with amount and billing info
+    // Prepare URLs
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-    
-    // Log the payment request details
+    const notifyUrl = process.env.NETOPIA_NOTIFY_URL || `${baseUrl}/api/netopia/ipn`;
+    const redirectUrl = process.env.NETOPIA_RETURN_URL || `${baseUrl}/api/netopia/return`;
+    const cancelUrl = `${baseUrl}/subscriptions?error=payment_cancelled`;
+
     console.log('Payment Request Details:', {
       orderId,
       amount,
       currentPlan: currentSubscription?.plan,
       newPlan: subscriptionType,
-      returnUrl: `${baseUrl}/payment/verify?orderId=${orderId}`,
-      confirmUrl: `${baseUrl}/api/mobilpay/ipn`,
-      ipnUrl: `${baseUrl}/api/mobilpay/ipn`,
-      appUrl: baseUrl
-    });
-
-    // Log payment request details before sending
-    console.log('[PAYMENT_REQUEST] Preparing payment request:', {
-      orderId,
-      amount,
-      subscriptionType,
-      urls: {
-        returnUrl: `${baseUrl}/api/mobilpay/return`,
-        confirmUrl: `${baseUrl}/api/mobilpay/ipn`,
-        ipnUrl: `${baseUrl}/api/mobilpay/ipn`
-      }
+      notifyUrl,
+      redirectUrl,
+      cancelUrl
     });
 
     try {
-      const paymentRequest = getRequest(
-        orderId, 
-        amount, 
-        billingInfo,
-        {
-          returnUrl: `${baseUrl}/api/mobilpay/return`,
-          confirmUrl: `${baseUrl}/api/mobilpay/ipn`,
-          ipnUrl: `${baseUrl}/api/mobilpay/ipn`
-        },
-        'RON',
-        true
-      );
-      
-      console.log('[PAYMENT_REQUEST_SUCCESS] Payment request generated successfully');
+      // Initialize Netopia v2.x client
+      const netopia = new NetopiaV2({
+        posSignature: process.env.NETOPIA_POS_SIGNATURE!,
+        isProduction: process.env.NODE_ENV === 'production'
+      });
+
+      // Format billing information for Netopia v2.x
+      const formattedBilling = formatBillingInfo(billingInfo);
+
+      // Create hosted payment (Netopia handles the payment form)
+      const paymentResult = await netopia.createHostedPayment({
+        orderID: orderId,
+        amount,
+        currency: 'RON',
+        description: `Subscription payment for ${subscriptionType} plan`,
+        billing: formattedBilling,
+        redirectUrl,
+        notifyUrl,
+        cancelUrl,
+        language: 'ro'
+      });
+
+      console.log('[NETOPIA_V2] Hosted payment created successfully');
       
       // Find or create the plan
       const plan = await prisma.plan.upsert({
@@ -230,6 +234,7 @@ export async function POST(req: Request) {
           currency: 'RON',
           status: 'PENDING',
           subscriptionType,
+          isRecurring: true, // Enable recurring for subscriptions
           user: {
             connect: {
               id: user.id
@@ -245,14 +250,17 @@ export async function POST(req: Request) {
       
       return NextResponse.json({
         success: true,
-        env_key: paymentRequest.env_key,
-        data: paymentRequest.data,
-        iv: paymentRequest.iv,
-        cipher: paymentRequest.cipher
+        redirectUrl: paymentResult.redirectUrl,
+        formData: paymentResult.formData,
+        orderId
       });
+
     } catch (error) {
-      console.error('[PAYMENT_REQUEST_ERROR] Error generating payment request:', error);
-      return new NextResponse("Error generating payment request", { status: 500 });
+      console.error('[NETOPIA_V2] Error creating payment:', error);
+      return new NextResponse(
+        error instanceof Error ? error.message : "Error creating payment", 
+        { status: 500 }
+      );
     }
 
   } catch (error) {

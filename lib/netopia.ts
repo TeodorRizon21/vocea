@@ -1,5 +1,6 @@
 import { decodeResponse } from '@/order';
 import crypto from 'crypto';
+import { OrderStatus } from '@prisma/client';
 
 export interface IpnResponse {
   orderId: string;
@@ -10,6 +11,57 @@ export interface IpnResponse {
   isRecurring: boolean;
   recurringDetails: any;
   crc?: string;
+}
+
+export interface NetopiaConfig {
+  apiKey: string;
+  returnUrl: string;
+  confirmUrl: string;
+  sandbox?: boolean;
+}
+
+export interface BillingDetails {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  country?: string;
+}
+
+export interface RecurringDetails {
+  initialOrderId?: string;
+  interval: 'DAY' | 'MONTH' | 'YEAR';
+  intervalCount: number;
+  gracePeriod: number;
+  automaticPayment: boolean;
+}
+
+export interface PaymentRequest {
+  amount: number;
+  currency: string;
+  orderId: string;
+  orderName?: string;
+  orderDesc?: string;
+  billing: BillingDetails;
+  recurring?: RecurringDetails;
+}
+
+export interface PaymentResponse {
+  status: string;
+  orderId: string;
+  amount: number;
+  currency: string;
+  errorCode: string;
+  errorMessage: string;
+  isRecurring: boolean;
+  paymentDetails: {
+    maskedCard: string;
+    paymentMethod: string;
+    rrn: string;
+    authCode?: string;
+  };
 }
 
 export async function decodeIpnResponse(req: Request): Promise<IpnResponse> {
@@ -93,4 +145,75 @@ export function validatePayment(status: string, errorCode: string) {
     isValid: isSuccess,
     paymentStatus: isSuccess ? 'COMPLETED' : 'FAILED'
   };
+}
+
+export class Netopia {
+  private config: NetopiaConfig;
+  private apiUrl: string;
+
+  constructor(config: NetopiaConfig) {
+    this.config = config;
+    this.apiUrl = process.env.NEXT_PUBLIC_NETOPIA_PAYMENT_URL || 
+      (config.sandbox 
+        ? 'https://sandboxsecure.mobilpay.ro'
+        : 'https://secure.mobilpay.ro');
+  }
+
+  async startPayment(request: PaymentRequest): Promise<{ paymentUrl: string }> {
+    const response = await fetch(`${this.apiUrl}/api/payment/start`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.config.apiKey}`
+      },
+      body: JSON.stringify({
+        amount: request.amount,
+        currency: request.currency,
+        orderId: request.orderId,
+        orderName: request.orderName,
+        orderDesc: request.orderDesc,
+        billing: request.billing,
+        recurring: request.recurring,
+        returnUrl: this.config.returnUrl,
+        confirmUrl: this.config.confirmUrl
+      })
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to start payment');
+    }
+
+    return response.json();
+  }
+
+  async verifyPayment(orderId: string): Promise<PaymentResponse> {
+    const response = await fetch(`${this.apiUrl}/api/payment/verify/${orderId}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${this.config.apiKey}`
+      }
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to verify payment');
+    }
+
+    return response.json();
+  }
+
+  async cancelRecurring(orderId: string): Promise<void> {
+    const response = await fetch(`${this.apiUrl}/api/recurring/cancel/${orderId}`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${this.config.apiKey}`
+      }
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to cancel recurring payment');
+    }
+  }
 } 

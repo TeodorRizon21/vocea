@@ -18,7 +18,7 @@ export const PaymentForm = ({
   onError
 }: PaymentFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [netopiaFields, setNetopiaFields] = useState<null | { env_key: string; data: string; iv: string; cipher: string }>(null);
+  const [netopiaPayment, setNetopiaPayment] = useState<null | { redirectUrl: string; formData: Record<string, string>; orderId: string }>(null);
   const { toast } = useToast();
 
   const handlePayment = async () => {
@@ -31,15 +31,15 @@ export const PaymentForm = ({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          subscriptionId,
           subscriptionType,
-          isRecurring,
           billingInfo: {
             firstName: "Test", // This should come from a form
             lastName: "User",
             email: "test@example.com",
             phone: "1234567890",
-            address: "Test Address"
+            address: "Test Address",
+            city: "Bucharest",
+            postalCode: "123456"
           }
         }),
       });
@@ -49,19 +49,18 @@ export const PaymentForm = ({
       }
 
       const data = await response.json();
-      console.log('Payment request response:', data);
+      console.log('[PAYMENT_FORM] Payment request response:', data);
 
-      if (data.success && data.env_key && data.data && data.iv && data.cipher) {
-        setNetopiaFields({
-          env_key: data.env_key,
-          data: data.data,
-          iv: data.iv,
-          cipher: data.cipher
+      if (data.success && data.redirectUrl && data.formData && data.orderId) {
+        setNetopiaPayment({
+          redirectUrl: data.redirectUrl,
+          formData: data.formData,
+          orderId: data.orderId
         });
 
         toast({
           title: isRecurring ? "Recurring payment initiated" : "One-time payment initiated",
-          description: "You will be redirected to the payment page.",
+          description: "You will be redirected to the Netopia payment page.",
         });
 
         onSuccess?.();
@@ -69,7 +68,7 @@ export const PaymentForm = ({
         throw new Error('Invalid payment response');
       }
     } catch (error) {
-      console.error('Payment error:', error);
+      console.error('[PAYMENT_FORM] Payment error:', error);
       toast({
         title: "Payment failed",
         description: "There was an error processing your payment. Please try again.",
@@ -81,13 +80,12 @@ export const PaymentForm = ({
     }
   };
 
-  if (netopiaFields) {
+  if (netopiaPayment) {
     return (
       <NetopiaPaymentForm
-        envKey={netopiaFields.env_key}
-        data={netopiaFields.data}
-        iv={netopiaFields.iv}
-        cipher={netopiaFields.cipher}
+        redirectUrl={netopiaPayment.redirectUrl}
+        formData={netopiaPayment.formData}
+        orderId={netopiaPayment.orderId}
       />
     );
   }

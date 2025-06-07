@@ -193,24 +193,28 @@ enum OrderStatus {
   PENDING
   COMPLETED
   FAILED
+  CANCELLED
+  REFUNDED
 }
 
 model Order {
-  id              String   @id @default(auto()) @map("_id") @db.ObjectId
-  orderId         String   @unique
-  userId          String   @db.ObjectId
-  planId          String   @db.ObjectId
+  id              String      @id @default(auto()) @map("_id") @db.ObjectId
+  orderId         String      @unique
+  userId          String      @db.ObjectId
+  planId          String      @db.ObjectId
   amount          Float
   currency        String
-  status          OrderStatus  // Changed from String to OrderStatus
+  status          OrderStatus @default(PENDING)
   subscriptionType String
-  isRecurring     Boolean  @default(false)  // New field
-  recurringStatus String?  // ACTIVE, EXPIRED, CANCELLED
+  isRecurring     Boolean     @default(false)
+  recurringStatus String?
   lastChargeAt    DateTime?
   nextChargeAt    DateTime?
-  failureCount    Int      @default(0)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  user            User     @relation(fields: [userId], references: [id])
-  plan            Plan     @relation(fields: [planId], references: [id])
+  failureCount    Int         @default(0)
+  failureReason   String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+  plan Plan @relation(fields: [planId], references: [id])
 }
