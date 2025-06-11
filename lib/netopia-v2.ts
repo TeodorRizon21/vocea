@@ -13,10 +13,11 @@ export interface BillingInfo {
   firstName: string;
   lastName: string;
   city: string;
-  country: number; // Numeric ISO 3166-1 code (e.g., 642 for Romania)
+  country: string;
   state: string;
   postalCode: string;
-  details: string;
+  address: string;
+  details?: string;
 }
 
 export interface Product {
@@ -30,85 +31,101 @@ export interface Product {
 // Request structure for v2.x API conform documentației oficiale
 export interface StartRequest {
   config: {
-    emailTemplate?: string;
     notifyUrl: string;
     redirectUrl: string;
     language: string;
   };
   payment: {
-    options?: {
-      installments?: number;
-      bonus?: number;
+    options: {
+      installments: number;
     };
-    instrument?: {
-      type: string; // "card"
-      account?: string; // Card number for direct payments
-      expMonth?: number;
-      expYear?: number;
-      secretCode?: string; // CVV
-      token?: string;
+    instrument: {
+      type: string;
     };
-    data?: {
-      BROWSER_USER_AGENT?: string;
-      OS?: string;
-      OS_VERSION?: string;
-      MOBILE?: string;
-      SCREEN_POINT?: string;
-      SCREEN_PRINT?: string;
-      BROWSER_COLOR_DEPTH?: string;
-      BROWSER_SCREEN_HEIGHT?: string;
-      BROWSER_SCREEN_WIDTH?: string;
-      BROWSER_PLUGINS?: string;
-      BROWSER_JAVA_ENABLED?: string;
-      BROWSER_LANGUAGE?: string;
-      BROWSER_TZ?: string;
-      BROWSER_TZ_OFFSET?: string;
-      IP_ADDRESS?: string;
+    data: {
+      BROWSER_USER_AGENT: string;
+      OS: string;
+      OS_VERSION: string;
+      MOBILE: string;
+      BROWSER_COLOR_DEPTH: string;
+      BROWSER_SCREEN_WIDTH: string;
+      BROWSER_SCREEN_HEIGHT: string;
+      BROWSER_JAVA_ENABLED: string;
+      BROWSER_LANGUAGE: string;
+      BROWSER_TZ: string;
+      BROWSER_TZ_OFFSET: string;
+      IP_ADDRESS: string;
     };
   };
   order: {
-    ntpID?: string;
-    posSignature: string; // Required POS Signature
-    dateTime: string; // Format: YYYY-MM-DDTHH:mm:ssZ
+    posSignature: string;
+    dateTime: string;
     description: string;
     orderID: string;
     amount: number;
     currency: string;
-    billing: BillingInfo;
-    shipping: BillingInfo;
-    products?: Product[];
-    installments?: {
+    billing: {
+      email: string;
+      phone: string;
+      firstName: string;
+      lastName: string;
+      city: string;
+      country: number;
+      state: string;
+      postalCode: string;
+      details: string;
+    };
+    shipping: {
+      email: string;
+      phone: string;
+      firstName: string;
+      lastName: string;
+      city: string;
+      country: number;
+      state: string;
+      postalCode: string;
+      details: string;
+    };
+    installments: {
       selected: number;
       available: number[];
     };
-    data?: any;
   };
 }
 
 // Response structure conform documentației NETOPIA v2.x
 export interface StartResponse {
-  status: number;
-  code: number;
-  message: string;
-  data?: {
-    customerAction?: {
-      authenticationToken?: string;
-      formData?: {
-        backUrl?: string;
-        paReq?: string;
-      };
-      type?: string; // "Authentication3D"
+  customerAction?: {
+    authenticationToken?: string;
+    formData?: {
+      backUrl?: string;
+      paReq?: string;
       url?: string;
     };
-    error?: {
-      code: string; // Error codes like "100", "56", "99", etc.
-      message: string;
+    type?: string;
+    url?: string;
+  };
+  error?: {
+    code: string;
+    message: string;
+  };
+  payment?: {
+    amount: number;
+    currency: string;
+    ntpID: string;
+    status: number;
+    paymentURL?: string;
+    binding?: {
+      expireMonth: number;
+      expireYear: number;
     };
-    payment?: {
-      amount: number;
-      currency: string;
-      ntpID: string;
-      status: number; // Status codes: 3=Paid, 5=Confirmed, 15=3DS required
+    instrument?: {
+      country: number;
+    };
+    operationDate?: string;
+    options?: {
+      bonus: number;
+      installments: number;
     };
   };
 }
@@ -320,13 +337,10 @@ export class NetopiaV2 {
       const result: StartResponse = await response.json();
       
       console.log('[NETOPIA_V2] Payment response:', {
-        status: result.status,
-        code: result.code,
-        message: result.message,
-        hasCustomerAction: !!result.data?.customerAction,
-        hasError: !!result.data?.error,
-        errorCode: result.data?.error?.code,
-        paymentStatus: result.data?.payment?.status
+        hasCustomerAction: !!result.customerAction,
+        hasError: !!result.error,
+        errorCode: result.error?.code,
+        paymentStatus: result.payment?.status
       });
 
       return result;
@@ -405,6 +419,28 @@ export class NetopiaV2 {
     redirectUrl: string;
     notifyUrl: string;
     language?: string;
+    payment?: {
+      options: {
+        installments: number;
+      };
+      instrument: {
+        type: string;
+      };
+      data: {
+        BROWSER_USER_AGENT: string;
+        OS: string;
+        OS_VERSION: string;
+        MOBILE: string;
+        BROWSER_COLOR_DEPTH: string;
+        BROWSER_SCREEN_WIDTH: string;
+        BROWSER_SCREEN_HEIGHT: string;
+        BROWSER_JAVA_ENABLED: string;
+        BROWSER_LANGUAGE: string;
+        BROWSER_TZ: string;
+        BROWSER_TZ_OFFSET: string;
+        IP_ADDRESS: string;
+      };
+    };
   }): Promise<{ 
     redirectUrl?: string; 
     formData?: Record<string, string>; 
@@ -413,34 +449,38 @@ export class NetopiaV2 {
     requires3DS?: boolean;
     error?: any 
   }> {
+    const COUNTRY_CODES: Record<string, number> = {
+      'Romania': 642,
+      'RO': 642
+    };
+
     // Request structure EXACTĂ conform sample request din documentație
     const request: StartRequest = {
       config: {
         notifyUrl: orderDetails.notifyUrl,
         redirectUrl: orderDetails.redirectUrl,
-        language: orderDetails.language || 'RO'
+        language: orderDetails.language || 'ro'
       },
       payment: {
         options: {
           installments: 1
         },
         instrument: {
-          type: "card"
+          type: 'card'
         },
         data: {
-          // Browser data conform documentației pentru 3DS
-          BROWSER_USER_AGENT: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-          OS: "Windows",
-          OS_VERSION: "10",
-          MOBILE: "false",
-          BROWSER_COLOR_DEPTH: "24",
-          BROWSER_SCREEN_WIDTH: "1920",
-          BROWSER_SCREEN_HEIGHT: "1080",
-          BROWSER_JAVA_ENABLED: "false",
-          BROWSER_LANGUAGE: "ro-RO",
-          BROWSER_TZ: "Europe/Bucharest",
-          BROWSER_TZ_OFFSET: "+02:00",
-          IP_ADDRESS: "127.0.0.1"
+          BROWSER_USER_AGENT: typeof window !== 'undefined' ? window.navigator.userAgent.split(' (')[0] : 'Node.js',
+          OS: 'Windows',
+          OS_VERSION: '10',
+          MOBILE: 'false',
+          BROWSER_COLOR_DEPTH: '24',
+          BROWSER_SCREEN_WIDTH: '1920',
+          BROWSER_SCREEN_HEIGHT: '1080',
+          BROWSER_JAVA_ENABLED: 'false',
+          BROWSER_LANGUAGE: 'ro-RO',
+          BROWSER_TZ: 'Europe/Bucharest',
+          BROWSER_TZ_OFFSET: '+02:00',
+          IP_ADDRESS: '127.0.0.1'
         }
       },
       order: {
@@ -451,13 +491,26 @@ export class NetopiaV2 {
         amount: orderDetails.amount,
         currency: orderDetails.currency,
         billing: {
-          ...orderDetails.billing,
-          // Ensure all required fields are present
-          country: orderDetails.billing.country || 642, // Romania by default
+          email: orderDetails.billing.email,
+          phone: orderDetails.billing.phone,
+          firstName: orderDetails.billing.firstName,
+          lastName: orderDetails.billing.lastName,
+          city: orderDetails.billing.city,
+          country: COUNTRY_CODES[orderDetails.billing.country] || 642,
+          state: orderDetails.billing.city,
+          postalCode: orderDetails.billing.postalCode,
+          details: orderDetails.billing.address
         },
         shipping: {
-          ...orderDetails.billing, // Use billing as shipping for simplicity
-          country: orderDetails.billing.country || 642
+          email: orderDetails.billing.email,
+          phone: orderDetails.billing.phone,
+          firstName: orderDetails.billing.firstName,
+          lastName: orderDetails.billing.lastName,
+          city: orderDetails.billing.city,
+          country: COUNTRY_CODES[orderDetails.billing.country] || 642,
+          state: orderDetails.billing.city,
+          postalCode: orderDetails.billing.postalCode,
+          details: orderDetails.billing.address
         },
         installments: {
           selected: 1,
@@ -466,71 +519,28 @@ export class NetopiaV2 {
       }
     };
 
+    console.log('[NETOPIA_V2] RAW REQUEST TO API:', JSON.stringify(request, null, 2));
+
     try {
       const response = await this.startPayment(request);
-      
-      // Handle response conform quick-start din documentație
-      if (response.data?.error) {
-        const errorCode = response.data.error.code;
-        
-        // Error code 100 + status 15 = 3DS required
-        if (errorCode === "100" && response.data?.payment?.status === 15) {
-          console.log('[NETOPIA_V2] 3DS authentication required for payment');
-          return {
-            redirectUrl: response.data.customerAction?.url,
-            formData: response.data.customerAction?.formData || {},
-            authenticationToken: response.data.customerAction?.authenticationToken,
-            ntpID: response.data.payment?.ntpID,
-            requires3DS: true
-          };
-        }
-        
-        // Other errors
-        return {
-          error: {
-            code: errorCode,
-            message: response.data.error.message
-          }
-        };
+      console.log('[NETOPIA_V2] Full response:', response);
+
+      // Extract payment URL from response
+      const paymentUrl = response.payment?.paymentURL;
+      const ntpID = response.payment?.ntpID;
+
+      if (!paymentUrl) {
+        throw new Error('No payment URL in response');
       }
-      
-      // Success cases - status 3 (Paid) or status 5 (Confirmed)
-      if (response.data?.payment?.status === 3 || response.data?.payment?.status === 5) {
-        console.log('[NETOPIA_V2] Payment completed successfully without 3DS');
-        return {
-          redirectUrl: orderDetails.redirectUrl,
-          requires3DS: false
-        };
-      }
-      
-      // Payment pending 3DS (status 15)
-      if (response.data?.payment?.status === 15 && response.data.customerAction) {
-        console.log('[NETOPIA_V2] Payment pending 3DS authentication');
-        return {
-          redirectUrl: response.data.customerAction.url,
-          formData: response.data.customerAction.formData || {},
-          authenticationToken: response.data.customerAction.authenticationToken,
-          ntpID: response.data.payment.ntpID,
-          requires3DS: true
-        };
-      }
-      
-      // Unexpected response
+
       return {
-        error: {
-          code: "999",
-          message: `Unexpected response format: status=${response.status}, paymentStatus=${response.data?.payment?.status}`
-        }
+        redirectUrl: paymentUrl,
+        ntpID,
+        requires3DS: false
       };
-      
     } catch (error) {
       console.error('[NETOPIA_V2] Hosted payment creation failed:', error);
-      return {
-        error: {
-          code: "999",
-          message: error instanceof Error ? error.message : "Unknown error"
-        }
-      };
+      throw error;
     }
   }
 
@@ -673,6 +683,106 @@ export class NetopiaV2 {
 
     return results;
   }
+
+  /**
+   * Create a recurring payment using a saved token
+   * This enables automatic recurring payments without user interaction
+   */
+  async createRecurringPayment(orderDetails: {
+    orderID: string;
+    amount: number;
+    currency: string;
+    description: string;
+    token: string; // Saved token from previous payment
+    billing: BillingInfo;
+    notifyUrl: string;
+  }): Promise<{
+    success: boolean;
+    ntpID?: string;
+    status?: number;
+    error?: any;
+  }> {
+    console.log('[NETOPIA_V2] Creating recurring payment with token:', {
+      orderID: orderDetails.orderID,
+      amount: orderDetails.amount,
+      token: orderDetails.token.substring(0, 10) + '...' // Log only first 10 chars for security
+    });
+
+    const COUNTRY_CODES: Record<string, number> = {
+      'Romania': 642,
+      'RO': 642
+    };
+
+    try {
+      const response = await fetch(`${this.apiUrl}/payment/card/recurring`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': this.config.apiKey
+        },
+        body: JSON.stringify({
+          config: {
+            notifyUrl: orderDetails.notifyUrl,
+            language: 'ro'
+          },
+          order: {
+            posSignature: this.config.posSignature,
+            dateTime: new Date().toISOString(),
+            description: orderDetails.description,
+            orderID: orderDetails.orderID,
+            amount: orderDetails.amount,
+            currency: orderDetails.currency,
+            billing: {
+              email: orderDetails.billing.email,
+              phone: orderDetails.billing.phone,
+              firstName: orderDetails.billing.firstName,
+              lastName: orderDetails.billing.lastName,
+              city: orderDetails.billing.city,
+              country: COUNTRY_CODES[orderDetails.billing.country] || 642,
+              state: orderDetails.billing.city,
+              postalCode: orderDetails.billing.postalCode,
+              details: orderDetails.billing.address
+            }
+          },
+          payment: {
+            token: orderDetails.token
+          }
+        })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[NETOPIA_V2] Recurring payment failed - HTTP error:', response.status, errorText);
+        throw new Error(`HTTP Error ${response.status}: ${errorText}`);
+      }
+
+      const result = await response.json();
+      console.log('[NETOPIA_V2] Recurring payment response:', result);
+
+      // Check if payment was successful
+      if (result.payment?.status === 3 || result.payment?.status === 5) {
+        return {
+          success: true,
+          ntpID: result.payment.ntpID,
+          status: result.payment.status
+        };
+      } else {
+        return {
+          success: false,
+          error: result.error || 'Payment failed',
+          status: result.payment?.status
+        };
+      }
+
+    } catch (error) {
+      console.error('[NETOPIA_V2] Recurring payment creation failed:', error);
+      return {
+        success: false,
+        error: error
+      };
+    }
+  }
 }
 
 // Helper functions
@@ -689,15 +799,19 @@ export function formatBillingInfo(billingData: {
   city: string;
   postalCode?: string;
 }): BillingInfo {
+  // Create a more complete address format
+  const fullAddress = billingData.address || `Str. Exemplu nr. 1, ${billingData.city}, Romania`;
+  
   return {
     email: billingData.email,
     phone: billingData.phone || "0700000000", // Default phone if not provided
     firstName: billingData.firstName,
     lastName: billingData.lastName,
     city: billingData.city,
-    country: getRomaniaCountryCode(),
-    state: billingData.city, // Use city as state for Romania
-    postalCode: billingData.postalCode || "000000", // Default postal code
-    details: billingData.address || `${billingData.city}, Romania` // Default address
+    country: getRomaniaCountryCode().toString(),
+    state: billingData.city, // Default state to city name for Romania
+    postalCode: billingData.postalCode || "010000", // Default postal code for Romania
+    details: fullAddress, // Complete address for display
+    address: fullAddress // Complete address for display
   };
 } 

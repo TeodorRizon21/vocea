@@ -30,6 +30,7 @@ model User {
   comments    ForumComment[] // Added relation to forum comments
   reports     Report[]       @relation("UserReports") // Added relation to reports
   orders      Order[]
+  subscriptions Subscription[]
 }
 
 model Project {
@@ -86,15 +87,27 @@ model News {
 
 // Subscription model for handling user subscription plans
 model Subscription {
-  id             String    @id @default(auto()) @map("_id") @db.ObjectId
-  userId         String    @unique // References clerkId from User
-  plan           String    @default("Basic") // "Basic", "Premium", or "Gold"
-  projectsPosted Int       @default(0) // Track number of projects posted
-  startDate      DateTime  @default(now())
-  endDate        DateTime?
-  status         String // "active", "cancelled", "expired"
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  id              String        @id @default(auto()) @map("_id") @db.ObjectId
+  userId          String        @db.ObjectId
+  planId          String        @db.ObjectId
+  orderId         String?       @db.ObjectId
+  startDate       DateTime
+  endDate         DateTime
+  status          String        @default("active")
+  plan            String
+  amount          Float
+  currency        String
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  // Relations
+  user            User          @relation(fields: [userId], references: [id])
+  planModel       Plan          @relation(fields: [planId], references: [id])
+  order           Order?        @relation(fields: [orderId], references: [id])
+
+  @@index([userId])
+  @@index([planId])
+  @@index([orderId])
 }
 
 // Updated Forum models
@@ -179,14 +192,15 @@ model Report {
 }
 
 model Plan {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  name      String   @unique
-  price     Float
-  currency  String
-  features  String[]
-  orders    Order[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String         @id @default(auto()) @map("_id") @db.ObjectId
+  name          String         @unique
+  price         Float
+  currency      String
+  features      String[]
+  orders        Order[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  subscriptions Subscription[]
 }
 
 enum OrderStatus {
@@ -198,23 +212,28 @@ enum OrderStatus {
 }
 
 model Order {
-  id              String      @id @default(auto()) @map("_id") @db.ObjectId
-  orderId         String      @unique
-  userId          String      @db.ObjectId
-  planId          String      @db.ObjectId
+  id              String        @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  userId          String        @db.ObjectId
+  status          OrderStatus
+  orderId         String        @unique
+  planId          String        @db.ObjectId
   amount          Float
   currency        String
-  status          OrderStatus @default(PENDING)
   subscriptionType String
-  isRecurring     Boolean     @default(false)
-  recurringStatus String?
-  lastChargeAt    DateTime?
-  nextChargeAt    DateTime?
-  failureCount    Int         @default(0)
-  failureReason   String?
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  isRecurring     Boolean       @default(false)
+  failureCount    Int          @default(0)
+  lastError       String?
+  errorMessage    String?
+  netopiaId       String?
+  token           String?
+  
+  // Relations
+  user            User          @relation(fields: [userId], references: [id])
+  plan            Plan          @relation(fields: [planId], references: [id])
+  subscriptions   Subscription[]
 
-  user User @relation(fields: [userId], references: [id])
-  plan Plan @relation(fields: [planId], references: [id])
+  @@index([userId])
+  @@index([planId])
 }

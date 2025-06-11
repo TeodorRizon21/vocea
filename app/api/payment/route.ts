@@ -1,22 +1,15 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
-import { NetopiaV2, formatBillingInfo } from '@/lib/netopia-v2';
+import { NetopiaV2 } from '@/lib/netopia-v2';
 
-// Add SSL bypass for development
+// Disable SSL verification in development
 if (process.env.NODE_ENV === 'development') {
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
   console.log('SSL verification disabled for development environment in payment API');
 }
 
-// Log environment variables for debugging
-console.log('Payment API Environment Variables (v2.x):', {
-  hasPosSignature: !!process.env.NETOPIA_POS_SIGNATURE,
-  hasReturnUrl: !!process.env.NETOPIA_RETURN_URL,
-  hasNotifyUrl: !!process.env.NETOPIA_NOTIFY_URL,
-  environment: process.env.NODE_ENV
-});
-
+// Plan types
 type PlanType = 'Bronze' | 'Basic' | 'Premium' | 'Gold';
 
 // Plan hierarchy and prices
@@ -33,6 +26,21 @@ const PLAN_PRICES: Record<PlanType, number> = {
   Premium: 8,
   Gold: 28
 };
+
+// Initialize Netopia client
+const netopiaClient = new NetopiaV2({
+  apiKey: process.env.NETOPIA_API_KEY || '',
+  posSignature: process.env.NETOPIA_POS_SIGNATURE || '',
+  isProduction: process.env.NODE_ENV === 'production'
+});
+
+// Log environment variables
+console.log('Payment API Environment Variables (v2.x):', {
+  hasPosSignature: !!process.env.NETOPIA_POS_SIGNATURE,
+  hasReturnUrl: !!process.env.NETOPIA_RETURN_URL,
+  hasNotifyUrl: !!process.env.NETOPIA_NOTIFY_URL,
+  environment: process.env.NODE_ENV
+});
 
 export async function POST(req: Request) {
   try {
@@ -113,7 +121,7 @@ export async function POST(req: Request) {
     // Get current active subscription
     const currentSubscription = await prisma.subscription.findFirst({
       where: {
-        userId: session.userId,
+        userId: user.id,
         status: {
           in: ['active', 'cancelled']
         },
@@ -126,154 +134,164 @@ export async function POST(req: Request) {
       }
     });
 
-    // Check if user can purchase the requested plan
-    if (currentSubscription?.plan) {
-      const currentPlanRank = PLAN_HIERARCHY[currentSubscription.plan as PlanType];
-      const requestedPlanRank = PLAN_HIERARCHY[subscriptionType as PlanType];
+    // Calculate upgrade difference (simple price difference)
+    let finalAmount = PLAN_PRICES[subscriptionType as PlanType];
+    let isUpgrade = false;
+    let upgradeInfo = null;
 
-      // Prevent downgrade if current plan is active
-      if (requestedPlanRank < currentPlanRank) {
-        return new NextResponse(
-          "Cannot downgrade to a lower plan while current plan is active. Please wait until your current plan expires.", 
-          { status: 400 }
-        );
-      }
-
-      // If same plan, prevent purchase unless expired
-      if (requestedPlanRank === currentPlanRank) {
-        return new NextResponse(
-          "You already have this plan. Please wait until your current plan expires to purchase it again.", 
-          { status: 400 }
-        );
-      }
-    }
-
-    // Calculate amount based on subscription type and current plan
-    let amount = PLAN_PRICES[subscriptionType as PlanType];
-    
-    // If upgrading from an active plan, just charge the difference
-    if (currentSubscription?.status === 'active' && currentSubscription.plan) {
-      const currentPlanPrice = PLAN_PRICES[currentSubscription.plan as PlanType];
-      amount = Math.round((amount - currentPlanPrice) * 100) / 100;
+    if (currentSubscription) {
+      const currentPlan = currentSubscription.plan as PlanType;
+      const newPlan = subscriptionType as PlanType;
       
-      console.log('Price Calculation:', {
-        newPlanPrice: PLAN_PRICES[subscriptionType as PlanType],
-        currentPlanPrice,
-        priceDifference: amount
-      });
+      // Check if this is an upgrade (higher hierarchy number)
+      if (PLAN_HIERARCHY[newPlan] > PLAN_HIERARCHY[currentPlan]) {
+        isUpgrade = true;
+        
+        const currentPlanPrice = PLAN_PRICES[currentPlan];
+        const newPlanPrice = PLAN_PRICES[newPlan];
+        const priceDifference = newPlanPrice - currentPlanPrice;
+        
+        // Simple difference - pay only the difference between plans
+        finalAmount = priceDifference;
+        
+        // Ensure minimum payment of 1 RON
+        if (finalAmount < 1) {
+          finalAmount = 1;
+        }
+        
+        upgradeInfo = {
+          currentPlan,
+          newPlan,
+          currentPlanPrice,
+          newPlanPrice,
+          priceDifference,
+          finalAmount: parseFloat(finalAmount.toFixed(2))
+        };
+      }
     }
 
-    // Generate a unique order ID
+    // Generate order ID
     const orderId = `SUB_${Date.now()}`;
 
-    // Prepare URLs
+    // Set up return and notify URLs
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-    const notifyUrl = process.env.NETOPIA_NOTIFY_URL || `${baseUrl}/api/netopia/ipn`;
-    const redirectUrl = process.env.NETOPIA_RETURN_URL || `${baseUrl}/api/netopia/return`;
+    const returnUrl = `${baseUrl}/api/netopia/return`;
+    const notifyUrl = `${baseUrl}/api/webhooks/netopia`;
     const cancelUrl = `${baseUrl}/subscriptions?error=payment_cancelled`;
 
     console.log('Payment Request Details:', {
       orderId,
-      amount,
+      originalAmount: PLAN_PRICES[subscriptionType as PlanType],
+      finalAmount,
       currentPlan: currentSubscription?.plan,
       newPlan: subscriptionType,
+      isUpgrade,
+      upgradeInfo,
       notifyUrl,
-      redirectUrl,
+      redirectUrl: returnUrl,
       cancelUrl
     });
 
-    try {
-      // Check for required environment variables
-      if (!process.env.NETOPIA_API_KEY || !process.env.NETOPIA_POS_SIGNATURE) {
-        console.error('[PAYMENT_API] Missing NETOPIA configuration');
-        return NextResponse.json(
-          { error: 'Payment configuration error' },
-          { status: 500 }
-        );
-      }
-
-      // Initialize Netopia v2.x client
-      const netopia = new NetopiaV2({
-        apiKey: process.env.NETOPIA_API_KEY,
-        posSignature: process.env.NETOPIA_POS_SIGNATURE!,
-        isProduction: false // REVERTED: Înapoi la sandbox pentru debug
-      });
-
-      // Format billing information for Netopia v2.x
-      const formattedBilling = formatBillingInfo(billingInfo);
-
-      // Create hosted payment (Netopia handles the payment form)
-      const paymentResult = await netopia.createHostedPayment({
-        orderID: orderId,
-        amount,
-        currency: 'RON',
-        description: `Subscription payment for ${subscriptionType} plan`,
-        billing: formattedBilling,
-        redirectUrl,
-        notifyUrl,
-        language: 'ro'
-      });
-
-      console.log('[NETOPIA_V2] Hosted payment created successfully');
-      
-      // Find or create the plan
-      const plan = await prisma.plan.upsert({
-        where: {
-          name: subscriptionType
+    // Create payment request
+    const result = await netopiaClient.createHostedPayment({
+      orderID: orderId,
+      amount: finalAmount,
+      currency: 'RON',
+      description: isUpgrade 
+        ? `Upgrade to ${subscriptionType} plan (pro-rata: ${finalAmount} RON)`
+        : `Subscription payment for ${subscriptionType} plan`,
+      billing: {
+        ...billingInfo,
+        country: 'RO', // Use country code instead of full name
+        state: billingInfo.city // Use city as state if not provided
+      },
+      redirectUrl: returnUrl,
+      notifyUrl: notifyUrl,
+      language: 'ro',
+      payment: {
+        options: {
+          installments: 1
         },
-        create: {
-          name: subscriptionType,
-          price: PLAN_PRICES[subscriptionType as PlanType],
-          currency: 'RON',
-          features: subscriptionType === 'Premium' 
-            ? ['Unlimited projects', 'Priority support'] 
-            : ['Unlimited projects', 'Priority support', 'Advanced features']
+        instrument: {
+          type: 'card'
         },
-        update: {
-          price: PLAN_PRICES[subscriptionType as PlanType],
-          currency: 'RON'
-        }
-      });
-      
-      // Store the order in the database
-      await prisma.order.create({
         data: {
-          orderId,
-          amount,
-          currency: 'RON',
-          status: 'PENDING',
-          subscriptionType,
-          isRecurring: true, // Enable recurring for subscriptions
-          user: {
-            connect: {
-              id: user.id
-            }
-          },
-          plan: {
-            connect: {
-              id: plan.id
-            }
-          }
+          BROWSER_USER_AGENT: req.headers.get('user-agent')?.split(' (')[0] || 'Unknown',
+          OS: 'Windows',
+          OS_VERSION: '10',
+          MOBILE: 'false',
+          BROWSER_COLOR_DEPTH: '24',
+          BROWSER_SCREEN_WIDTH: '1920',
+          BROWSER_SCREEN_HEIGHT: '1080',
+          BROWSER_JAVA_ENABLED: 'false',
+          BROWSER_LANGUAGE: 'ro-RO',
+          BROWSER_TZ: 'Europe/Bucharest',
+          BROWSER_TZ_OFFSET: '+02:00',
+          IP_ADDRESS: req.headers.get('x-forwarded-for')?.split(',')[0] || req.headers.get('x-real-ip') || '127.0.0.1'
         }
-      });
-      
-      return NextResponse.json({
-        success: true,
-        redirectUrl: paymentResult.redirectUrl,
-        formData: paymentResult.formData,
-        orderId
-      });
+      }
+    });
 
-    } catch (error) {
-      console.error('[NETOPIA_V2] Error creating payment:', error);
-      return new NextResponse(
-        error instanceof Error ? error.message : "Error creating payment", 
-        { status: 500 }
-      );
+    console.log('[NETOPIA_V2] Full response:', result);
+
+    if (!result.redirectUrl) {
+      console.error('[PAYMENT_ERROR] No payment URL in response');
+      return new NextResponse("Payment initialization failed", { status: 500 });
     }
 
+    // Find or create the plan
+    const plan = await prisma.plan.findFirst({
+      where: { name: subscriptionType }
+    });
+
+    if (!plan) {
+      console.error('[PAYMENT_ERROR] Plan not found:', subscriptionType);
+      return new NextResponse("Invalid plan", { status: 400 });
+    }
+
+    // Update plan price if needed
+    await prisma.plan.updateMany({
+      where: { id: plan.id },
+      data: {
+        price: PLAN_PRICES[subscriptionType as PlanType],
+        currency: 'RON'
+      }
+    });
+
+    // Create order with pro-rata amount
+    const order = await prisma.order.create({
+      data: {
+        orderId,
+        userId: user.id,
+        planId: plan.id,
+        amount: finalAmount,
+        currency: 'RON',
+        status: 'PENDING',
+        subscriptionType,
+        isRecurring: true,
+        failureCount: 0
+      }
+    });
+
+    return NextResponse.json({
+      success: true,
+      redirectUrl: result.redirectUrl,
+      formData: {}, // Netopia v2 doesn't need form data
+      orderId: order.orderId,
+      isUpgrade,
+      upgradeInfo: upgradeInfo ? {
+        originalPrice: upgradeInfo.newPlanPrice,
+        finalAmount: upgradeInfo.finalAmount,
+        savings: parseFloat((upgradeInfo.newPlanPrice - upgradeInfo.finalAmount).toFixed(2)),
+        message: `Upgrade de la ${upgradeInfo.currentPlan} la ${upgradeInfo.newPlan} - plăți doar diferența: ${upgradeInfo.finalAmount} RON`
+      } : null
+    });
+
   } catch (error) {
-    console.error('[PAYMENT_ERROR] Unexpected error:', error);
-    return new NextResponse("Internal Error", { status: 500 });
+    console.error('[PAYMENT_ERROR] Payment initialization failed:', error);
+    return new NextResponse(
+      error instanceof Error ? error.message : "Payment initialization failed",
+      { status: 500 }
+    );
   }
 } 

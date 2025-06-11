@@ -180,10 +180,15 @@ export default function DashboardPage() {
 
     const fetchSubscription = async () => {
       try {
+        console.log('[DASHBOARD] Fetching subscription data...');
         const response = await fetch("/api/subscription");
         if (response.ok) {
           const data = await response.json();
+          console.log('[DASHBOARD] Subscription API response:', data);
+          console.log('[DASHBOARD] Setting selectedSubscription to:', data.plan || "Basic");
           setSelectedSubscription(data.plan || "Basic");
+        } else {
+          console.error('[DASHBOARD] Failed to fetch subscription:', response.status);
         }
       } catch (error) {
         console.error("Error fetching subscription data:", error);

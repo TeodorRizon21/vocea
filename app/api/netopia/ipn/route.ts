@@ -181,24 +181,38 @@ export async function POST(req: Request) {
         endDate.setMonth(endDate.getMonth() + 1);
 
         // Create or update subscription
-        await prisma.subscription.upsert({
+        const existingSubscription = await prisma.subscription.findFirst({
           where: {
-            userId: order.user.clerkId
-          },
-          create: {
-            userId: order.user.clerkId,
-            plan: order.subscriptionType || 'Basic',
-            status: 'active',
-            startDate: new Date(),
-            endDate
-          },
-          update: {
-            plan: order.subscriptionType || 'Basic',
-            status: 'active',
-            startDate: new Date(),
-            endDate
+            userId: order.user.id // Use MongoDB ObjectId instead of clerkId
           }
         });
+
+        if (existingSubscription) {
+          await prisma.subscription.update({
+            where: {
+              id: existingSubscription.id
+            },
+            data: {
+              plan: order.subscriptionType || 'Basic',
+              status: 'active',
+              startDate: new Date(),
+              endDate
+            }
+          });
+        } else {
+          await prisma.subscription.create({
+            data: {
+              userId: order.user.id, // Use MongoDB ObjectId instead of clerkId
+              planId: order.planId,
+              plan: order.subscriptionType || 'Basic',
+              status: 'active',
+              startDate: new Date(),
+              endDate,
+              amount: order.amount,
+              currency: order.currency
+            }
+          });
+        }
 
         // Update user's plan type
         await prisma.user.update({

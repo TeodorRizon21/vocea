@@ -11,15 +11,27 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get user's subscription from the database
+    // Get user's database ID
     const user = await prisma.user.findUnique({
       where: { clerkId: userId },
-      select: { planType: true }
+      select: { id: true, planType: true }
     });
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
+
+    // Get current subscription to determine plan limits
+    const subscription = await prisma.subscription.findFirst({
+      where: {
+        userId: user.id,
+        status: { in: ['active', 'cancelled'] }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    console.log("User planType from database:", user.planType);
+    console.log("Subscription plan from database:", subscription?.plan || 'No subscription');
 
     // Get the start of the current month
     const startOfMonth = new Date();
@@ -37,10 +49,19 @@ export async function GET(req: NextRequest) {
       }
     });
 
-    // Get the limit based on subscription
-    const subscriptionType = (user.planType || "Basic") as SubscriptionType;
+    // Get the limit based on subscription (use Subscription table as source of truth)
+    // If no subscription exists, default to Basic plan
+    const subscriptionType = (subscription?.plan || "Basic") as SubscriptionType;
     const limit = PROJECT_LIMITS[subscriptionType];
     
+    console.log("Subscription calculation:", {
+      userPlanType: user.planType,
+      subscriptionPlan: subscription?.plan,
+      effectiveSubscriptionType: subscriptionType,
+      limit,
+      PROJECT_LIMITS
+    });
+
     // For Gold plan (or any plan with Infinity limit), explicitly set remaining to Infinity
     const remaining = limit === Infinity ? Infinity : limit - projectCount;
     

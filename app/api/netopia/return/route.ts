@@ -4,124 +4,85 @@ import { prisma } from '@/lib/prisma';
 
 export async function GET(req: NextRequest) {
   try {
-    console.log('[NETOPIA_V2_RETURN] Processing return from payment');
+    console.log('[NETOPIA_RETURN] Processing return request');
     
-    const searchParams = req.nextUrl.searchParams;
-    const orderID = searchParams.get('orderID');
-    const paRes = searchParams.get('paRes'); // 3DS authentication response
-    const authenticationToken = searchParams.get('authenticationToken');
-    const ntpID = searchParams.get('ntpID');
+    // Get URL parameters
+    const url = new URL(req.url);
+    const orderId = url.searchParams.get('orderId');
+    const errorCode = url.searchParams.get('errorCode');
+    const errorMessage = url.searchParams.get('errorMessage');
 
-    console.log('[NETOPIA_V2_RETURN] Return parameters:', {
-      orderID,
-      hasPaRes: !!paRes,
-      hasAuthToken: !!authenticationToken,
-      ntpID
+    console.log('[NETOPIA_RETURN] Parameters:', {
+      orderId,
+      errorCode,
+      errorMessage
     });
 
-    if (!orderID) {
-      console.error('[NETOPIA_V2_RETURN] Missing orderID parameter');
-      return NextResponse.redirect(new URL('/subscriptions?error=missing_order_id', req.url));
+    if (!orderId) {
+      console.error('[NETOPIA_RETURN] No orderId provided');
+      return new NextResponse('Missing orderId', { status: 400 });
     }
 
-    // Find the order in database
+    // Find the order
     const order = await prisma.order.findUnique({
-      where: { orderId: orderID },
-      include: { 
-        user: true,
-        plan: true
-      }
+      where: { orderId }
     });
 
     if (!order) {
-      console.error('[NETOPIA_V2_RETURN] Order not found:', orderID);
-      return NextResponse.redirect(new URL('/subscriptions?error=order_not_found', req.url));
+      console.error('[NETOPIA_RETURN] Order not found:', orderId);
+      return new NextResponse('Order not found', { status: 404 });
     }
 
-    // If we have paRes, this is a return from 3DS authentication
-    if (paRes && authenticationToken && ntpID) {
-      console.log('[NETOPIA_V2_RETURN] Processing 3DS authentication response');
-      
-      try {
-        // Initialize Netopia client
-        const netopia = new NetopiaV2({
-          apiKey: process.env.NETOPIA_API_KEY!,
-          posSignature: process.env.NETOPIA_POS_SIGNATURE!,
-          isProduction: process.env.NODE_ENV === 'production'
-        });
+    // Build redirect URL based on order status
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    let redirectUrl = '';
 
-        // Verify 3DS authentication
-        const authResult = await netopia.verifyAuth({
-          authenticationToken,
-          ntpID,
-          paRes
-        });
-
-        console.log('[NETOPIA_V2_RETURN] 3DS verification result:', {
-          status: authResult.status,
-          code: authResult.code,
-          paymentStatus: authResult.data?.payment?.status,
-          hasError: !!authResult.data?.error
-        });
-
-        // Check if payment was successful after 3DS
-        if (authResult.data?.payment?.status === 3 || authResult.data?.payment?.status === 5) {
-                     // Payment successful - update order status
-           await prisma.order.update({
-             where: { orderId: orderID },
-             data: {
-               status: 'COMPLETED'
-             }
-           });
-
-          // Update subscription and user plan
-          await updateUserSubscription(order.user.clerkId, order.subscriptionType || 'Basic');
-
-          console.log('[NETOPIA_V2_RETURN] Payment completed successfully after 3DS');
-          return NextResponse.redirect(new URL('/subscriptions?success=payment_completed', req.url));
-        } else {
-          // Payment failed
-          const errorMessage = authResult.data?.error?.message || 'Payment verification failed';
-          await prisma.order.update({
-            where: { orderId: orderID },
-            data: {
-              status: 'FAILED',
-              failureReason: errorMessage
-            }
-          });
-
-          console.log('[NETOPIA_V2_RETURN] Payment failed after 3DS:', errorMessage);
-          return NextResponse.redirect(new URL('/subscriptions?error=payment_failed', req.url));
+    // Check if there are immediate error parameters from Netopia
+    if (errorCode || errorMessage) {
+      // Immediate failure from Netopia
+      redirectUrl = `${baseUrl}/payment/failed?orderId=${orderId}`;
+      if (errorMessage) {
+        redirectUrl += `&message=${encodeURIComponent(errorMessage)}`;
+      }
+    } else {
+      // Check order status from database
+      if (order.status === 'COMPLETED') {
+        // Payment successful
+        redirectUrl = `${baseUrl}/payment/success?orderId=${orderId}`;
+      } else if (order.status === 'FAILED') {
+        // Payment failed  
+        redirectUrl = `${baseUrl}/payment/failed?orderId=${orderId}`;
+        if (order.lastError) {
+          redirectUrl += `&message=${encodeURIComponent(order.lastError)}`;
         }
-      } catch (error) {
-        console.error('[NETOPIA_V2_RETURN] Error verifying 3DS authentication:', error);
-        await prisma.order.update({
-          where: { orderId: orderID },
-          data: {
-            status: 'FAILED',
-            failureReason: 'Error processing 3DS authentication'
-          }
-        });
-        return NextResponse.redirect(new URL('/subscriptions?error=verification_error', req.url));
+      } else {
+        // Payment still pending - redirect to a pending page or show status
+        redirectUrl = `${baseUrl}/subscriptions?status=pending&orderId=${orderId}`;
       }
     }
 
-    // For non-3DS payments or direct returns, check order status
-    if (order.status === 'COMPLETED') {
-      console.log('[NETOPIA_V2_RETURN] Order already completed');
-      return NextResponse.redirect(new URL('/subscriptions?success=payment_completed', req.url));
-    } else if (order.status === 'FAILED') {
-      console.log('[NETOPIA_V2_RETURN] Order failed');
-      return NextResponse.redirect(new URL('/subscriptions?error=payment_failed', req.url));
-    } else {
-      // Order still pending - redirect to pending page
-      console.log('[NETOPIA_V2_RETURN] Order still pending');
-      return NextResponse.redirect(new URL('/subscriptions?status=pending', req.url));
-    }
+    console.log('[NETOPIA_RETURN] Redirecting to:', redirectUrl);
 
+    // Return redirect response
+    return new Response(null, {
+      status: 302,
+      headers: {
+        Location: redirectUrl
+      }
+    });
   } catch (error) {
-    console.error('[NETOPIA_V2_RETURN] Unexpected error:', error);
-    return NextResponse.redirect(new URL('/subscriptions?error=processing_error', req.url));
+    console.error('[NETOPIA_RETURN] Error processing return:', error);
+    
+    // Redirect to failed page with error
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const errorUrl = `${baseUrl}/payment/failed?message=${encodeURIComponent('An unexpected error occurred during payment processing')}`;
+    
+    return new Response(null, {
+      status: 302,
+      headers: {
+        Location: errorUrl
+      }
+    });
   }
 }
 
@@ -166,25 +127,44 @@ async function updateUserSubscription(userId: string, planType: string) {
     const endDate = new Date();
     endDate.setMonth(endDate.getMonth() + 1);
 
-    // Create or update subscription
-    await prisma.subscription.upsert({
+    // Get user's MongoDB ID first
+    const user = await prisma.user.findFirst({
       where: {
-        userId: userId
-      },
-      create: {
-        userId: userId,
-        plan: planType,
-        status: 'active',
-        startDate: new Date(),
-        endDate
-      },
-      update: {
+        clerkId: userId
+      }
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    // Create or update subscription
+    const existingSubscription = await prisma.subscription.findFirst({
+      where: {
+        userId: user.id,
+        status: {
+          in: ['active', 'cancelled']
+        }
+      }
+    });
+
+    if (existingSubscription) {
+      await prisma.subscription.update({
+        where: {
+          id: existingSubscription.id
+        },
+        data: {
         plan: planType,
         status: 'active',
         startDate: new Date(),
         endDate
       }
     });
+    } else {
+      // This function doesn't have access to order details, so we can't create a full subscription
+      // In practice, this function might not be used for creating new subscriptions
+      console.warn('Cannot create new subscription without order details');
+    }
 
     // Update user's plan type
     await prisma.user.update({
