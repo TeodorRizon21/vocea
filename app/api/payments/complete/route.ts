@@ -66,26 +66,41 @@ export async function POST(req: NextRequest) {
         endDate.setDate(endDate.getDate() + 30);
 
         // Update or create subscription
-        await prisma.subscription.upsert({
+        const existingSubscription = await prisma.subscription.findFirst({
           where: {
-            userId
-          },
-          create: {
-            userId,
-            plan: order.plan.name,
-            status: 'active',
-            startDate,
-            endDate,
-            projectsPosted: 0
-          },
-          update: {
-            plan: order.plan.name,
-            status: 'active',
-            startDate,
-            endDate,
-            ...(order.plan.name === 'Gold' ? { projectsPosted: 0 } : {})
+            userId: user.id,
+            status: {
+              in: ['active', 'cancelled']
+            }
           }
         });
+
+        if (existingSubscription) {
+          await prisma.subscription.update({
+            where: {
+              id: existingSubscription.id
+            },
+            data: {
+            plan: order.plan.name,
+            status: 'active',
+            startDate,
+              endDate
+            }
+          });
+        } else {
+          await prisma.subscription.create({
+            data: {
+              userId: user.id,
+              planId: order.planId,
+            plan: order.plan.name,
+            status: 'active',
+            startDate,
+            endDate,
+              amount: order.amount,
+              currency: order.currency
+          }
+        });
+        }
 
         // Update user's plan type
         await prisma.user.update({

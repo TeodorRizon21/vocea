@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
     // Create or update subscription record
     const existingSubscription = await prisma.subscription.findFirst({
       where: {
-        userId,
+        userId: user.id, // Fixed: use user.id (MongoDB ObjectId) instead of clerkId
       },
     })
 
@@ -76,17 +76,24 @@ export async function POST(req: NextRequest) {
         data: {
           plan: subscription,
           status: "active",
-          // Reset projectsPosted count if downgrading from Gold to Premium
-          // @ts-ignore - projectsPosted exists in the schema but TypeScript definitions aren't updated
-          ...(existingSubscription.plan === "Gold" && subscription === "Premium" ? { projectsPosted: 0 } : {})
         },
       })
     } else {
+      // Create new subscription with all required fields
+      const startDate = new Date();
+      const endDate = new Date();
+      endDate.setDate(endDate.getDate() + 30); // 30 days from now
+      
       await prisma.subscription.create({
         data: {
-          userId,
+          userId: user.id, // Use user.id (MongoDB ObjectId) instead of clerkId
+          planId: "672950f0b95b7a38088d7bc9", // Default plan ID for Basic - you might want to get this from database
           plan: subscription,
           status: "active",
+          startDate,
+          endDate,
+          amount: 0, // Basic plan is free
+          currency: "RON",
         },
       })
     }
@@ -116,16 +123,16 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   try {
-    const { userId } = getAuth(req);
+    const { userId: clerkId } = getAuth(req);
     
-    if (!userId) {
+    if (!clerkId) {
       return new NextResponse('Unauthorized', { status: 401 });
     }
 
     // Get user's MongoDB ID first
     const user = await prisma.user.findFirst({
       where: {
-        clerkId: userId
+        clerkId: clerkId
       }
     });
 
@@ -133,10 +140,10 @@ export async function GET(req: NextRequest) {
       return new NextResponse('User not found', { status: 404 });
     }
 
-    // Get the current subscription
+    // Get the current subscription - use user.id (MongoDB ObjectId)
     const currentSubscription = await prisma.subscription.findFirst({
       where: {
-        userId,
+        userId: user.id, // Fixed: use user.id instead of clerkId
         status: {
           in: ['active', 'cancelled']
         }
@@ -169,28 +176,41 @@ export async function GET(req: NextRequest) {
       const endDate = new Date();
       endDate.setDate(endDate.getDate() + 30);
 
-      // Update or create subscription
-      await prisma.subscription.upsert({
+      // Update or create subscription - use user.id (MongoDB ObjectId)
+      const existingSubscription = await prisma.subscription.findFirst({
         where: {
-          userId
-        },
-        create: {
-          userId,
-          plan: latestOrder.plan.name,
-          status: 'active',
-          startDate,
-          endDate,
-          projectsPosted: 0
-        },
-        update: {
-          plan: latestOrder.plan.name,
-          status: 'active',
-          startDate,
-          endDate,
-          // Reset projectsPosted if upgrading to a higher plan
-          ...(latestOrder.plan.name === 'Gold' ? { projectsPosted: 0 } : {})
+          userId: user.id
         }
       });
+
+      if (existingSubscription) {
+        await prisma.subscription.update({
+          where: {
+            id: existingSubscription.id
+          },
+          data: {
+            plan: latestOrder.plan.name,
+            status: 'active',
+            startDate,
+            endDate,
+            amount: latestOrder.amount,
+            currency: latestOrder.currency
+          }
+        });
+      } else {
+        await prisma.subscription.create({
+          data: {
+            userId: user.id,
+            planId: latestOrder.planId,
+            plan: latestOrder.plan.name,
+            status: 'active',
+            startDate,
+            endDate,
+            amount: latestOrder.amount,
+            currency: latestOrder.currency
+          }
+        });
+      }
 
       // Update user's plan type in User model
       await prisma.user.update({
@@ -256,11 +276,17 @@ export async function GET(req: NextRequest) {
     }
 
     // Return current subscription
-    return NextResponse.json({
+    const responseData = {
       plan: currentSubscription.plan,
       status: currentSubscription.status,
       endDate: currentSubscription.endDate
-    });
+    };
+    
+    console.log('[SUBSCRIPTION_API] Returning subscription data:', responseData);
+    console.log('[SUBSCRIPTION_API] Current subscription from DB:', currentSubscription);
+    console.log('[SUBSCRIPTION_API] User planType from DB:', user.planType);
+    
+    return NextResponse.json(responseData);
   } catch (error) {
     console.error('[SUBSCRIPTION_ERROR]', error);
     return new NextResponse('Internal Error', { status: 500 });

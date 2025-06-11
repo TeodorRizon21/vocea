@@ -29,7 +29,7 @@ export default function OrderPage() {
   const { language } = useLanguage();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [netopiaFields, setNetopiaFields] = useState<null | { env_key: string; data: string; iv: string; cipher: string }>(null);
+  const [netopiaPayment, setNetopiaPayment] = useState<null | { redirectUrl: string; formData: Record<string, string>; orderId: string }>(null);
 
   const [formData, setFormData] = useState<OrderFormData>({
     firstName: user?.firstName || "",
@@ -144,12 +144,11 @@ export default function OrderPage() {
       }
 
       const data = await response.json();
-      if (data.env_key && data.data && data.iv && data.cipher) {
-        setNetopiaFields({
-          env_key: data.env_key,
-          data: data.data,
-          iv: data.iv,
-          cipher: data.cipher,
+      if (data.success && data.redirectUrl && data.formData && data.orderId) {
+        setNetopiaPayment({
+          redirectUrl: data.redirectUrl,
+          formData: data.formData,
+          orderId: data.orderId,
         });
       } else {
         throw new Error("Invalid payment response");
@@ -166,16 +165,15 @@ export default function OrderPage() {
     return null;
   }
 
-  if (netopiaFields) {
+  if (netopiaPayment) {
     return (
       <div className="container mx-auto px-4 py-8 max-w-2xl">
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 sm:p-8">
           <h1 className="text-2xl sm:text-3xl font-bold mb-6">{content.title}</h1>
           <NetopiaPaymentForm
-            envKey={netopiaFields.env_key}
-            data={netopiaFields.data}
-            iv={netopiaFields.iv}
-            cipher={netopiaFields.cipher}
+            redirectUrl={netopiaPayment.redirectUrl}
+            formData={netopiaPayment.formData}
+            orderId={netopiaPayment.orderId}
           />
         </div>
       </div>

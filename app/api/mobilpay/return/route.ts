@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { decodeResponse } from '@/order';
+import { decodeIpnResponse, validatePayment } from '@/lib/netopia';
 
 export async function GET(req: Request) {
   try {
@@ -15,49 +15,31 @@ export async function GET(req: Request) {
       return NextResponse.redirect(new URL('/subscriptions?error=missing_order', req.url));
     }
 
-    // Always redirect to verification page with orderId
-    return NextResponse.redirect(new URL(`/payment/verify?orderId=${orderId}`, req.url));
+    // Check order status in database
+    const order = await prisma.order.findUnique({
+      where: { orderId }
+    });
+
+    if (!order) {
+      console.error('Order not found:', orderId);
+      return NextResponse.redirect(new URL('/subscriptions?error=order_not_found', req.url));
+    }
+
+    // Redirect based on order status
+    if (order.status === 'COMPLETED') {
+      return NextResponse.redirect(new URL(`/payment/success?orderId=${orderId}`, req.url));
+    } else if (order.status === 'FAILED') {
+      return NextResponse.redirect(new URL(`/payment/failed?orderId=${orderId}&error=${order.failureReason || 'Payment failed'}`, req.url));
+    } else {
+      // Payment still pending
+      return NextResponse.redirect(new URL('/subscriptions?status=pending', req.url));
+    }
+
   } catch (error) {
-    console.error('[NETOPIA_RETURN_GET_ERROR]', error);
+    console.error('[NETOPIA_RETURN_ERROR]', error);
     return NextResponse.redirect(new URL('/subscriptions?error=internal_error', req.url));
   }
 }
 
-export async function POST(req: Request) {
-  try {
-    console.log('Received POST return from Netopia');
-    
-    const formData = await req.formData();
-    const envKey = formData.get('env_key');
-    const data = formData.get('data');
-    const iv = formData.get('iv');
-    const cipher = formData.get('cipher');
-
-    if (!envKey || !data || !iv || !cipher) {
-      console.error('Missing required payment data');
-      return NextResponse.redirect(new URL('/subscriptions?error=missing_data', req.url));
-    }
-
-    // Decode the response from Netopia
-    const decodedResponse = await decodeResponse({
-      env_key: envKey.toString(),
-      data: data.toString(),
-      iv: iv.toString(),
-      cipher: cipher.toString()
-    });
-
-    console.log('Decoded return response:', decodedResponse);
-
-    // Extract transaction information
-    const { order } = decodedResponse;
-    const { 
-      $: { id: orderId }
-    } = order;
-
-    // Always redirect to verification page with orderId
-    return NextResponse.redirect(new URL(`/payment/verify?orderId=${orderId}`, req.url));
-  } catch (error) {
-    console.error('[NETOPIA_RETURN_POST_ERROR]', error);
-    return NextResponse.redirect(new URL('/subscriptions?error=internal_error', req.url));
-  }
-} 
+// Handle POST requests similarly
+export const POST = GET; 
