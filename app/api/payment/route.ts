@@ -183,10 +183,20 @@ export async function POST(req: Request) {
     });
 
     try {
+      // Check for required environment variables
+      if (!process.env.NETOPIA_API_KEY || !process.env.NETOPIA_POS_SIGNATURE) {
+        console.error('[PAYMENT_API] Missing NETOPIA configuration');
+        return NextResponse.json(
+          { error: 'Payment configuration error' },
+          { status: 500 }
+        );
+      }
+
       // Initialize Netopia v2.x client
       const netopia = new NetopiaV2({
+        apiKey: process.env.NETOPIA_API_KEY,
         posSignature: process.env.NETOPIA_POS_SIGNATURE!,
-        isProduction: process.env.NODE_ENV === 'production'
+        isProduction: false // REVERTED: Înapoi la sandbox pentru debug
       });
 
       // Format billing information for Netopia v2.x
@@ -201,7 +211,6 @@ export async function POST(req: Request) {
         billing: formattedBilling,
         redirectUrl,
         notifyUrl,
-        cancelUrl,
         language: 'ro'
       });
 

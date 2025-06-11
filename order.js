@@ -1,5 +1,9 @@
 'use strict';
 
+// NOTE: This file is for NETOPIA v1.x (legacy)
+// Current implementation uses v2.x (lib/netopia-v2.ts)
+// This file is kept for backwards compatibility but should not be used in new implementations
+
 module.exports = {
   getRequest: getRequest,
   decodeResponse: decodeResponse
@@ -12,10 +16,11 @@ const privateKey = process.env.NETOPIA_PRIVATE_KEY;
 const publicKey = process.env.NETOPIA_PUBLIC_KEY;
 const signature = process.env.NETOPIA_SIGNATURE;
 const returnUrl = process.env.NETOPIA_RETURN_URL;
-const confirmUrl = process.env.NETOPIA_CONFIRM_URL;
+// Legacy v1.x - now replaced with NETOPIA_NOTIFY_URL in v2.x
+const confirmUrl = process.env.NETOPIA_CONFIRM_URL || process.env.NETOPIA_NOTIFY_URL;
 
 // Log environment variables for debugging
-console.log('Netopia Configuration:', {
+console.log('Netopia Configuration (Legacy v1.x):', {
   hasSignature: !!signature,
   hasReturnUrl: !!returnUrl,
   hasConfirmUrl: !!confirmUrl,
@@ -44,7 +49,7 @@ const getPayment = (orderId, amount, currency, billingInfo, urlConfig, isRecurri
     throw new Error('NETOPIA_RETURN_URL is not set in environment variables');
   }
   if (!confirmUrl) {
-    throw new Error('NETOPIA_CONFIRM_URL is not set in environment variables');
+    throw new Error('NETOPIA_CONFIRM_URL or NETOPIA_NOTIFY_URL is not set in environment variables');
   }
 
   console.log('Creating payment request with URLs:', {

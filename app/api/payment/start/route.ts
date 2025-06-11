@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
-import { Netopia, PaymentRequest, BillingDetails, RecurringDetails } from '@/lib/netopia';
+import { NetopiaV2, formatBillingInfo } from '@/lib/netopia-v2';
 
 export async function POST(req: Request) {
   try {
@@ -20,7 +20,7 @@ export async function POST(req: Request) {
 
     // Get user details
     const user = await prisma.user.findUnique({
-      where: { id: session.userId }
+      where: { clerkId: session.userId }
     });
 
     if (!user) {
@@ -49,54 +49,63 @@ export async function POST(req: Request) {
         isRecurring,
         recurringStatus: isRecurring ? 'PENDING' : null,
         subscriptionType: plan.name,
-        userId: session.userId,
-        planId
+        user: {
+          connect: {
+            id: user.id
+          }
+        },
+        plan: {
+          connect: {
+            id: plan.id
+          }
+        }
       }
     });
 
-    // Initialize Netopia client
-    const netopia = new Netopia({
+    // Initialize Netopia v2.x client
+    const netopia = new NetopiaV2({
       apiKey: process.env.NETOPIA_API_KEY!,
-      returnUrl: process.env.NETOPIA_RETURN_URL!,
-      confirmUrl: process.env.NETOPIA_CONFIRM_URL!,
-      sandbox: process.env.NODE_ENV === 'development'
+      posSignature: process.env.NETOPIA_POS_SIGNATURE!,
+      isProduction: process.env.NODE_ENV === 'production'
     });
 
-    // Prepare billing details
-    const billing: BillingDetails = {
-      firstName: user.firstName || '',
-      lastName: user.lastName || '',
+    // Prepare URLs for v2.x
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const notifyUrl = process.env.NETOPIA_NOTIFY_URL || `${baseUrl}/api/netopia/ipn`;
+    const redirectUrl = process.env.NETOPIA_RETURN_URL || `${baseUrl}/api/netopia/return`;
+    
+    // Format billing information for v2.x
+    const formattedBilling = formatBillingInfo({
+      firstName: user.firstName || 'Customer',
+      lastName: user.lastName || 'User',
       email: user.email || '',
-      city: user.city || ''
-    };
+      phone: '0700000000', // Default phone since not required in user model
+      address: 'Default Address', // Default address since not required in user model
+      city: user.city || 'Bucharest',
+      postalCode: '010000' // Default postal code
+    });
 
-    // Prepare payment request
-    const paymentRequest: PaymentRequest = {
+    // Create hosted payment (v2.x)
+    const paymentResult = await netopia.createHostedPayment({
+      orderID: orderId,
       amount,
       currency: 'RON',
-      orderId,
-      orderName: `${plan.name} Subscription`,
-      orderDesc: `Subscription payment for ${plan.name} plan`,
-      billing
-    };
+      description: `Subscription payment for ${plan.name} plan`,
+      billing: formattedBilling,
+      redirectUrl,
+      notifyUrl,
+      language: 'ro'
+    });
 
-    // Add recurring payment details if needed
-    if (isRecurring) {
-      const recurring: RecurringDetails = {
-        interval: 'MONTH',
-        intervalCount: 1,
-        gracePeriod: 3,
-        automaticPayment: true
-      };
-      paymentRequest.recurring = recurring;
-    }
-
-    const response = await netopia.startPayment(paymentRequest);
-
-    return NextResponse.json(response);
+    return NextResponse.json({
+      success: true,
+      redirectUrl: paymentResult.redirectUrl,
+      formData: paymentResult.formData,
+      orderId
+    });
 
   } catch (error: any) {
-    console.error('[PAYMENT_START_ERROR]', error);
+    console.error('[PAYMENT_START_ERROR_V2]', error);
     return new NextResponse(error.message || "Internal Server Error", { 
       status: error.status || 500 
     });
