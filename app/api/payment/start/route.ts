@@ -47,7 +47,6 @@ export async function POST(req: Request) {
         currency: 'RON',
         status: 'PENDING',
         isRecurring,
-        recurringStatus: isRecurring ? 'PENDING' : null,
         subscriptionType: plan.name,
         user: {
           connect: {
