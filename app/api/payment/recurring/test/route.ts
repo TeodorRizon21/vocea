@@ -43,7 +43,6 @@ export async function POST(req: Request) {
         status: 'PENDING',
         subscriptionType: originalOrder.subscriptionType,
         isRecurring: true,
-        recurringStatus: 'PENDING',
         userId: originalOrder.userId,
         planId: originalOrder.planId
       }

@@ -40,9 +40,6 @@ export async function GET(req: Request) {
           amount: order.amount,
           currency: order.currency,
           isRecurring: order.isRecurring,
-          recurringStatus: order.recurringStatus,
-          lastChargeAt: order.lastChargeAt,
-          nextChargeAt: order.nextChargeAt,
           plan: order.plan.name,
           user: order.user
         }
@@ -72,9 +69,6 @@ export async function GET(req: Request) {
         status: order.status,
         amount: order.amount,
         currency: order.currency,
-        recurringStatus: order.recurringStatus,
-        lastChargeAt: order.lastChargeAt,
-        nextChargeAt: order.nextChargeAt,
         plan: order.plan.name
       }))
     });
