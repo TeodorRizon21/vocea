@@ -171,7 +171,9 @@ export class NetopiaV2 {
   constructor(config: NetopiaConfig) {
     this.config = config;
     // URL-uri corecte conform documentației oficiale NETOPIA v2.x
-    this.apiUrl = config.isProduction 
+    // Allow forcing sandbox even in production for unapproved accounts
+    const forceSandbox = process.env.NETOPIA_FORCE_SANDBOX === 'true';
+    this.apiUrl = (config.isProduction && !forceSandbox)
       ? 'https://secure.mobilpay.ro/pay'  // Production URL corect din documentație
       : 'https://secure.sandbox.netopia-payments.com';  // Sandbox URL
     
@@ -182,6 +184,7 @@ export class NetopiaV2 {
       hasPosSignature: !!config.posSignature,
       posSignatureLength: config.posSignature.length,
       isProduction: config.isProduction,
+      forceSandbox: forceSandbox,
       selectedApiUrl: this.apiUrl
     });
   }
@@ -245,8 +248,9 @@ export class NetopiaV2 {
       sandboxUrl: 'https://secure.sandbox.netopia-payments.com',
       productionUrl: 'https://secure.mobilpay.ro/pay',
       currentApiUrl: this.apiUrl,
-      isUsingSandbox: !this.config.isProduction,
+      isUsingSandbox: this.apiUrl.includes('sandbox'),
       expectedSandboxDomain: this.apiUrl.includes('sandbox'),
+      forceSandboxEnv: process.env.NETOPIA_FORCE_SANDBOX,
       tlsRejectUnauthorized: process.env.NODE_TLS_REJECT_UNAUTHORIZED
     });
 
