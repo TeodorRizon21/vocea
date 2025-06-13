@@ -76,6 +76,10 @@ function decodeV2Response(data) {
       authCode: payment.data?.AuthCode,
       errorCode: payment.code,
       errorMessage: errorMessages[payment.code] || payment.message || 'Unknown error',
+      // Extract recurring payment token
+      token: payment.token || payment.binding?.token,
+      tokenExpiryMonth: payment.binding?.expireMonth,
+      tokenExpiryYear: payment.binding?.expireYear,
       raw: data
     };
   } catch (error) {

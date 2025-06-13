@@ -22,6 +22,12 @@ model User {
   isAdmin     Boolean        @default(false) // Added isAdmin field
   planType    String         @default("Basic") // Added planType field for subscription
   language    String         @default("ro") // Added language field with Romanian as default
+  // Recurring payment fields
+  recurringToken String?      // Token for recurring payments from Netopia
+  tokenExpiry    DateTime?    // Token expiration date
+  phone          String?      // Phone number for billing
+  address        String?      // Address for billing
+  postalCode     String?      // Postal code for billing
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
   projects    Project[]      @relation("UserProjects")
@@ -228,6 +234,12 @@ model Order {
   errorMessage    String?
   netopiaId       String?
   token           String?
+  tokenExpiry     DateTime?     // Token expiration date
+  paidAt          DateTime?     // When payment was completed
+  paymentMethod   String?       // Payment method used
+  transactionId   String?       // Transaction ID from payment provider
+  failureReason   String?       // Reason for payment failure
+  recurringSubscriptionId String? @db.ObjectId // Link to subscription for recurring payments
   
   // Relations
   user            User          @relation(fields: [userId], references: [id])
