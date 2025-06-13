@@ -21,6 +21,7 @@ const isPublicRoute = createRouteMatcher([
   "/api/uploadthing/(.*)",
   "/api/mobilpay/(.*)",
   "/api/payment/(.*)",
+  "/api/admin/(.*)",
   // Add sign-in and sign-up routes as public
   "/sign-in(.*)",
   "/sign-up(.*)",

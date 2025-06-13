@@ -37,7 +37,12 @@ export async function POST(req: Request) {
     // Process payment data based on version
     const processedData = isV2 ? decodeV2Response(paymentData) : paymentData;
     
-    console.log('[NETOPIA_IPN] Processed payment data:', processedData);
+    console.log('[NETOPIA_IPN] Processed payment data:', {
+      ...processedData,
+      token: processedData.token ? `${processedData.token.substring(0, 20)}...` : null,
+      tokenExpiryMonth: processedData.tokenExpiryMonth,
+      tokenExpiryYear: processedData.tokenExpiryYear
+    });
 
     // Find the order
     const order = await prisma.order.findUnique({
@@ -72,9 +77,13 @@ export async function POST(req: Request) {
       where: { id: order.id },
       data: {
         status: newStatus,
-        netopiaId: processedData.ntpID || null,
-        errorMessage: processedData.errorMessage || null,
-        lastError: processedData.errorCode ? `${processedData.errorCode}: ${processedData.errorMessage}` : null,
+        // Store recurring payment token if received and payment is successful
+        ...(newStatus === 'COMPLETED' && processedData.token && {
+          token: processedData.token,
+          tokenExpiry: processedData.tokenExpiryMonth && processedData.tokenExpiryYear 
+            ? new Date(processedData.tokenExpiryYear, processedData.tokenExpiryMonth - 1) 
+            : null
+        }),
         updatedAt: new Date()
       }
     });
@@ -109,6 +118,21 @@ export async function POST(req: Request) {
           plan: order.subscriptionType,
           amount: order.amount,
           currency: order.currency
+        }
+      });
+
+      // Update user's plan type and store recurring payment token
+      await prisma.user.update({
+        where: { clerkId: order.user.clerkId },
+        data: { 
+          planType: (order.subscriptionType as 'Basic' | 'Bronze' | 'Premium' | 'Gold') || 'Basic',
+          // Store recurring payment token for future use
+          ...(processedData.token && {
+            recurringToken: processedData.token,
+            tokenExpiry: processedData.tokenExpiryMonth && processedData.tokenExpiryYear 
+              ? new Date(processedData.tokenExpiryYear, processedData.tokenExpiryMonth - 1) 
+              : null
+          })
         }
       });
 

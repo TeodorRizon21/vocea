@@ -15,6 +15,9 @@ interface NetopiaV2IpnData {
   authCode?: string;
   errorCode?: number; // Error codes conform documentației: 0=Success, 19=Expired, 20=Insufficient funds, etc.
   errorMessage?: string;
+  // Recurring payment fields
+  token?: string; // Token for recurring payments
+  tokenExpiryDate?: string; // Token expiration date
 }
 
 export async function POST(req: Request) {
@@ -34,6 +37,7 @@ export async function POST(req: Request) {
     let ipnData: NetopiaV2IpnData;
     try {
       ipnData = await req.json();
+      console.log('[NETOPIA_V2_IPN] Full parsed JSON:', JSON.stringify(ipnData, null, 2));
     } catch (parseError) {
       console.error('[NETOPIA_V2_IPN] Failed to parse JSON:', parseError);
       // Încearcă să citească ca text pentru debugging
@@ -57,7 +61,9 @@ export async function POST(req: Request) {
       paymentMethod: ipnData.paymentMethod,
       maskedCard: ipnData.maskedCard,
       rrn: ipnData.rrn,
-      authCode: ipnData.authCode
+      authCode: ipnData.authCode,
+      token: ipnData.token,
+      tokenExpiryDate: ipnData.tokenExpiryDate
     });
 
     // Validate required fields
@@ -162,6 +168,11 @@ export async function POST(req: Request) {
           paidAt: new Date(),
           paymentMethod: ipnData.paymentMethod,
           transactionId: ipnData.ntpID,
+          // Store recurring payment token if received
+          ...(ipnData.token && {
+            token: ipnData.token,
+            tokenExpiry: ipnData.tokenExpiryDate ? new Date(ipnData.tokenExpiryDate) : null
+          }),
           // Set next charge date for recurring payments
           ...(order.isRecurring && {
             lastChargeAt: new Date(),
@@ -218,7 +229,7 @@ export async function POST(req: Request) {
         await prisma.user.update({
           where: { clerkId: order.user.clerkId },
           data: { 
-            planType: order.subscriptionType || 'Basic'
+            planType: (order.subscriptionType as 'Basic' | 'Bronze' | 'Premium' | 'Gold') || 'Basic'
           }
         });
 

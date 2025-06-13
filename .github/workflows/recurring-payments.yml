@@ -1,0 +1,64 @@
+name: Recurring Payments Processor
+
+on:
+  # Rulează zilnic la 9:00 AM UTC (12:00 PM Romania)
+  schedule:
+    - cron: '0 9 * * *'
+  
+  # Permite rularea manuală din GitHub interface
+  workflow_dispatch:
+
+jobs:
+  process-recurring-payments:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Process Recurring Payments
+        run: |
+          echo "🔄 Processing recurring payments..."
+          
+          # Fă request către API-ul de plăți recurente
+          response=$(curl -s -w "HTTPSTATUS:%{http_code}" \
+            -X POST \
+            -H "Authorization: Bearer ${{ secrets.ADMIN_SECRET }}" \
+            -H "Content-Type: application/json" \
+            "${{ secrets.APP_URL }}/api/admin/recurring-payments")
+          
+          # Extrage body și status code
+          body=$(echo "$response" | sed -E 's/HTTPSTATUS\:[0-9]{3}$//')
+          status=$(echo "$response" | tr -d '\n' | sed -E 's/.*HTTPSTATUS:([0-9]{3})$/\1/')
+          
+          echo "Status Code: $status"
+          echo "Response Body: $body"
+          
+          # Verifică dacă request-ul a fost cu succes
+          if [ "$status" -eq 200 ]; then
+            echo "✅ Recurring payments processed successfully"
+            
+            # Parse JSON response pentru detalii
+            echo "$body" | jq -r '.results | "📊 Results: Processed: \(.processed), Successful: \(.successful), Failed: \(.failed), Downgraded: \(.downgraded)"'
+            
+            # Afișează detaliile pentru fiecare plată
+            echo "$body" | jq -r '.results.details[] | "👤 User: \(.user) - Status: \(.status) - \(if .reason then "Reason: \(.reason)" elif .error then "Error: \(.error)" else "Success" end)"'
+          else
+            echo "❌ Failed to process recurring payments"
+            echo "Response: $body"
+            exit 1
+          fi
+
+      - name: Check Subscriptions Status (Optional)
+        if: success()
+        run: |
+          echo "📊 Checking upcoming renewals..."
+          
+          response=$(curl -s -w "HTTPSTATUS:%{http_code}" \
+            -H "Authorization: Bearer ${{ secrets.ADMIN_SECRET }}" \
+            -H "Content-Type: application/json" \
+            "${{ secrets.APP_URL }}/api/admin/recurring-payments")
+          
+          body=$(echo "$response" | sed -E 's/HTTPSTATUS\:[0-9]{3}$//')
+          status=$(echo "$response" | tr -d '\n' | sed -E 's/.*HTTPSTATUS:([0-9]{3})$/\1/')
+          
+          if [ "$status" -eq 200 ]; then
+            echo "$body" | jq -r '"📈 Upcoming renewals: \(.count) subscriptions need attention in the next 24 hours"'
+          fi 
