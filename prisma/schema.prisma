@@ -110,7 +110,7 @@ model News {
 // Subscription model for handling user subscription plans
 model Subscription {
   id              String        @id @default(auto()) @map("_id") @db.ObjectId
-  userId          String        // References clerkId from User
+  userId          String        @db.ObjectId // References id from User
   planId          String?       @db.ObjectId
   orderId         String?       @db.ObjectId
   startDate       DateTime
@@ -123,7 +123,7 @@ model Subscription {
   updatedAt       DateTime      @updatedAt
 
   // Relations
-  user            User          @relation(fields: [userId], references: [clerkId])
+  user            User          @relation(fields: [userId], references: [id])
   planModel       Plan?         @relation(fields: [planId], references: [id])
   order           Order?        @relation(fields: [orderId], references: [id])
 
