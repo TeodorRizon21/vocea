@@ -9,7 +9,7 @@ export async function POST(request: Request) {
     
     // Verifică header-ul de autorizare pentru cron (pentru securitate)
     const authHeader = request.headers.get('authorization');
-    const cronSecret = process.env.CRON_SECRET;
+    const cronSecret = process.env.CRON_RECURRING_SECRET;
     
     if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
       console.error('[RECURRING_CRON] Unauthorized access attempt');
