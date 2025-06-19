@@ -60,5 +60,5 @@ jobs:
           status=$(echo "$response" | tr -d '\n' | sed -E 's/.*HTTPSTATUS:([0-9]{3})$/\1/')
           
           if [ "$status" -eq 200 ]; then
-            echo "$body" | jq -r '"📈 Upcoming renewals: \(.count) subscriptions need attention in the next 24 hours"'
-          fi 
+            echo "$body" | jq -r '"�� Upcoming renewals: \(.count) subscriptions need attention in the next 24 hours"'
+          fi
