@@ -22,12 +22,28 @@ model User {
   isAdmin     Boolean        @default(false) // Added isAdmin field
   planType    String         @default("Basic") // Added planType field for subscription
   language    String         @default("ro") // Added language field with Romanian as default
-  // Recurring payment fields
+  // Recurring payment fields - Complete billing data for Netopia
   recurringToken String?      // Token for recurring payments from Netopia
   tokenExpiry    DateTime?    // Token expiration date
-  phone          String?      // Phone number for billing
-  address        String?      // Address for billing
-  postalCode     String?      // Postal code for billing
+  
+  // Billing information for recurring payments
+  billingPhone       String?  // Phone number for billing
+  billingAddress     String?  // Address for billing
+  billingCity        String?  // City for billing
+  billingState       String?  // State/County for billing
+  billingPostalCode  String?  // Postal code for billing
+  billingCountry     Int?     // Country code (642 for Romania)
+  
+  // Additional Netopia data
+  lastPaymentMethod  String?  // Last payment method used
+  cardExpireMonth    Int?     // Card expiration month
+  cardExpireYear     Int?     // Card expiration year
+  netopiaCustomerId  String?  // Netopia customer ID if available
+  
+  // Recurring payment settings
+  autoRenewEnabled   Boolean  @default(true) // Whether auto-renewal is enabled
+  lastRecurringPayment DateTime? // Date of last recurring payment
+  nextRecurringPayment DateTime? // Date of next scheduled recurring payment
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
   projects    Project[]      @relation("UserProjects")
@@ -94,21 +110,21 @@ model News {
 // Subscription model for handling user subscription plans
 model Subscription {
   id              String        @id @default(auto()) @map("_id") @db.ObjectId
-  userId          String        @db.ObjectId
-  planId          String        @db.ObjectId
+  userId          String        // References clerkId from User
+  planId          String?       @db.ObjectId
   orderId         String?       @db.ObjectId
   startDate       DateTime
   endDate         DateTime
   status          String        @default("active")
-  plan            String
-  amount          Float
-  currency        String
+  plan            String?
+  amount          Float?
+  currency        String?
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
 
   // Relations
-  user            User          @relation(fields: [userId], references: [id])
-  planModel       Plan          @relation(fields: [planId], references: [id])
+  user            User          @relation(fields: [userId], references: [clerkId])
+  planModel       Plan?         @relation(fields: [planId], references: [id])
   order           Order?        @relation(fields: [orderId], references: [id])
 
   @@index([userId])
@@ -211,6 +227,7 @@ model Plan {
 
 enum OrderStatus {
   PENDING
+  PENDING_USER_ACTION
   COMPLETED
   FAILED
   CANCELLED
@@ -221,7 +238,7 @@ model Order {
   id              String        @id @default(auto()) @map("_id") @db.ObjectId
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
-  userId          String        @db.ObjectId
+  userId          String        // References clerkId from User
   status          OrderStatus
   orderId         String        @unique
   planId          String        @db.ObjectId
@@ -240,9 +257,27 @@ model Order {
   transactionId   String?       // Transaction ID from payment provider
   failureReason   String?       // Reason for payment failure
   recurringSubscriptionId String? @db.ObjectId // Link to subscription for recurring payments
+  maskedCard      String?       // Numărul de card mascat pentru plăți recurente
+  
+  // Complete billing data saved at payment time
+  billingEmail      String?     // Email used for billing
+  billingPhone      String?     // Phone used for billing
+  billingFirstName  String?     // First name for billing
+  billingLastName   String?     // Last name for billing
+  billingAddress    String?     // Address for billing
+  billingCity       String?     // City for billing
+  billingState      String?     // State/County for billing
+  billingPostalCode String?     // Postal code for billing
+  billingCountry    Int?        // Country code for billing
+  
+  // Netopia response data
+  netopiaToken      String?     // Token received from Netopia
+  netopiaBinding    String?     // Binding information from Netopia
+  netopiaAuthCode   String?     // Authorization code
+  netopiaRRN        String?     // Retrieval Reference Number
   
   // Relations
-  user            User          @relation(fields: [userId], references: [id])
+  user            User          @relation(fields: [userId], references: [clerkId])
   plan            Plan          @relation(fields: [planId], references: [id])
   subscriptions   Subscription[]
 

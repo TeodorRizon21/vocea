@@ -17,7 +17,16 @@ interface NetopiaV2IpnData {
   errorMessage?: string;
   // Recurring payment fields
   token?: string; // Token for recurring payments
-  tokenExpiryDate?: string; // Token expiration date
+  tokenExpiryMonth?: number;
+  tokenExpiryYear?: number;
+  // Billing fields from original order
+  phone?: string;
+  billingAddress?: string;
+  billingCity?: string;
+  billingState?: string;
+  billingPostalCode?: string;
+  billingCountry?: number;
+  raw: any;
 }
 
 export async function POST(req: Request) {
@@ -34,10 +43,40 @@ export async function POST(req: Request) {
     });
 
     // Parse JSON payload (v2.x sends JSON instead of encrypted XML)
+    let rawIpnData: any;
     let ipnData: NetopiaV2IpnData;
+    
     try {
-      ipnData = await req.json();
-      console.log('[NETOPIA_V2_IPN] Full parsed JSON:', JSON.stringify(ipnData, null, 2));
+      rawIpnData = await req.json();
+      console.log('[NETOPIA_V2_IPN] Full parsed JSON:', JSON.stringify(rawIpnData, null, 2));
+      
+      // Adaptez formatul de la Netopia la formatul așteptat
+      if (rawIpnData.order && rawIpnData.payment) {
+        // Format nou de la Netopia v2.x
+        ipnData = {
+          orderID: rawIpnData.order.orderID,
+          ntpID: rawIpnData.payment.ntpID,
+          amount: rawIpnData.payment.amount,
+          currency: rawIpnData.payment.currency,
+          status: rawIpnData.payment.status,
+          paymentMethod: rawIpnData.payment.paymentMethod || 'card',
+          maskedCard: rawIpnData.mobilpay?.pan_masked || rawIpnData.payment.maskedCard,
+          rrn: rawIpnData.payment.data?.RRN,
+          authCode: rawIpnData.payment.data?.AuthCode,
+          errorCode: rawIpnData.payment.code !== '00' ? parseInt(rawIpnData.payment.code) : 0,
+          errorMessage: rawIpnData.payment.message !== 'Approved' ? rawIpnData.payment.message : undefined,
+          // Date pentru plăți recurente
+          token: rawIpnData.payment.binding?.token || rawIpnData.payment.token,
+          tokenExpiryMonth: rawIpnData.payment.binding?.expireMonth,
+          tokenExpiryYear: rawIpnData.payment.binding?.expireYear,
+          // Salvez și răspunsul raw pentru debugging
+          raw: rawIpnData
+        };
+        console.log('[NETOPIA_V2_IPN] Converted to internal format:', JSON.stringify(ipnData, null, 2));
+      } else {
+        // Format vechi - folosește direct
+        ipnData = rawIpnData;
+      }
     } catch (parseError) {
       console.error('[NETOPIA_V2_IPN] Failed to parse JSON:', parseError);
       // Încearcă să citească ca text pentru debugging
@@ -63,7 +102,8 @@ export async function POST(req: Request) {
       rrn: ipnData.rrn,
       authCode: ipnData.authCode,
       token: ipnData.token,
-      tokenExpiryDate: ipnData.tokenExpiryDate
+      tokenExpiryMonth: ipnData.tokenExpiryMonth,
+      tokenExpiryYear: ipnData.tokenExpiryYear
     });
 
     // Validate required fields
@@ -152,7 +192,9 @@ export async function POST(req: Request) {
       currentStatus: order.status,
       newStatus: orderStatus,
       userId: order.user.clerkId,
-      planName: order.plan?.name
+      planName: order.plan?.name,
+      isRecurring: order.isRecurring,
+      hasToken: !!ipnData.token
     });
 
     // Update order status
@@ -168,64 +210,129 @@ export async function POST(req: Request) {
           paidAt: new Date(),
           paymentMethod: ipnData.paymentMethod,
           transactionId: ipnData.ntpID,
-          // Store recurring payment token if received
-          ...(ipnData.token && {
-            token: ipnData.token,
-            tokenExpiry: ipnData.tokenExpiryDate ? new Date(ipnData.tokenExpiryDate) : null
-          }),
-          // Set next charge date for recurring payments
-          ...(order.isRecurring && {
-            lastChargeAt: new Date(),
-            nextChargeAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
-          })
+          maskedCard: ipnData.maskedCard,
+          // Date pentru plăți recurente
+          netopiaToken: ipnData.token,
+          netopiaBinding: JSON.stringify(rawIpnData.payment?.binding || {}),
+          netopiaAuthCode: ipnData.authCode,
+          netopiaRRN: ipnData.rrn,
+          // Billing data
+          billingEmail: rawIpnData.order.invoice.contact_info.billing.email,
+          billingPhone: rawIpnData.order.invoice.contact_info.billing.mobile_phone,
+          billingFirstName: rawIpnData.order.invoice.contact_info.billing.first_name,
+          billingLastName: rawIpnData.order.invoice.contact_info.billing.last_name,
+          billingAddress: rawIpnData.order.invoice.contact_info.billing.address,
+          billingCity: rawIpnData.order.invoice.contact_info.billing.city,
+          billingState: rawIpnData.order.invoice.contact_info.billing.state || 'București',
+          billingPostalCode: rawIpnData.order.invoice.contact_info.billing.postal_code || '010000',
+          billingCountry: rawIpnData.order.invoice.contact_info.billing.country || 642
         })
       }
     });
 
-    // If payment is successful, create or update subscription
+    // CORECTARE MAJORĂ: Procesează automat plățile recurente
     if (orderStatus === 'COMPLETED') {
-      console.log('[NETOPIA_V2_IPN] Payment successful, updating subscription');
+      console.log('[NETOPIA_V2_IPN] ✅ Payment successful, processing automatic completion...');
       
       try {
-        // Calculate subscription end date (1 month from now)
-        const endDate = new Date();
-        endDate.setMonth(endDate.getMonth() + 1);
+        // CORECTARE 1: Salvează token-ul pentru plăți recurente în USER (nu în order)
+        if (ipnData.token && order.isRecurring) {
+          console.log('[NETOPIA_V2_IPN] 🔑 Saving recurring token for user:', order.user.clerkId);
+          
+          let tokenExpiry = null;
+          if (ipnData.tokenExpiryMonth && ipnData.tokenExpiryYear) {
+            try {
+              tokenExpiry = new Date(ipnData.tokenExpiryYear, ipnData.tokenExpiryMonth - 1, 1);
+            } catch (e) {
+              console.error('[NETOPIA_V2_IPN] Invalid token expiry date format:', ipnData.tokenExpiryMonth, ipnData.tokenExpiryYear);
+            }
+          }
 
-        // Create or update subscription
+          await prisma.user.update({
+            where: { id: order.user.id },
+            data: {
+              recurringToken: ipnData.token,
+              tokenExpiry: tokenExpiry,
+              // Save billing data from IPN response for future recurring payments
+              billingPhone: rawIpnData.order.invoice.contact_info.billing.mobile_phone,
+              billingAddress: rawIpnData.order.invoice.contact_info.billing.address,
+              billingCity: rawIpnData.order.invoice.contact_info.billing.city,
+              billingState: rawIpnData.order.invoice.contact_info.billing.state || 'București',
+              billingPostalCode: rawIpnData.order.invoice.contact_info.billing.postal_code || '010000',
+              billingCountry: rawIpnData.order.invoice.contact_info.billing.country || 642,
+              // Update payment method and card info
+              lastPaymentMethod: ipnData.paymentMethod || 'card',
+              cardExpireMonth: rawIpnData.payment?.binding?.expireMonth || 12,
+              cardExpireYear: rawIpnData.payment?.binding?.expireYear || 2030,
+              netopiaCustomerId: ipnData.ntpID,
+              autoRenewEnabled: true,
+              lastRecurringPayment: new Date()
+            } as any
+          });
+
+          console.log('[NETOPIA_V2_IPN] ✅ Recurring token saved for automatic future payments');
+        }
+
+        // CORECTARE 2: Procesează abonamentul automat
+        console.log('[NETOPIA_V2_IPN] 📅 Processing subscription automatically...');
+
+        // Calculate subscription end date (30 days from now for new, extend existing)
+        let endDate = new Date();
+        
+        // Find existing subscription
         const existingSubscription = await prisma.subscription.findFirst({
           where: {
-            userId: order.user.id // Use MongoDB ObjectId instead of clerkId
+            userId: order.user.id,
+            status: 'active'
           }
         });
 
         if (existingSubscription) {
+          // CORECTARE 3: Pentru plăți recurente, extinde abonamentul existent
+          if (order.isRecurring || order.orderId.includes('AUTO_REC_') || order.orderId.includes('CRON_AUTO_')) {
+            console.log('[NETOPIA_V2_IPN] 🔄 Extending existing subscription for recurring payment');
+            endDate = new Date(existingSubscription.endDate);
+            endDate.setDate(endDate.getDate() + 30); // Adaugă 30 zile la data existentă
+          } else {
+            // Pentru plăți noi, începe de la data curentă
+            endDate.setDate(endDate.getDate() + 30);
+          }
+
           await prisma.subscription.update({
-            where: {
-              id: existingSubscription.id
-            },
+            where: { id: existingSubscription.id },
             data: {
-              plan: order.subscriptionType || 'Basic',
-              status: 'active',
-              startDate: new Date(),
-              endDate
-            }
-          });
-        } else {
-          await prisma.subscription.create({
-            data: {
-              userId: order.user.id, // Use MongoDB ObjectId instead of clerkId
               planId: order.planId,
               plan: order.subscriptionType || 'Basic',
               status: 'active',
-              startDate: new Date(),
-              endDate,
+              endDate: endDate,
+              updatedAt: new Date(),
               amount: order.amount,
               currency: order.currency
             }
           });
+
+          console.log('[NETOPIA_V2_IPN] ✅ Subscription extended to:', endDate.toLocaleDateString('ro-RO'));
+        } else {
+          // Create new subscription
+          endDate.setDate(endDate.getDate() + 30);
+          
+          await prisma.subscription.create({
+            data: {
+              userId: order.user.id,
+              planId: order.planId!,
+              plan: order.subscriptionType || 'Basic',
+              status: 'active',
+              startDate: new Date(),
+              endDate: endDate,
+              amount: order.amount,
+              currency: order.currency
+            }
+          });
+
+          console.log('[NETOPIA_V2_IPN] ✅ New subscription created until:', endDate.toLocaleDateString('ro-RO'));
         }
 
-        // Update user's plan type
+        // CORECTARE 4: Actualizează planul utilizatorului
         await prisma.user.update({
           where: { clerkId: order.user.clerkId },
           data: { 
@@ -233,18 +340,142 @@ export async function POST(req: Request) {
           }
         });
 
-        console.log('[NETOPIA_V2_IPN] Subscription updated successfully');
+        console.log('[NETOPIA_V2_IPN] ✅ User plan updated to:', order.subscriptionType);
+
+        // CORECTARE 5: Notificare automată pentru plăți de succes
+        await sendPaymentSuccessNotification({
+          userEmail: order.user.email || '',
+          userName: `${order.user.firstName || ''} ${order.user.lastName || ''}`.trim() || 'Customer',
+          planName: order.subscriptionType || 'Basic',
+          amount: order.amount,
+          currency: order.currency,
+          endDate: endDate,
+          orderID: order.orderId,
+          transactionId: ipnData.ntpID,
+          isRecurring: order.isRecurring,
+          tokenSaved: !!ipnData.token
+        });
+
+        console.log('[NETOPIA_V2_IPN] ✅ Payment processing completed successfully');
+
       } catch (subscriptionError) {
-        console.error('[NETOPIA_V2_IPN] Error updating subscription:', subscriptionError);
+        console.error('[NETOPIA_V2_IPN] ❌ Error processing subscription:', subscriptionError);
         // Don't fail the IPN if subscription update fails
       }
     }
 
-    console.log('[NETOPIA_V2_IPN] IPN processed successfully');
+    // CORECTARE 6: Procesează automat plățile eșuate
+    if (orderStatus === 'FAILED') {
+      console.log('[NETOPIA_V2_IPN] ❌ Payment failed, processing failure...');
+      
+      try {
+        // Pentru plăți recurente eșuate, notifică utilizatorul
+        if (order.isRecurring) {
+          await sendPaymentFailureNotification({
+            userEmail: order.user.email || '',
+            userName: `${order.user.firstName || ''} ${order.user.lastName || ''}`.trim() || 'Customer',
+            planName: order.subscriptionType || 'Basic',
+            error: errorDescription,
+            orderID: order.orderId
+          });
+
+          // Marchează abonamentul ca problematic dacă e recurent
+          const subscription = await prisma.subscription.findFirst({
+            where: { userId: order.user.id, status: 'active' }
+          });
+
+          if (subscription) {
+            await prisma.subscription.update({
+              where: { id: subscription.id },
+              data: {
+                status: 'payment_failed'
+              }
+            });
+          }
+        }
+      } catch (failureError) {
+        console.error('[NETOPIA_V2_IPN] Error processing failure:', failureError);
+      }
+    }
+
+    console.log('[NETOPIA_V2_IPN] ✅ IPN processed successfully');
     return new NextResponse('OK', { status: 200 });
 
   } catch (error) {
     console.error('[NETOPIA_V2_IPN_ERROR]', error);
     return new NextResponse('Error processing IPN', { status: 500 });
+  }
+}
+
+// CORECTARE 7: Funcție pentru notificări de succes
+async function sendPaymentSuccessNotification(params: {
+  userEmail: string;
+  userName: string;
+  planName: string;
+  amount: number;
+  currency: string;
+  endDate: Date;
+  orderID: string;
+  transactionId: string;
+  isRecurring: boolean;
+  tokenSaved: boolean;
+}) {
+  try {
+    console.log('[NETOPIA_V2_IPN] 📧 Sending success notification to:', params.userEmail);
+    
+    const subject = params.isRecurring 
+      ? `Abonamentul ${params.planName} a fost reînnoit automat! ✅`
+      : `Plata pentru ${params.planName} a fost completată cu succes! ✅`;
+
+    console.log('[NETOPIA_V2_IPN] Success notification details:', {
+      to: params.userEmail,
+      subject: subject,
+      content: {
+        userName: params.userName,
+        planName: params.planName,
+        amount: `${params.amount} ${params.currency}`,
+        endDate: params.endDate.toLocaleDateString('ro-RO'),
+        orderID: params.orderID,
+        transactionId: params.transactionId,
+        isRecurring: params.isRecurring,
+        tokenSaved: params.tokenSaved,
+        recurringSetup: params.tokenSaved ? 'Plățile viitoare vor fi automate' : null
+      }
+    });
+
+    // TODO: Implementează trimiterea efectivă de email de succes
+    
+  } catch (error) {
+    console.error('[NETOPIA_V2_IPN] Failed to send success notification:', error);
+  }
+}
+
+// CORECTARE 8: Funcție pentru notificări de eșec
+async function sendPaymentFailureNotification(params: {
+  userEmail: string;
+  userName: string;
+  planName: string;
+  error: string;
+  orderID: string;
+}) {
+  try {
+    console.log('[NETOPIA_V2_IPN] 📧 Sending failure notification to:', params.userEmail);
+    
+    console.log('[NETOPIA_V2_IPN] Failure notification details:', {
+      to: params.userEmail,
+      subject: `⚠️ Problema cu plata pentru ${params.planName}`,
+      content: {
+        userName: params.userName,
+        planName: params.planName,
+        error: params.error,
+        orderID: params.orderID,
+        action: 'Te rugăm să încerci din nou sau să contactezi suportul'
+      }
+    });
+
+    // TODO: Implementează trimiterea efectivă de email de eșec
+    
+  } catch (error) {
+    console.error('[NETOPIA_V2_IPN] Failed to send failure notification:', error);
   }
 } 

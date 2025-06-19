@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { NetopiaV2, formatBillingInfo } from '@/lib/netopia-v2';
+import { clerkClient } from '@clerk/nextjs/server';
 
 export async function POST(request: Request) {
   try {
@@ -15,29 +16,27 @@ export async function POST(request: Request) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    // Găsește toate comenzile recurente care trebuie procesate
-    // Căutăm comenzi completate de cel puțin 30 zile pentru a simula următoarea încărcare
+    // CORECTARE: Găsește abonamente care expiră în următoarele 3 zile SAU au expirat deja
     const now = new Date();
-    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const threeDaysFromNow = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
     
-    const ordersToProcess = await prisma.order.findMany({
+    const expiredSubscriptions = await prisma.subscription.findMany({
       where: {
-        isRecurring: true,
-        status: 'COMPLETED',
-        createdAt: {
-          lte: thirtyDaysAgo // Comenzi mai vechi de 30 zile
-        },
-        failureCount: {
-          lt: 3 // Nu procesa comenzile care au eșuat de 3 ori
+        status: 'active',
+        endDate: {
+          lte: threeDaysFromNow // Abonamente care expiră în 3 zile sau au expirat
         }
       },
       include: {
         user: true,
-        plan: true
+        planModel: true
       }
     });
 
-    console.log(`[RECURRING_CRON] Found ${ordersToProcess.length} orders to process`);
+    const validSubscriptions = expiredSubscriptions;
+
+    console.log(`[RECURRING_CRON] Found ${expiredSubscriptions.length} subscriptions expiring soon or expired`);
+    console.log(`[RECURRING_CRON] Processing ${validSubscriptions.length} valid subscriptions`);
 
     const results = {
       processed: 0,
@@ -53,188 +52,292 @@ export async function POST(request: Request) {
       isProduction: process.env.NODE_ENV === 'production'
     });
 
-    for (const order of ordersToProcess) {
+    for (const subscription of validSubscriptions) {
       try {
         results.processed++;
         
-        console.log(`[RECURRING_CRON] Processing order ${order.orderId} for user ${order.user.clerkId}`);
+        console.log(`[RECURRING_CRON] Processing subscription ${subscription.id} for user ${subscription.user.clerkId}`);
 
-        // Verifică că utilizatorul încă are un abonament activ
-        const subscription = await prisma.subscription.findFirst({
-          where: { userId: order.userId }
+        // 🎯 LOGICA NOUĂ: Găsește ultima plată SUB reușită pentru acest user
+        const lastSuccessfulSubOrder = await prisma.order.findFirst({
+          where: {
+            userId: subscription.userId,
+            orderId: {
+              startsWith: 'SUB_'
+            },
+            status: 'COMPLETED',
+            token: {
+              not: null
+            }
+          },
+          orderBy: {
+            createdAt: 'desc'
+          }
         });
 
-        if (!subscription || subscription.status !== 'active') {
-          console.log(`[RECURRING_CRON] Subscription not active for user ${order.user.clerkId}, skipping`);
+        if (!lastSuccessfulSubOrder) {
+          console.log(`[RECURRING_CRON] No successful SUB order found for user ${subscription.user.clerkId}, skipping automatic renewal`);
           
-          // Marchează comanda cu o eroare
-          await prisma.order.update({
-            where: { id: order.id },
+          // Marchează că abonamentul nu poate fi reînnoit automat
+          await prisma.subscription.update({
+            where: { id: subscription.id },
             data: {
-              lastError: 'Subscription no longer active'
+              status: 'expired'
             }
           });
           
           continue;
         }
 
-        // Generează un nou ID de comandă pentru această plată recurentă
-        const newOrderId = `REC_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        console.log(`[RECURRING_CRON] Found source SUB order: ${lastSuccessfulSubOrder.orderId} for user ${subscription.user.clerkId}`);
 
-        // Pregătește informațiile de facturare
-        const billingInfo = formatBillingInfo({
-          firstName: order.user.firstName || 'Customer',
-          lastName: order.user.lastName || 'User',
-          email: order.user.email || '',
-          phone: '0700000000',
-          address: 'Default Address',
-          city: order.user.city || 'București',
-          postalCode: '010000'
+        // 🎯 LOGICA NOUĂ: Găsește planul CURENT al utilizatorului
+        const currentUserPlanType = subscription.user.planType;
+        console.log(`[RECURRING_CRON] User ${subscription.user.clerkId} current plan: ${currentUserPlanType}`);
+
+        // Găsește planul corect din baza de date (nu din subscription expirat!)
+        const currentPlan = await prisma.plan.findUnique({
+          where: { name: currentUserPlanType }
+        });
+
+        if (!currentPlan) {
+          console.error(`[RECURRING_CRON] Plan ${currentUserPlanType} not found in database for user ${subscription.user.clerkId}`);
+          results.errors.push(`Plan ${currentUserPlanType} not found for user ${subscription.user.clerkId}`);
+          continue;
+        }
+
+        console.log(`[RECURRING_CRON] 🎯 CORRECT PAYMENT DATA:`, {
+          oldSubscriptionPlan: subscription.planModel?.name,
+          oldSubscriptionPrice: subscription.planModel?.price,
+          currentUserPlan: currentUserPlanType,
+          correctPrice: currentPlan.price,
+          difference: `${subscription.planModel?.price || 0} → ${currentPlan.price}`,
+          sourceOrderId: lastSuccessfulSubOrder.orderId,
+          sourceOrderToken: lastSuccessfulSubOrder.token ? '✅ Available' : '❌ Missing'
+        });
+
+        // 🎯 LOGICA NOUĂ: Folosește datele de billing din order-ul sursă SUB
+        const billingInfo = {
+          firstName: lastSuccessfulSubOrder.billingFirstName || subscription.user.firstName || 'Customer',
+          lastName: lastSuccessfulSubOrder.billingLastName || subscription.user.lastName || 'User',
+          email: lastSuccessfulSubOrder.billingEmail || subscription.user.email || '',
+          phone: lastSuccessfulSubOrder.billingPhone || subscription.user.billingPhone || '0700000000',
+          address: lastSuccessfulSubOrder.billingAddress || subscription.user.billingAddress || 'Adresă București',
+          city: lastSuccessfulSubOrder.billingCity || subscription.user.billingCity || 'București',
+          postalCode: lastSuccessfulSubOrder.billingPostalCode || subscription.user.billingPostalCode || '010000',
+          country: lastSuccessfulSubOrder.billingCountry || subscription.user.billingCountry || 642 // Romania
+        };
+
+        // 🎯 LOGICA NOUĂ: Folosește tokenul din order-ul sursă SUB
+        const recurringToken = lastSuccessfulSubOrder.token;
+        if (!recurringToken) {
+          console.error(`[RECURRING_CRON] No recurring token in source order ${lastSuccessfulSubOrder.orderId} for user ${subscription.user.clerkId}`);
+          results.errors.push(`No recurring token in source order for user ${subscription.user.clerkId}`);
+          continue;
+        }
+
+        // Generează un nou ID de comandă pentru această plată recurentă
+        const newOrderId = `CRON_AUTO_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+        console.log(`[RECURRING_CRON] 🎯 Using EXACT payment data from SUB order:`, {
+          clerkId: subscription.user.clerkId,
+          email: billingInfo.email,
+          name: `${billingInfo.firstName} ${billingInfo.lastName}`,
+          planName: currentPlan.name,
+          amount: currentPlan.price,
+          sourceOrderId: lastSuccessfulSubOrder.orderId,
+          sourceOrderToken: recurringToken.substring(0, 20) + '...'
         });
 
         // URL-uri pentru callback-uri
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
         const notifyUrl = `${baseUrl}/api/netopia/ipn`;
-        const redirectUrl = `${baseUrl}/api/netopia/return?orderId=${newOrderId}`;
 
-        let paymentResult;
-
-        if (order.token) {
-          // Folosește tokenul salvat pentru plăți complet automate
-          console.log(`[RECURRING_CRON] Using saved token for automatic payment: ${order.orderId}`);
-          
-          paymentResult = await netopia.createRecurringPayment({
-            orderID: newOrderId,
-            amount: order.amount,
-            currency: order.currency,
-            description: `Abonament ${order.plan.name} - Plată recurentă automată`,
-            token: order.token,
-            billing: billingInfo,
-            notifyUrl
-          });
-        } else {
-          // Fallback la plăți normale dacă nu există token (utilizatorul va trebui să reintroducă datele)
-          console.log(`[RECURRING_CRON] No token found, creating regular payment: ${order.orderId}`);
-          
-          paymentResult = await netopia.createHostedPayment({
-            orderID: newOrderId,
-            amount: order.amount,
-            currency: order.currency,
-            description: `Abonament ${order.plan.name} - Plată recurentă`,
-            billing: billingInfo,
-            notifyUrl,
-            redirectUrl,
-            language: 'ro'
-          });
-        }
-
-        const isSuccess = ('success' in paymentResult && paymentResult.success) || 
-                         ('redirectUrl' in paymentResult && paymentResult.redirectUrl);
+        // 🎯 LOGICA NOUĂ: Folosește datele exacte din order-ul SUB pentru recurență
+        console.log(`[RECURRING_CRON] Creating AUTOMATIC recurring payment using SUB order data for: ${billingInfo.email} - Plan: ${currentPlan.name} - Amount: ${currentPlan.price} RON`);
         
-        if (isSuccess) {
+        const paymentResult = await netopia.createRecurringPayment({
+          orderID: newOrderId,
+          amount: currentPlan.price,
+          currency: currentPlan.currency || 'RON',
+          description: `Reînnoire automată abonament ${currentPlan.name}`,
+          token: recurringToken, // 🎯 TOKENUL DIN ORDER-UL SUB!
+          billing: {
+            ...billingInfo,
+            state: billingInfo.city, // Pentru România, folosim orașul ca județ dacă nu avem altă informație
+            country: billingInfo.country.toString() // Convertim numărul în string
+          }, // 🎯 BILLING-UL DIN ORDER-UL SUB!
+          notifyUrl
+        });
+
+        console.log(`[RECURRING_CRON] Payment result for ${billingInfo.email}:`, {
+          success: paymentResult.success,
+          ntpID: paymentResult.ntpID,
+          status: paymentResult.status
+        });
+
+        if (paymentResult.success) {
+          // Determină status-ul pe baza răspunsului Netopia
+          let orderStatus = 'PENDING';
+          let subscriptionStatus = 'pending_payment';
+          let shouldExtendSubscription = false;
+          
+          if (paymentResult.status === 3 || paymentResult.status === 5) {
+            // Plată completă automată (RARĂ)
+            orderStatus = 'COMPLETED';
+            subscriptionStatus = 'active';
+            shouldExtendSubscription = true;
+            console.log(`[RECURRING_CRON] ✅ Plată automată completă pentru ${billingInfo.email}`);
+          } else if (paymentResult.status === 1) {
+            // Plată inițiată - necesită completare user
+            orderStatus = 'PENDING_USER_ACTION';
+            subscriptionStatus = 'pending_payment';
+            console.log(`[RECURRING_CRON] ⏰ Plată inițiată pentru ${billingInfo.email} - necesită completare`);
+            console.log(`[RECURRING_CRON] Payment URL: ${paymentResult.paymentURL}`);
+          }
+          
           // Creează o nouă comandă pentru această plată recurentă
+          const newOrder = await prisma.order.create({
+            data: {
+              orderId: newOrderId,
+              amount: currentPlan.price,
+              currency: currentPlan.currency || 'RON',
+              status: orderStatus as any,
+              isRecurring: true,
+              subscriptionType: currentPlan.name as any,
+              userId: subscription.userId,
+              planId: currentPlan.id,
+              token: recurringToken, // 🎯 TOKENUL DIN ORDER-UL SUB!
+              netopiaId: paymentResult.ntpID,
+              paidAt: shouldExtendSubscription ? new Date() : null,
+              lastError: paymentResult.paymentURL ? `Payment URL: ${paymentResult.paymentURL}` : null,
+              // 🎯 BILLING INFO DIN ORDER-UL SUB!
+              billingEmail: billingInfo.email,
+              billingPhone: billingInfo.phone,
+              billingFirstName: billingInfo.firstName,
+              billingLastName: billingInfo.lastName,
+              billingAddress: billingInfo.address,
+              billingCity: billingInfo.city,
+              billingPostalCode: billingInfo.postalCode,
+              billingCountry: billingInfo.country
+            }
+          });
+
+          // CORECTARE: Extinde abonamentul automat cu 30 zile
+          const newEndDate = new Date(subscription.endDate);
+          newEndDate.setDate(newEndDate.getDate() + 30);
+
+          // 🎯 ACTUALIZEAZĂ SUBSCRIPTION-UL CU DATELE CORECTE
+          await prisma.subscription.update({
+            where: { id: subscription.id },
+            data: {
+              endDate: newEndDate,
+              status: 'active', // Asigură-te că rămâne activ
+              planId: currentPlan.id,
+              plan: currentPlan.name,
+              amount: currentPlan.price,
+              currency: currentPlan.currency || 'RON',
+              updatedAt: new Date()
+            }
+          });
+
+          // CORECTARE: Trimite notificare automată
+          if (paymentResult.ntpID) {
+            await sendAutomaticRenewalNotification({
+              userEmail: billingInfo.email,
+              userName: `${billingInfo.firstName} ${billingInfo.lastName}`,
+              planName: currentPlan.name,
+              amount: currentPlan.price,
+              currency: currentPlan.currency || 'RON',
+              newEndDate: newEndDate,
+              orderID: newOrderId,
+              transactionId: paymentResult.ntpID
+            });
+          } else {
+            console.warn(`[RECURRING_CRON] No transaction ID available for order ${newOrderId}`);
+          }
+
+          results.successful++;
+          console.log(`[RECURRING_CRON] ✅ Successfully renewed subscription for ${billingInfo.email} until ${newEndDate.toLocaleDateString('ro-RO')} - Plan: ${currentPlan.name} - Amount: ${currentPlan.price} RON`);
+
+        } else {
+          // Plata a eșuat
+          console.error(`[RECURRING_CRON] ❌ Payment failed for ${billingInfo.email}:`, paymentResult.error);
+          
+          // Creează comandă failed pentru tracking
           await prisma.order.create({
             data: {
               orderId: newOrderId,
-              amount: order.amount,
-              currency: order.currency,
-              status: 'PENDING',
+              amount: currentPlan.price,
+              currency: currentPlan.currency || 'RON',
+              status: 'FAILED',
               isRecurring: true,
-              subscriptionType: order.subscriptionType,
-              userId: order.userId,
-              planId: order.planId
+              subscriptionType: currentPlan.name as any,
+              userId: subscription.userId,
+              planId: currentPlan.id,
+              token: recurringToken, // 🎯 TOKENUL DIN ORDER-UL SUB!
+              lastError: paymentResult.error?.toString() || 'Automatic payment failed',
+              // 🎯 BILLING INFO DIN ORDER-UL SUB!
+              billingEmail: billingInfo.email,
+              billingPhone: billingInfo.phone,
+              billingFirstName: billingInfo.firstName,
+              billingLastName: billingInfo.lastName,
+              billingAddress: billingInfo.address,
+              billingCity: billingInfo.city,
+              billingPostalCode: billingInfo.postalCode,
+              billingCountry: billingInfo.country
             }
           });
 
-          // Actualizează comanda originală
-          await prisma.order.update({
-            where: { id: order.id },
+          // Marchează abonamentul ca expirat
+          await prisma.subscription.update({
+            where: { id: subscription.id },
             data: {
-              failureCount: 0,
-              lastError: null
+              status: 'expired'
             }
           });
 
-          results.successful++;
-          console.log(`[RECURRING_CRON] Successfully processed payment for order ${order.orderId}`);
-
-        } else {
-          // Gestionează eșecul plății
-          const newFailureCount = order.failureCount + 1;
-          const maxFailures = 3;
-
-          await prisma.order.update({
-            where: { id: order.id },
+          // Actualizează planul utilizatorului la Basic
+          await prisma.user.update({
+            where: { id: subscription.userId },
             data: {
-              failureCount: newFailureCount,
-              lastError: paymentResult.error?.toString() || 'Payment failed'
+              planType: 'Basic'
             }
           });
 
-          if (newFailureCount >= maxFailures) {
-            // Anulează abonamentul după 3 eșecuri consecutive
-            const subscriptionToCancel = await prisma.subscription.findFirst({
-              where: { userId: order.userId }
-            });
-            
-            if (subscriptionToCancel) {
-              await prisma.subscription.update({
-                where: { id: subscriptionToCancel.id },
-                data: {
-                  status: 'cancelled',
-                  endDate: now
-                }
-              });
-            }
-
-            // Actualizează planul utilizatorului la Basic
-            await prisma.user.update({
-              where: { id: order.userId },
-              data: {
-                planType: 'Basic'
-              }
-            });
-
-            console.error(`[RECURRING_CRON] Subscription cancelled for user ${order.user.clerkId} after ${maxFailures} failed payments`);
-          }
+          // Trimite notificare de eșec
+          await sendPaymentFailureNotification({
+            userEmail: billingInfo.email,
+            userName: `${billingInfo.firstName} ${billingInfo.lastName}`,
+            planName: currentPlan.name,
+            error: paymentResult.error?.toString() || 'Payment failed'
+          });
 
           results.failed++;
-          results.errors.push(`Order ${order.orderId}: ${paymentResult.error}`);
-          console.error(`[RECURRING_CRON] Payment failed for order ${order.orderId}: ${paymentResult.error}`);
         }
 
       } catch (error) {
+        console.error(`[RECURRING_CRON] Error processing subscription ${subscription.id}:`, error);
         results.failed++;
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        results.errors.push(`Order ${order.orderId}: ${errorMessage}`);
-        console.error(`[RECURRING_CRON] Error processing order ${order.orderId}:`, error);
-
-        // Încearcă să actualizezi comanda cu eroarea
-        try {
-          await prisma.order.update({
-            where: { id: order.id },
-            data: {
-              failureCount: order.failureCount + 1,
-              lastError: errorMessage
-            }
-          });
-        } catch (updateError) {
-          console.error(`[RECURRING_CRON] Failed to update order ${order.orderId} with error:`, updateError);
-        }
+        results.errors.push(`Subscription ${subscription.id}: ${error instanceof Error ? error.message : 'Unknown error'}`);
       }
     }
 
-    console.log('[RECURRING_CRON] Completed processing recurring payments', results);
+    console.log(`[RECURRING_CRON] Processing completed:`, {
+      processed: results.processed,
+      successful: results.successful,
+      failed: results.failed,
+      errors: results.errors.length
+    });
 
     return NextResponse.json({
       success: true,
-      message: 'Recurring payments processed',
+      message: 'Recurring payments processing completed',
       results
     });
 
   } catch (error) {
-    console.error('[RECURRING_CRON] Fatal error in recurring payments cron:', error);
-    
+    console.error('[RECURRING_CRON] Critical error:', error);
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error'
@@ -242,56 +345,27 @@ export async function POST(request: Request) {
   }
 }
 
-// Metodă GET pentru verificarea statusului cron-ului
-export async function GET(req: Request) {
-  try {
-    // Statistici despre plățile recurente
-    const activeRecurring = await prisma.order.count({
-      where: {
-        isRecurring: true,
-        status: 'COMPLETED'
-      }
-    });
+// Funcții helper pentru notificări (dacă nu există deja)
+async function sendAutomaticRenewalNotification(data: {
+  userEmail: string;
+  userName: string;
+  planName: string;
+  amount: number;
+  currency: string;
+  newEndDate: Date;
+  orderID: string;
+  transactionId: string;
+}) {
+  console.log(`[RECURRING_CRON] Sending renewal notification to ${data.userEmail}`);
+  // Implementează logica de notificare aici
+}
 
-    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-    const pendingPayments = await prisma.order.count({
-      where: {
-        isRecurring: true,
-        status: 'COMPLETED',
-        createdAt: {
-          lte: thirtyDaysAgo
-        },
-        failureCount: {
-          lt: 3
-        }
-      }
-    });
-
-    const failedRecurring = await prisma.order.count({
-      where: {
-        isRecurring: true,
-        failureCount: {
-          gte: 3
-        }
-      }
-    });
-
-    return NextResponse.json({
-      status: 'healthy',
-      timestamp: new Date().toISOString(),
-      statistics: {
-        activeRecurring,
-        pendingPayments,
-        failedRecurring
-      }
-    });
-
-  } catch (error) {
-    console.error('[RECURRING_CRON] Error getting cron status:', error);
-    
-    return NextResponse.json({
-      status: 'error',
-      error: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
-  }
-} 
+async function sendPaymentFailureNotification(data: {
+  userEmail: string;
+  userName: string;
+  planName: string;
+  error: string;
+}) {
+  console.log(`[RECURRING_CRON] Sending failure notification to ${data.userEmail}`);
+  // Implementează logica de notificare aici
+}

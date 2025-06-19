@@ -20,8 +20,10 @@ const isPublicRoute = createRouteMatcher([
   "/api/uploadthing",
   "/api/uploadthing/(.*)",
   "/api/mobilpay/(.*)",
+  "/api/netopia/(.*)",
   "/api/payment/(.*)",
   "/api/admin/(.*)",
+  "/api/cron/(.*)", // 🎯 ADĂUGAT: Permite accesul la cron jobs
   // Add sign-in and sign-up routes as public
   "/sign-in(.*)",
   "/sign-up(.*)",

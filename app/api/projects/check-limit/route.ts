@@ -49,9 +49,9 @@ export async function GET(req: NextRequest) {
       }
     });
 
-    // Get the limit based on subscription (use Subscription table as source of truth)
-    // If no subscription exists, default to Basic plan
-    const subscriptionType = (subscription?.plan || "Basic") as SubscriptionType;
+    // Get the limit based on subscription first, then user.planType, then default to Basic
+    // This should match the logic in /api/subscription route
+    const subscriptionType = (subscription?.plan || user.planType || "Basic") as SubscriptionType;
     const limit = PROJECT_LIMITS[subscriptionType];
     
     console.log("Subscription calculation:", {

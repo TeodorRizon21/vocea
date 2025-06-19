@@ -59,7 +59,7 @@ export async function POST(req: Request) {
       await sendPlanCancellationEmail({
         name: user.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : 'User',
         email: user.email,
-        planName: subscription.plan,
+        planName: subscription.plan || 'Unknown',
         endDate: subscription.endDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // Use existing end date or default to 30 days from now
       });
     }

@@ -704,6 +704,7 @@ export class NetopiaV2 {
     success: boolean;
     ntpID?: string;
     status?: number;
+    paymentURL?: string;
     error?: any;
   }> {
     console.log('[NETOPIA_V2] Creating recurring payment with token:', {
@@ -718,7 +719,7 @@ export class NetopiaV2 {
     };
 
     try {
-      const response = await fetch(`${this.apiUrl}/payment/card/recurring`, {
+      const response = await fetch(`${this.apiUrl}/payment/card/start`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -728,7 +729,17 @@ export class NetopiaV2 {
         body: JSON.stringify({
           config: {
             notifyUrl: orderDetails.notifyUrl,
+            redirectUrl: orderDetails.notifyUrl.replace('/ipn', '/return'),
             language: 'ro'
+          },
+          payment: {
+            options: {
+              installments: 1
+            },
+            instrument: {
+              type: 'card',
+              token: orderDetails.token
+            }
           },
           order: {
             posSignature: this.config.posSignature,
@@ -737,6 +748,7 @@ export class NetopiaV2 {
             orderID: orderDetails.orderID,
             amount: orderDetails.amount,
             currency: orderDetails.currency,
+            scaExemptionInd: "MIT",
             billing: {
               email: orderDetails.billing.email,
               phone: orderDetails.billing.phone,
@@ -747,10 +759,18 @@ export class NetopiaV2 {
               state: orderDetails.billing.city,
               postalCode: orderDetails.billing.postalCode,
               details: orderDetails.billing.address
+            },
+            shipping: {
+              email: orderDetails.billing.email,
+              phone: orderDetails.billing.phone,
+              firstName: orderDetails.billing.firstName,
+              lastName: orderDetails.billing.lastName,
+              city: orderDetails.billing.city,
+              country: COUNTRY_CODES[orderDetails.billing.country] || 642,
+              state: orderDetails.billing.city,
+              postalCode: orderDetails.billing.postalCode,
+              details: orderDetails.billing.address
             }
-          },
-          payment: {
-            token: orderDetails.token
           }
         })
       });
@@ -764,12 +784,15 @@ export class NetopiaV2 {
       const result = await response.json();
       console.log('[NETOPIA_V2] Recurring payment response:', result);
 
-      // Check if payment was successful
-      if (result.payment?.status === 3 || result.payment?.status === 5) {
+      // Check if payment was successful or in progress
+      // Status 1 = Pending/In Progress (valid for recurring payments)
+      // Status 3 = Paid, Status 5 = Confirmed
+      if (result.payment?.status === 1 || result.payment?.status === 3 || result.payment?.status === 5) {
         return {
           success: true,
           ntpID: result.payment.ntpID,
-          status: result.payment.status
+          status: result.payment.status,
+          paymentURL: result.payment.paymentURL
         };
       } else {
         return {

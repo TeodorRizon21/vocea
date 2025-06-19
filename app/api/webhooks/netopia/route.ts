@@ -46,11 +46,24 @@ export async function POST(req: Request) {
 
     // Find the order
     const order = await prisma.order.findUnique({
-      where: { orderId: processedData.orderID },
-      include: {
-        user: true,
-        plan: true
-      }
+      where: { orderId: processedData.orderID }
+    });
+    
+    if (!order) {
+      console.error('[NETOPIA_IPN] Order not found:', processedData.orderID);
+      return new NextResponse(JSON.stringify({ errorCode: 3, message: 'Order not found' }), { 
+        status: 404,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+    
+    // Get user and plan separately to avoid include issues
+    const user = await prisma.user.findUnique({
+      where: { clerkId: order.userId }
+    });
+    
+    const plan = await prisma.plan.findUnique({
+      where: { id: order.planId }
     });
 
     if (!order) {
@@ -122,35 +135,49 @@ export async function POST(req: Request) {
       });
 
       // Update user's plan type and store recurring payment token
-      await prisma.user.update({
-        where: { clerkId: order.user.clerkId },
-        data: { 
-          planType: (order.subscriptionType as 'Basic' | 'Bronze' | 'Premium' | 'Gold') || 'Basic',
-          // Store recurring payment token for future use
-          ...(processedData.token && {
-            recurringToken: processedData.token,
-            tokenExpiry: processedData.tokenExpiryMonth && processedData.tokenExpiryYear 
-              ? new Date(processedData.tokenExpiryYear, processedData.tokenExpiryMonth - 1) 
-              : null
-          })
-        }
-      });
-
-      console.log('[NETOPIA_IPN] Subscription created successfully');
-
-      // Send appropriate email based on payment status
-      if (order.user.email) {
-        const userName = order.user.firstName 
-          ? `${order.user.firstName} ${order.user.lastName || ''}`.trim() 
-          : 'User';
-
-        await sendPlanUpdateEmail({
-          name: userName,
-          email: order.user.email,
-          planName: order.plan.name,
-          amount: order.amount,
-          currency: order.currency
+      if (user) {
+        await prisma.user.update({
+          where: { clerkId: user.clerkId },
+          data: { 
+            planType: (order.subscriptionType as 'Basic' | 'Bronze' | 'Premium' | 'Gold') || 'Basic',
+            // Store recurring payment token for future use AND billing data
+            ...(processedData.token && {
+              recurringToken: processedData.token,
+              tokenExpiry: processedData.tokenExpiryMonth && processedData.tokenExpiryYear 
+                ? new Date(processedData.tokenExpiryYear, processedData.tokenExpiryMonth - 1) 
+                : null,
+              // Save billing data for future recurring payments
+              billingPhone: '0700000000', // Default for now
+              billingAddress: 'Strada Exemplu 1',
+              billingCity: user.city || 'București',
+              billingState: 'București',
+              billingPostalCode: '010000',
+              billingCountry: 642,
+              lastPaymentMethod: 'card',
+              cardExpireMonth: processedData.tokenExpiryMonth || 12,
+              cardExpireYear: processedData.tokenExpiryYear || 2030,
+              autoRenewEnabled: true,
+              lastRecurringPayment: new Date()
+            })
+          }
         });
+
+        console.log('[NETOPIA_IPN] Subscription created successfully');
+
+        // Send appropriate email based on payment status
+        if (user.email && plan) {
+          const userName = user.firstName 
+            ? `${user.firstName} ${user.lastName || ''}`.trim() 
+            : 'User';
+
+          await sendPlanUpdateEmail({
+            name: userName,
+            email: user.email,
+            planName: plan.name,
+            amount: order.amount,
+            currency: order.currency
+          });
+        }
       }
     }
 
