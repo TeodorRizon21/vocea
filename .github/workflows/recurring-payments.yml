@@ -17,12 +17,12 @@ jobs:
         run: |
           echo "🔄 Processing recurring payments..."
           
-          # Fă request către API-ul de plăți recurente
+          # Fă request către API-ul de plăți recurente (cron endpoint)
           response=$(curl -s -w "HTTPSTATUS:%{http_code}" \
             -X POST \
-            -H "Authorization: Bearer ${{ secrets.ADMIN_SECRET }}" \
+            -H "Authorization: Bearer ${{ secrets.CRON_RECURRING_SECRET }}" \
             -H "Content-Type: application/json" \
-            "${{ secrets.APP_URL }}/api/admin/recurring-payments")
+            "${{ secrets.APP_URL }}/api/cron/recurring-payments")
           
           # Extrage body și status code
           body=$(echo "$response" | sed -E 's/HTTPSTATUS\:[0-9]{3}$//')
@@ -36,10 +36,10 @@ jobs:
             echo "✅ Recurring payments processed successfully"
             
             # Parse JSON response pentru detalii
-            echo "$body" | jq -r '.results | "📊 Results: Processed: \(.processed), Successful: \(.successful), Failed: \(.failed), Downgraded: \(.downgraded)"'
+            echo "$body" | jq -r '.results | "📊 Results: Processed: \(.processed), Successful: \(.successful), Failed: \(.failed)"'
             
             # Afișează detaliile pentru fiecare plată
-            echo "$body" | jq -r '.results.details[] | "👤 User: \(.user) - Status: \(.status) - \(if .reason then "Reason: \(.reason)" elif .error then "Error: \(.error)" else "Success" end)"'
+            echo "$body" | jq -r '.results.errors[]? | "❌ Error: \(.)"'
           else
             echo "❌ Failed to process recurring payments"
             echo "Response: $body"
