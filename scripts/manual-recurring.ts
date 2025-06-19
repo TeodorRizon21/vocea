@@ -25,7 +25,7 @@ import { NetopiaV2, formatBillingInfo } from '../lib/netopia-v2';
     }
 
     const sourceOrder = await prisma.order.findUnique({
-      where: { orderId: sourceOrderId }
+      where: { id: sourceOrderId }
     });
 
     if (!sourceOrder) {

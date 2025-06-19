@@ -58,13 +58,10 @@ export async function POST(request: Request) {
         
         console.log(`[RECURRING_CRON] Processing subscription ${subscription.id} for user ${subscription.user.clerkId}`);
 
-        // 🎯 LOGICA NOUĂ: Găsește ultima plată SUB reușită pentru acest user
+        // 🎯 LOGICA NOUĂ: Găsește ultima plată reușită pentru acest user
         const lastSuccessfulSubOrder = await prisma.order.findFirst({
           where: {
             userId: subscription.userId,
-            orderId: {
-              startsWith: 'SUB_'
-            },
             status: 'COMPLETED',
             token: {
               not: null
