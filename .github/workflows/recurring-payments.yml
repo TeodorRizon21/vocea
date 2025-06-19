@@ -18,7 +18,7 @@ jobs:
           echo "🔄 Processing recurring payments..."
           
           # Fă request către API-ul de plăți recurente (cron endpoint)
-          response=$(curl -s -w "HTTPSTATUS:%{http_code}" \
+          response=$(curl -L -s -w "HTTPSTATUS:%{http_code}" \
             -X POST \
             -H "Authorization: Bearer ${{ secrets.CRON_RECURRING_SECRET }}" \
             -H "Content-Type: application/json" \
