@@ -177,7 +177,6 @@ export async function POST(req: Request) {
     const order = await prisma.order.findUnique({
       where: { orderId: ipnData.orderID },
       include: { 
-        user: true,
         plan: true
       }
     });
@@ -187,18 +186,28 @@ export async function POST(req: Request) {
       return new NextResponse('Order not found', { status: 404 });
     }
 
+    // Find user separately since userId might be ObjectId instead of clerkId
+    const user = await prisma.user.findUnique({
+      where: { id: order.userId } // Assuming userId is MongoDB ObjectId
+    });
+
+    if (!user) {
+      console.error('[NETOPIA_V2_IPN] User not found for order:', order.userId);
+      return new NextResponse('User not found', { status: 404 });
+    }
+
     console.log('[NETOPIA_V2_IPN] Found order:', {
       orderId: order.orderId,
       currentStatus: order.status,
       newStatus: orderStatus,
-      userId: order.user.clerkId,
+      userId: user.clerkId,
       planName: order.plan?.name,
       isRecurring: order.isRecurring,
       hasToken: !!ipnData.token
     });
 
     // Update order status
-    const updatedOrder = await prisma.order.update({
+    await prisma.order.update({
       where: { orderId: ipnData.orderID },
       data: { 
         status: orderStatus,
@@ -216,16 +225,16 @@ export async function POST(req: Request) {
           netopiaBinding: JSON.stringify(rawIpnData.payment?.binding || {}),
           netopiaAuthCode: ipnData.authCode,
           netopiaRRN: ipnData.rrn,
-          // Billing data
-          billingEmail: rawIpnData.order.invoice.contact_info.billing.email,
-          billingPhone: rawIpnData.order.invoice.contact_info.billing.mobile_phone,
-          billingFirstName: rawIpnData.order.invoice.contact_info.billing.first_name,
-          billingLastName: rawIpnData.order.invoice.contact_info.billing.last_name,
-          billingAddress: rawIpnData.order.invoice.contact_info.billing.address,
-          billingCity: rawIpnData.order.invoice.contact_info.billing.city,
-          billingState: rawIpnData.order.invoice.contact_info.billing.state || 'București',
-          billingPostalCode: rawIpnData.order.invoice.contact_info.billing.postal_code || '010000',
-          billingCountry: rawIpnData.order.invoice.contact_info.billing.country || 642
+          // Billing data - use fallback if not present in IPN
+          billingEmail: rawIpnData.order?.invoice?.contact_info?.billing?.email || user.email || '',
+          billingPhone: rawIpnData.order?.invoice?.contact_info?.billing?.mobile_phone || user.billingPhone || '',
+          billingFirstName: rawIpnData.order?.invoice?.contact_info?.billing?.first_name || user.firstName || '',
+          billingLastName: rawIpnData.order?.invoice?.contact_info?.billing?.last_name || user.lastName || '',
+          billingAddress: rawIpnData.order?.invoice?.contact_info?.billing?.address || user.billingAddress || '',
+          billingCity: rawIpnData.order?.invoice?.contact_info?.billing?.city || user.billingCity || '',
+          billingState: rawIpnData.order?.invoice?.contact_info?.billing?.state || user.billingState || 'București',
+          billingPostalCode: rawIpnData.order?.invoice?.contact_info?.billing?.postal_code || user.billingPostalCode || '010000',
+          billingCountry: rawIpnData.order?.invoice?.contact_info?.billing?.country || user.billingCountry || 642
         })
       }
     });
@@ -237,7 +246,7 @@ export async function POST(req: Request) {
       try {
         // CORECTARE 1: Salvează token-ul pentru plăți recurente în USER (nu în order)
         if (ipnData.token && order.isRecurring) {
-          console.log('[NETOPIA_V2_IPN] 🔑 Saving recurring token for user:', order.user.clerkId);
+          console.log('[NETOPIA_V2_IPN] 🔑 Saving recurring token for user:', user.clerkId);
           
           let tokenExpiry = null;
           if (ipnData.tokenExpiryMonth && ipnData.tokenExpiryYear) {
@@ -249,17 +258,17 @@ export async function POST(req: Request) {
           }
 
           await prisma.user.update({
-            where: { id: order.user.id },
+            where: { id: user.id },
             data: {
               recurringToken: ipnData.token,
               tokenExpiry: tokenExpiry,
-              // Save billing data from IPN response for future recurring payments
-              billingPhone: rawIpnData.order.invoice.contact_info.billing.mobile_phone,
-              billingAddress: rawIpnData.order.invoice.contact_info.billing.address,
-              billingCity: rawIpnData.order.invoice.contact_info.billing.city,
-              billingState: rawIpnData.order.invoice.contact_info.billing.state || 'București',
-              billingPostalCode: rawIpnData.order.invoice.contact_info.billing.postal_code || '010000',
-              billingCountry: rawIpnData.order.invoice.contact_info.billing.country || 642,
+              // Save billing data from IPN response for future recurring payments - use fallback if not present
+              billingPhone: rawIpnData.order?.invoice?.contact_info?.billing?.mobile_phone || user.billingPhone || '',
+              billingAddress: rawIpnData.order?.invoice?.contact_info?.billing?.address || user.billingAddress || '',
+              billingCity: rawIpnData.order?.invoice?.contact_info?.billing?.city || user.billingCity || '',
+              billingState: rawIpnData.order?.invoice?.contact_info?.billing?.state || user.billingState || 'București',
+              billingPostalCode: rawIpnData.order?.invoice?.contact_info?.billing?.postal_code || user.billingPostalCode || '010000',
+              billingCountry: rawIpnData.order?.invoice?.contact_info?.billing?.country || user.billingCountry || 642,
               // Update payment method and card info
               lastPaymentMethod: ipnData.paymentMethod || 'card',
               cardExpireMonth: rawIpnData.payment?.binding?.expireMonth || 12,
@@ -282,7 +291,7 @@ export async function POST(req: Request) {
         // Find existing subscription
         const existingSubscription = await prisma.subscription.findFirst({
           where: {
-            userId: order.user.id,
+            userId: user.id,
             status: 'active'
           }
         });
@@ -291,7 +300,7 @@ export async function POST(req: Request) {
           // CORECTARE 3: Pentru plăți recurente, extinde abonamentul existent
           if (order.isRecurring || order.orderId.includes('AUTO_REC_') || order.orderId.includes('CRON_AUTO_')) {
             console.log('[NETOPIA_V2_IPN] 🔄 Extending existing subscription for recurring payment');
-            endDate = new Date(existingSubscription.endDate);
+            endDate = new Date(existingSubscription.endDate || new Date());
             endDate.setDate(endDate.getDate() + 30); // Adaugă 30 zile la data existentă
           } else {
             // Pentru plăți noi, începe de la data curentă
@@ -301,13 +310,10 @@ export async function POST(req: Request) {
           await prisma.subscription.update({
             where: { id: existingSubscription.id },
             data: {
-              planId: order.planId,
               plan: order.subscriptionType || 'Basic',
               status: 'active',
               endDate: endDate,
-              updatedAt: new Date(),
-              amount: order.amount,
-              currency: order.currency
+              updatedAt: new Date()
             }
           });
 
@@ -318,14 +324,11 @@ export async function POST(req: Request) {
           
           await prisma.subscription.create({
             data: {
-              userId: order.user.id,
-              planId: order.planId!,
+              userId: user.id,
               plan: order.subscriptionType || 'Basic',
               status: 'active',
               startDate: new Date(),
-              endDate: endDate,
-              amount: order.amount,
-              currency: order.currency
+              endDate: endDate
             }
           });
 
@@ -334,7 +337,7 @@ export async function POST(req: Request) {
 
         // CORECTARE 4: Actualizează planul utilizatorului
         await prisma.user.update({
-          where: { clerkId: order.user.clerkId },
+          where: { clerkId: user.clerkId },
           data: { 
             planType: (order.subscriptionType as 'Basic' | 'Bronze' | 'Premium' | 'Gold') || 'Basic'
           }
@@ -344,8 +347,8 @@ export async function POST(req: Request) {
 
         // CORECTARE 5: Notificare automată pentru plăți de succes
         await sendPaymentSuccessNotification({
-          userEmail: order.user.email || '',
-          userName: `${order.user.firstName || ''} ${order.user.lastName || ''}`.trim() || 'Customer',
+          userEmail: user.email || '',
+          userName: `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Customer',
           planName: order.subscriptionType || 'Basic',
           amount: order.amount,
           currency: order.currency,
@@ -372,8 +375,8 @@ export async function POST(req: Request) {
         // Pentru plăți recurente eșuate, notifică utilizatorul
         if (order.isRecurring) {
           await sendPaymentFailureNotification({
-            userEmail: order.user.email || '',
-            userName: `${order.user.firstName || ''} ${order.user.lastName || ''}`.trim() || 'Customer',
+            userEmail: user.email || '',
+            userName: `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Customer',
             planName: order.subscriptionType || 'Basic',
             error: errorDescription,
             orderID: order.orderId
@@ -381,7 +384,7 @@ export async function POST(req: Request) {
 
           // Marchează abonamentul ca problematic dacă e recurent
           const subscription = await prisma.subscription.findFirst({
-            where: { userId: order.user.id, status: 'active' }
+            where: { userId: user.id, status: 'active' }
           });
 
           if (subscription) {
