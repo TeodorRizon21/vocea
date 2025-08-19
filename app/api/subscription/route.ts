@@ -167,7 +167,9 @@ export async function GET(req: NextRequest) {
       }
     });
 
-    // If we have a completed order that's not reflected in subscription
+    // TEMPORARILY DISABLED: If we have a completed order that's not reflected in subscription
+    // This was overwriting our expired subscriptions for testing purposes
+    /*
     if (latestOrder && (!currentSubscription || currentSubscription.plan !== latestOrder.plan.name)) {
       console.log('Found newer completed order with plan:', latestOrder.plan.name);
 
@@ -232,6 +234,7 @@ export async function GET(req: NextRequest) {
         endDate
       });
     }
+    */
 
     // If no current subscription, default to Basic plan
     if (!currentSubscription) {
