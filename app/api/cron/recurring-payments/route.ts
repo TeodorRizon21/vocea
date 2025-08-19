@@ -105,7 +105,13 @@ export async function POST(request: Request) {
         console.log(`[RECURRING_CRON] Found valid recurring token for user ${subscription.user.clerkId}`);
 
         // 🎯 FIXED LOGIC: Renew the ORIGINAL subscription plan, not current user planType
-        const originalSubscriptionPlan = subscription.plan; // Use the plan from expired subscription
+        const originalSubscriptionPlan = subscription.plan;
+        
+        if (!originalSubscriptionPlan) {
+          console.error(`[RECURRING_CRON] Subscription ${subscription.id} has no plan specified, skipping`);
+          continue;
+        }
+        
         console.log(`[RECURRING_CRON] User ${subscription.user.clerkId} expired plan to renew: ${originalSubscriptionPlan}`);
         console.log(`[RECURRING_CRON] User current planType: ${subscription.user.planType} (will be updated after renewal)`);
 
