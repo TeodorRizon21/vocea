@@ -16,35 +16,60 @@ jobs:
       - name: Process Recurring Payments
         run: |
           echo "🔄 Processing recurring payments..."
+          echo "📍 Environment: Production"
+          echo "🌐 Target URL: ${{ secrets.APP_URL }}/api/cron/recurring-payments"
+          echo "🔐 Using secret: ${CRON_SECRET:0:20}..." # Show first 20 chars only
           
-          # Fă request către API-ul de plăți recurente (cron endpoint)
+          # Make request to recurring payments cron endpoint
           response=$(curl -L -s -w "HTTPSTATUS:%{http_code}" \
             -X POST \
             -H "Authorization: Bearer ${{ secrets.CRON_RECURRING_SECRET }}" \
             -H "Content-Type: application/json" \
             "${{ secrets.APP_URL }}/api/cron/recurring-payments")
           
-          # Extrage body și status code
+          # Extract body and status code
           body=$(echo "$response" | sed -E 's/HTTPSTATUS\:[0-9]{3}$//')
           status=$(echo "$response" | tr -d '\n' | sed -E 's/.*HTTPSTATUS:([0-9]{3})$/\1/')
           
-          echo "Status Code: $status"
-          echo "Response Body: $body"
+          echo "📊 Status Code: $status"
+          echo "📝 Response Body: $body"
           
-          # Verifică dacă request-ul a fost cu succes
+          # Check if request was successful
           if [ "$status" -eq 200 ]; then
-            echo "✅ Recurring payments processed successfully"
+            echo "✅ API call successful"
             
-            # Parse JSON response pentru detalii
-            echo "$body" | jq -r '.results | "📊 Results: Processed: \(.processed), Successful: \(.successful), Failed: \(.failed)"'
-            
-            # Afișează detaliile pentru fiecare plată
-            echo "$body" | jq -r '.results.errors[]? | "❌ Error: \(.)"'
+            # Parse JSON response for details
+            if echo "$body" | jq empty 2>/dev/null; then
+              echo "📊 Results Summary:"
+              echo "$body" | jq -r '.results | "  • Processed: \(.processed) subscriptions"'
+              echo "$body" | jq -r '.results | "  • Successful: \(.successful) renewals"' 
+              echo "$body" | jq -r '.results | "  • Failed: \(.failed) renewals"'
+              
+              # Show errors if any
+              echo "$body" | jq -r '.results.errors[]? | "❌ Error: \(.)"'
+              
+              # Check if any payments failed
+              failed_count=$(echo "$body" | jq -r '.results.failed // 0')
+              if [ "$failed_count" -gt 0 ]; then
+                echo "⚠️  WARNING: $failed_count payment(s) failed!"
+                echo "📋 Check production logs for detailed error information"
+                # Don't exit 1 here - failed payments are handled, not workflow failures
+              fi
+              
+              echo "✅ Recurring payments workflow completed successfully"
+            else
+              echo "❌ Invalid JSON response from API"
+              echo "Raw response: $body"
+              exit 1
+            fi
           else
             echo "❌ Failed to process recurring payments"
+            echo "HTTP Status: $status"
             echo "Response: $body"
             exit 1
           fi
+        env:
+          CRON_SECRET: ${{ secrets.CRON_RECURRING_SECRET }}
 
       - name: Check Subscriptions Status (Optional)
         if: success()

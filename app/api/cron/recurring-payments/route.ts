@@ -287,6 +287,16 @@ export async function POST(request: Request) {
         } else {
           // Plata a eșuat
           console.error(`[RECURRING_CRON] ❌ Payment failed for ${billingInfo.email}:`, paymentResult.error);
+          console.error(`[RECURRING_CRON] 🐛 Debug payment failure:`, {
+            userEmail: billingInfo.email,
+            planName: originalPlan.name,
+            amount: originalPlan.price,
+            hasToken: !!recurringToken,
+            tokenLength: recurringToken ? recurringToken.length : 0,
+            tokenExpiry: subscription.user.tokenExpiry,
+            paymentError: paymentResult.error,
+            fullPaymentResult: JSON.stringify(paymentResult, null, 2)
+          });
           
           // Creează comandă failed pentru tracking
           await prisma.order.create({
