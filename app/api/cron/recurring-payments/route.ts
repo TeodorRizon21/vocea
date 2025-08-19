@@ -19,13 +19,28 @@ export async function POST(request: Request) {
     // CORECTARE: Găsește abonamente care expiră în următoarele 3 zile SAU au expirat deja
     const now = new Date();
     const threeDaysFromNow = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+    const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
     
+    // Find subscriptions that are expiring soon OR recently expired (within last 3 days)
     const expiredSubscriptions = await prisma.subscription.findMany({
       where: {
-        status: 'active',
-        endDate: {
-          lte: threeDaysFromNow // Abonamente care expiră în 3 zile sau au expirat
-        }
+        OR: [
+          {
+            // Active subscriptions expiring within 3 days
+            status: 'active',
+            endDate: {
+              lte: threeDaysFromNow
+            }
+          },
+          {
+            // Recently expired subscriptions (within last 3 days) that can still be renewed
+            status: 'expired',
+            endDate: {
+              gte: threeDaysAgo, // Expired within last 3 days
+              lte: now // But actually expired (not future dated)
+            }
+          }
+        ]
       },
       include: {
         user: true,
@@ -35,7 +50,7 @@ export async function POST(request: Request) {
 
     const validSubscriptions = expiredSubscriptions;
 
-    console.log(`[RECURRING_CRON] Found ${expiredSubscriptions.length} subscriptions expiring soon or expired`);
+    console.log(`[RECURRING_CRON] Found ${expiredSubscriptions.length} subscriptions expiring soon or recently expired`);
     console.log(`[RECURRING_CRON] Processing ${validSubscriptions.length} valid subscriptions`);
 
     const results = {
@@ -89,27 +104,28 @@ export async function POST(request: Request) {
 
         console.log(`[RECURRING_CRON] Found valid recurring token for user ${subscription.user.clerkId}`);
 
-        // 🎯 LOGICA NOUĂ: Găsește planul CURENT al utilizatorului
-        const currentUserPlanType = subscription.user.planType;
-        console.log(`[RECURRING_CRON] User ${subscription.user.clerkId} current plan: ${currentUserPlanType}`);
+        // 🎯 FIXED LOGIC: Renew the ORIGINAL subscription plan, not current user planType
+        const originalSubscriptionPlan = subscription.plan; // Use the plan from expired subscription
+        console.log(`[RECURRING_CRON] User ${subscription.user.clerkId} expired plan to renew: ${originalSubscriptionPlan}`);
+        console.log(`[RECURRING_CRON] User current planType: ${subscription.user.planType} (will be updated after renewal)`);
 
-        // Găsește planul corect din baza de date (nu din subscription expirat!)
-        const currentPlan = await prisma.plan.findUnique({
-          where: { name: currentUserPlanType }
+        // Find the original plan from database (the one that expired and needs renewal)
+        const originalPlan = await prisma.plan.findUnique({
+          where: { name: originalSubscriptionPlan }
         });
 
-        if (!currentPlan) {
-          console.error(`[RECURRING_CRON] Plan ${currentUserPlanType} not found in database for user ${subscription.user.clerkId}`);
-          results.errors.push(`Plan ${currentUserPlanType} not found for user ${subscription.user.clerkId}`);
+        if (!originalPlan) {
+          console.error(`[RECURRING_CRON] Plan ${originalSubscriptionPlan} not found in database for user ${subscription.user.clerkId}`);
+          results.errors.push(`Plan ${originalSubscriptionPlan} not found for user ${subscription.user.clerkId}`);
           continue;
         }
 
         console.log(`[RECURRING_CRON] 🎯 CORRECT PAYMENT DATA:`, {
           oldSubscriptionPlan: subscription.planModel?.name,
           oldSubscriptionPrice: subscription.planModel?.price,
-          currentUserPlan: currentUserPlanType,
-          correctPrice: currentPlan.price,
-          difference: `${subscription.planModel?.price || 0} → ${currentPlan.price}`,
+          currentUserPlan: originalSubscriptionPlan,
+          correctPrice: originalPlan.price,
+          difference: `${subscription.planModel?.price || 0} → ${originalPlan.price}`,
           userToken: subscription.user.recurringToken ? '✅ Available' : '❌ Missing',
           tokenExpiry: subscription.user.tokenExpiry
         });
@@ -136,8 +152,8 @@ export async function POST(request: Request) {
           clerkId: subscription.user.clerkId,
           email: billingInfo.email,
           name: `${billingInfo.firstName} ${billingInfo.lastName}`,
-          planName: currentPlan.name,
-          amount: currentPlan.price,
+          planName: originalPlan.name,
+          amount: originalPlan.price,
           userToken: recurringToken.substring(0, 20) + '...',
           tokenExpiry: subscription.user.tokenExpiry
         });
@@ -147,13 +163,13 @@ export async function POST(request: Request) {
         const notifyUrl = `${baseUrl}/api/netopia/ipn`;
 
         // 🎯 LOGICA CORECTATĂ: Folosește datele din User pentru recurență
-        console.log(`[RECURRING_CRON] Creating AUTOMATIC recurring payment using User profile data for: ${billingInfo.email} - Plan: ${currentPlan.name} - Amount: ${currentPlan.price} RON`);
+        console.log(`[RECURRING_CRON] Creating AUTOMATIC recurring payment using User profile data for: ${billingInfo.email} - Plan: ${originalPlan.name} - Amount: ${originalPlan.price} RON`);
         
         const paymentResult = await netopia.createRecurringPayment({
           orderID: newOrderId,
-          amount: currentPlan.price,
-          currency: currentPlan.currency || 'RON',
-          description: `Reînnoire automată abonament ${currentPlan.name}`,
+          amount: originalPlan.price,
+          currency: originalPlan.currency || 'RON',
+          description: `Reînnoire automată abonament ${originalPlan.name}`,
           token: recurringToken, // 🎯 TOKENUL DIN USER!
           billing: {
             ...billingInfo,
@@ -193,13 +209,13 @@ export async function POST(request: Request) {
           const newOrder = await prisma.order.create({
             data: {
               orderId: newOrderId,
-              amount: currentPlan.price,
-              currency: currentPlan.currency || 'RON',
+              amount: originalPlan.price,
+              currency: originalPlan.currency || 'RON',
               status: orderStatus as any,
               isRecurring: true,
-              subscriptionType: currentPlan.name as any,
+              subscriptionType: originalPlan.name as any,
               userId: subscription.userId,
-              planId: currentPlan.id,
+              planId: originalPlan.id,
               token: recurringToken, // 🎯 TOKENUL DIN USER!
               netopiaId: paymentResult.ntpID,
               paidAt: shouldExtendSubscription ? new Date() : null,
@@ -226,10 +242,10 @@ export async function POST(request: Request) {
             data: {
               endDate: newEndDate,
               status: 'active', // Asigură-te că rămâne activ
-              planId: currentPlan.id,
-              plan: currentPlan.name,
-              amount: currentPlan.price,
-              currency: currentPlan.currency || 'RON',
+              planId: originalPlan.id,
+              plan: originalPlan.name,
+              amount: originalPlan.price,
+              currency: originalPlan.currency || 'RON',
               updatedAt: new Date()
             }
           });
@@ -239,9 +255,9 @@ export async function POST(request: Request) {
             await sendAutomaticRenewalNotification({
               userEmail: billingInfo.email,
               userName: `${billingInfo.firstName} ${billingInfo.lastName}`,
-              planName: currentPlan.name,
-              amount: currentPlan.price,
-              currency: currentPlan.currency || 'RON',
+              planName: originalPlan.name,
+              amount: originalPlan.price,
+              currency: originalPlan.currency || 'RON',
               newEndDate: newEndDate,
               orderID: newOrderId,
               transactionId: paymentResult.ntpID
@@ -250,8 +266,17 @@ export async function POST(request: Request) {
             console.warn(`[RECURRING_CRON] No transaction ID available for order ${newOrderId}`);
           }
 
+          // Update user's planType to match the renewed subscription
+          await prisma.user.update({
+            where: { id: subscription.userId },
+            data: {
+              planType: originalPlan.name
+            }
+          });
+          console.log(`[RECURRING_CRON] ✅ Updated user planType from ${subscription.user.planType} to ${originalPlan.name}`);
+
           results.successful++;
-          console.log(`[RECURRING_CRON] ✅ Successfully renewed subscription for ${billingInfo.email} until ${newEndDate.toLocaleDateString('ro-RO')} - Plan: ${currentPlan.name} - Amount: ${currentPlan.price} RON`);
+          console.log(`[RECURRING_CRON] ✅ Successfully renewed subscription for ${billingInfo.email} until ${newEndDate.toLocaleDateString('ro-RO')} - Plan: ${originalPlan.name} - Amount: ${originalPlan.price} RON`);
 
         } else {
           // Plata a eșuat
@@ -261,13 +286,13 @@ export async function POST(request: Request) {
           await prisma.order.create({
             data: {
               orderId: newOrderId,
-              amount: currentPlan.price,
-              currency: currentPlan.currency || 'RON',
+              amount: originalPlan.price,
+              currency: originalPlan.currency || 'RON',
               status: 'FAILED',
               isRecurring: true,
-              subscriptionType: currentPlan.name as any,
+              subscriptionType: originalPlan.name as any,
               userId: subscription.userId,
-              planId: currentPlan.id,
+              planId: originalPlan.id,
               token: recurringToken, // 🎯 TOKENUL DIN USER!
               lastError: paymentResult.error?.toString() || 'Automatic payment failed',
               // 🎯 BILLING INFO DIN USER!
@@ -302,7 +327,7 @@ export async function POST(request: Request) {
           await sendPaymentFailureNotification({
             userEmail: billingInfo.email,
             userName: `${billingInfo.firstName} ${billingInfo.lastName}`,
-            planName: currentPlan.name,
+            planName: originalPlan.name,
             error: paymentResult.error?.toString() || 'Payment failed'
           });
 
