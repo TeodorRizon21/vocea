@@ -58,22 +58,9 @@ export async function POST(request: Request) {
         
         console.log(`[RECURRING_CRON] Processing subscription ${subscription.id} for user ${subscription.user.clerkId}`);
 
-        // 🎯 LOGICA NOUĂ: Găsește ultima plată reușită pentru acest user
-        const lastSuccessfulSubOrder = await prisma.order.findFirst({
-          where: {
-            userId: subscription.userId,
-            status: 'COMPLETED',
-            token: {
-              not: null
-            }
-          },
-          orderBy: {
-            createdAt: 'desc'
-          }
-        });
-
-        if (!lastSuccessfulSubOrder) {
-          console.log(`[RECURRING_CRON] No successful SUB order found for user ${subscription.user.clerkId}, skipping automatic renewal`);
+        // 🎯 LOGICA CORECTATĂ: Verifică dacă utilizatorul are token salvat pentru plăți recurente
+        if (!subscription.user.recurringToken) {
+          console.log(`[RECURRING_CRON] No recurring token found for user ${subscription.user.clerkId}, skipping automatic renewal`);
           
           // Marchează că abonamentul nu poate fi reînnoit automat
           await prisma.subscription.update({
@@ -86,7 +73,21 @@ export async function POST(request: Request) {
           continue;
         }
 
-        console.log(`[RECURRING_CRON] Found source SUB order: ${lastSuccessfulSubOrder.orderId} for user ${subscription.user.clerkId}`);
+        // Verifică dacă tokenul nu a expirat
+        if (subscription.user.tokenExpiry && subscription.user.tokenExpiry < new Date()) {
+          console.log(`[RECURRING_CRON] Recurring token expired for user ${subscription.user.clerkId}, skipping automatic renewal`);
+          
+          await prisma.subscription.update({
+            where: { id: subscription.id },
+            data: {
+              status: 'expired'
+            }
+          });
+          
+          continue;
+        }
+
+        console.log(`[RECURRING_CRON] Found valid recurring token for user ${subscription.user.clerkId}`);
 
         // 🎯 LOGICA NOUĂ: Găsește planul CURENT al utilizatorului
         const currentUserPlanType = subscription.user.planType;
@@ -109,61 +110,56 @@ export async function POST(request: Request) {
           currentUserPlan: currentUserPlanType,
           correctPrice: currentPlan.price,
           difference: `${subscription.planModel?.price || 0} → ${currentPlan.price}`,
-          sourceOrderId: lastSuccessfulSubOrder.orderId,
-          sourceOrderToken: lastSuccessfulSubOrder.token ? '✅ Available' : '❌ Missing'
+          userToken: subscription.user.recurringToken ? '✅ Available' : '❌ Missing',
+          tokenExpiry: subscription.user.tokenExpiry
         });
 
-        // 🎯 LOGICA NOUĂ: Folosește datele de billing din order-ul sursă SUB
+        // 🎯 LOGICA CORECTATĂ: Folosește datele de billing din User (salvate în IPN)
         const billingInfo = {
-          firstName: lastSuccessfulSubOrder.billingFirstName || subscription.user.firstName || 'Customer',
-          lastName: lastSuccessfulSubOrder.billingLastName || subscription.user.lastName || 'User',
-          email: lastSuccessfulSubOrder.billingEmail || subscription.user.email || '',
-          phone: lastSuccessfulSubOrder.billingPhone || subscription.user.billingPhone || '0700000000',
-          address: lastSuccessfulSubOrder.billingAddress || subscription.user.billingAddress || 'Adresă București',
-          city: lastSuccessfulSubOrder.billingCity || subscription.user.billingCity || 'București',
-          postalCode: lastSuccessfulSubOrder.billingPostalCode || subscription.user.billingPostalCode || '010000',
-          country: lastSuccessfulSubOrder.billingCountry || subscription.user.billingCountry || 642 // Romania
+          firstName: subscription.user.firstName || 'Customer',
+          lastName: subscription.user.lastName || 'User',
+          email: subscription.user.email || '',
+          phone: subscription.user.billingPhone || '0700000000',
+          address: subscription.user.billingAddress || 'Adresă București',
+          city: subscription.user.billingCity || 'București',
+          postalCode: subscription.user.billingPostalCode || '010000',
+          country: subscription.user.billingCountry || 642 // Romania
         };
 
-        // 🎯 LOGICA NOUĂ: Folosește tokenul din order-ul sursă SUB
-        const recurringToken = lastSuccessfulSubOrder.token;
-        if (!recurringToken) {
-          console.error(`[RECURRING_CRON] No recurring token in source order ${lastSuccessfulSubOrder.orderId} for user ${subscription.user.clerkId}`);
-          results.errors.push(`No recurring token in source order for user ${subscription.user.clerkId}`);
-          continue;
-        }
+        // 🎯 LOGICA CORECTATĂ: Folosește tokenul din User
+        const recurringToken = subscription.user.recurringToken;
 
         // Generează un nou ID de comandă pentru această plată recurentă
         const newOrderId = `CRON_AUTO_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-        console.log(`[RECURRING_CRON] 🎯 Using EXACT payment data from SUB order:`, {
+        console.log(`[RECURRING_CRON] 🎯 Using EXACT payment data from User profile:`, {
           clerkId: subscription.user.clerkId,
           email: billingInfo.email,
           name: `${billingInfo.firstName} ${billingInfo.lastName}`,
           planName: currentPlan.name,
           amount: currentPlan.price,
-          sourceOrderId: lastSuccessfulSubOrder.orderId,
-          sourceOrderToken: recurringToken.substring(0, 20) + '...'
+          userToken: recurringToken.substring(0, 20) + '...',
+          tokenExpiry: subscription.user.tokenExpiry
         });
 
         // URL-uri pentru callback-uri
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
         const notifyUrl = `${baseUrl}/api/netopia/ipn`;
 
-        // 🎯 LOGICA NOUĂ: Folosește datele exacte din order-ul SUB pentru recurență
-        console.log(`[RECURRING_CRON] Creating AUTOMATIC recurring payment using SUB order data for: ${billingInfo.email} - Plan: ${currentPlan.name} - Amount: ${currentPlan.price} RON`);
+        // 🎯 LOGICA CORECTATĂ: Folosește datele din User pentru recurență
+        console.log(`[RECURRING_CRON] Creating AUTOMATIC recurring payment using User profile data for: ${billingInfo.email} - Plan: ${currentPlan.name} - Amount: ${currentPlan.price} RON`);
         
         const paymentResult = await netopia.createRecurringPayment({
           orderID: newOrderId,
           amount: currentPlan.price,
           currency: currentPlan.currency || 'RON',
           description: `Reînnoire automată abonament ${currentPlan.name}`,
-          token: recurringToken, // 🎯 TOKENUL DIN ORDER-UL SUB!
+          token: recurringToken, // 🎯 TOKENUL DIN USER!
           billing: {
             ...billingInfo,
             state: billingInfo.city, // Pentru România, folosim orașul ca județ dacă nu avem altă informație
             country: billingInfo.country.toString() // Convertim numărul în string
-          }, // 🎯 BILLING-UL DIN ORDER-UL SUB!
+          }, // 🎯 BILLING-UL DIN USER!
           notifyUrl
         });
 
@@ -204,11 +200,11 @@ export async function POST(request: Request) {
               subscriptionType: currentPlan.name as any,
               userId: subscription.userId,
               planId: currentPlan.id,
-              token: recurringToken, // 🎯 TOKENUL DIN ORDER-UL SUB!
+              token: recurringToken, // 🎯 TOKENUL DIN USER!
               netopiaId: paymentResult.ntpID,
               paidAt: shouldExtendSubscription ? new Date() : null,
               lastError: paymentResult.paymentURL ? `Payment URL: ${paymentResult.paymentURL}` : null,
-              // 🎯 BILLING INFO DIN ORDER-UL SUB!
+              // 🎯 BILLING INFO DIN USER!
               billingEmail: billingInfo.email,
               billingPhone: billingInfo.phone,
               billingFirstName: billingInfo.firstName,
@@ -272,9 +268,9 @@ export async function POST(request: Request) {
               subscriptionType: currentPlan.name as any,
               userId: subscription.userId,
               planId: currentPlan.id,
-              token: recurringToken, // 🎯 TOKENUL DIN ORDER-UL SUB!
+              token: recurringToken, // 🎯 TOKENUL DIN USER!
               lastError: paymentResult.error?.toString() || 'Automatic payment failed',
-              // 🎯 BILLING INFO DIN ORDER-UL SUB!
+              // 🎯 BILLING INFO DIN USER!
               billingEmail: billingInfo.email,
               billingPhone: billingInfo.phone,
               billingFirstName: billingInfo.firstName,

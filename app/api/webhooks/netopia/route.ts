@@ -85,21 +85,16 @@ export async function POST(req: Request) {
       newStatus = 'FAILED';
     }
 
-    // Update order status
+    // Update order status (removed token field since it doesn't exist in Order model)
     await prisma.order.update({
       where: { id: order.id },
       data: {
         status: newStatus,
-        // Store recurring payment token if received and payment is successful
-        ...(newStatus === 'COMPLETED' && processedData.token && {
-          token: processedData.token,
-          tokenExpiry: processedData.tokenExpiryMonth && processedData.tokenExpiryYear 
-            ? new Date(processedData.tokenExpiryYear, processedData.tokenExpiryMonth - 1) 
-            : null
-        }),
         updatedAt: new Date()
       }
     });
+
+    // Token will be saved in the user update section below if payment is completed
 
     // If payment is successful, create or update subscription
     if (newStatus === 'COMPLETED') {

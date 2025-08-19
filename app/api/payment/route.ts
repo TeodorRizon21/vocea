@@ -176,7 +176,7 @@ export async function POST(req: Request) {
     // Set up return and notify URLs
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
     const returnUrl = `${baseUrl}/api/netopia/return`;
-    const notifyUrl = `${baseUrl}/api/webhooks/netopia`;
+    const notifyUrl = `${baseUrl}/api/netopia/ipn`;
     const cancelUrl = `${baseUrl}/subscriptions?error=payment_cancelled`;
 
     console.log('Payment Request Details:', {
