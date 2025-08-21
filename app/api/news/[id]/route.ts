@@ -12,30 +12,40 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
     const data = await req.json()
 
-    if (!data.title || !data.description || !data.city) {
-      return new NextResponse("Missing required fields", { status: 400 })
+    // Validate required fields
+    if (!data.title || !data.title.trim()) {
+      return new NextResponse("Titlul este obligatoriu", { status: 400 })
     }
+
+    if (!data.description || !data.description.trim()) {
+      return new NextResponse("Descrierea este obligatorie", { status: 400 })
+    }
+
+    // City is not required - can be empty or "oricare"
+    // if (!data.city || data.city === "oricare") {
+    //   return new NextResponse("Orașul este obligatoriu", { status: 400 })
+    // }
 
     // Validate description length
     if (data.description.length < 300) {
-      return new NextResponse("News description must be at least 300 characters", { status: 400 })
+      return new NextResponse("Descrierea trebuie să aibă cel puțin 300 de caractere", { status: 400 })
     }
 
     const news = await prisma.news.update({
       where: { id: params.id },
       data: {
-        title: data.title,
-        description: data.description,
+        title: data.title.trim(),
+        description: data.description.trim(),
         image: data.image || null,
-        city: data.city,
-        university: data.university || null,
+        city: data.city === "oricare" ? "" : data.city,
+        university: data.university === "oricare" ? null : data.university,
       },
     })
 
     return NextResponse.json(news)
   } catch (error) {
     console.error("Error updating news:", error)
-    return new NextResponse("Internal Server Error", { status: 500 })
+    return new NextResponse("Eroare internă a serverului", { status: 500 })
   }
 }
 

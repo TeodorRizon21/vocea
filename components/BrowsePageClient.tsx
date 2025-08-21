@@ -58,18 +58,23 @@ interface BrowsePageClientProps {
   userPlan?: string;
 }
 
-// Diverse subcategories
+// Diverse subcategories (reordered and without job offers and services)
 const diverseSubcategories = [
+  { id: "all", label: "All" },
+  { id: "manuale-carti", label: "Manuale / Carti" },
+  { id: "electronice", label: "Electronice" },
+  { id: "electrocasnice", label: "Electrocasnice" },
+  { id: "autoturisme", label: "Autoturisme" },
+  { id: "sport", label: "Sport" },
+  { id: "cosmetice", label: "Cosmetice" },
+  { id: "altele", label: "Altele" },
+];
+
+// New Joburi/Servicii subcategories
+const joburiServiciiSubcategories = [
   { id: "all", label: "All" },
   { id: "oferte-munca", label: "Oferte muncă" },
   { id: "servicii", label: "Servicii" },
-  { id: "autoturisme", label: "Autoturisme" },
-  { id: "sport", label: "Sport" },
-  { id: "electronice", label: "Electronice" },
-  { id: "cosmetice", label: "Cosmetice" },
-  { id: "electrocasnice", label: "Electrocasnice" },
-  { id: "manuale-carti", label: "Manuale / Carti" },
-  { id: "altele", label: "Altele" },
 ];
 
 export default function BrowsePageClient({
@@ -127,29 +132,40 @@ export default function BrowsePageClient({
         language === "ro" ? "Cereri de Proiecte" : "Project Requests",
       diverseTitle:
         language === "ro" ? "Anunțuri Diverse" : "Various Announcements",
+      joburiServiciiTitle:
+        language === "ro" ? "Joburi / Servicii" : "Jobs / Services",
     };
   }, [language, forceRefresh]);
 
-  // Traducerea subcategoriilor diverse
+  // Traducerea subcategoriilor diverse (reordered)
   const translatedSubcategories = useMemo(
     () => [
       { id: "all", label: translations.all },
-      { id: "oferte-munca", label: translations.jobOffers },
-      { id: "servicii", label: translations.services },
+      { id: "manuale-carti", label: translations.manuals },
+      { id: "electronice", label: language === "ro" ? "Electronice" : "Electronics" },
+      { id: "electrocasnice", label: language === "ro" ? "Electrocasnice" : "Home Appliances" },
       { id: "autoturisme", label: language === "ro" ? "Autoturisme" : "Cars" },
       { id: "sport", label: language === "ro" ? "Sport" : "Sport" },
-      { id: "electronice", label: language === "ro" ? "Electronice" : "Electronics" },
       { id: "cosmetice", label: language === "ro" ? "Cosmetice" : "Cosmetics" },
-      { id: "electrocasnice", label: language === "ro" ? "Electrocasnice" : "Home Appliances" },
-      { id: "manuale-carti", label: translations.manuals },
       { id: "altele", label: language === "ro" ? "Altele" : "Other" },
     ],
     [translations, language]
   );
 
+  // Traducerea subcategoriilor Joburi/Servicii
+  const translatedJoburiServiciiSubcategories = useMemo(
+    () => [
+      { id: "all", label: translations.all },
+      { id: "oferte-munca", label: translations.jobOffers },
+      { id: "servicii", label: translations.services },
+    ],
+    [translations]
+  );
+
   // State
   const [activeTab, setActiveTab] = useState(initialTab);
   const [diverseSubcategory, setDiverseSubcategory] = useState("all");
+  const [joburiServiciiSubcategory, setJoburiServiciiSubcategory] = useState("all");
   const [filteredProjects, setFilteredProjects] = useState<ExtendedProject[]>(
     []
   );
@@ -186,7 +202,15 @@ export default function BrowsePageClient({
       result = result.filter(
         (project) => project.category === diverseSubcategory
       );
-      console.log("After subcategory filter:", result.length, "projects");
+      console.log("After diverse subcategory filter:", result.length, "projects");
+    }
+
+    // Then apply subcategory filter for joburi/servicii items
+    if (activeTab === "joburi-servicii" && joburiServiciiSubcategory !== "all") {
+      result = result.filter(
+        (project) => project.category === joburiServiciiSubcategory
+      );
+      console.log("After joburi/servicii subcategory filter:", result.length, "projects");
     }
 
     // Then apply search filter if needed
@@ -202,56 +226,76 @@ export default function BrowsePageClient({
 
     // Then apply university filter if needed
     if (filters.university) {
-      const universityName = getUniversityName(filters.university);
-      result = result.filter(
-        (project) =>
-          project.university && project.university === universityName
-      );
-      console.log("After university filter:", result.length, "projects");
+      // Only apply university filter for proiect and cerere tabs
+      if (activeTab === "proiect" || activeTab === "cerere") {
+        const universityName = getUniversityName(filters.university);
+        result = result.filter(
+          (project) =>
+            project.university && project.university === universityName
+        );
+        console.log("After university filter:", result.length, "projects");
+      }
     }
 
     // Then apply faculty filter if needed
     if (filters.university && filters.faculty) {
-      const facultyName = getFacultyName(filters.university, filters.faculty);
-      result = result.filter(
-        (project) => project.faculty && project.faculty === facultyName
-      );
-      console.log("After faculty filter:", result.length, "projects");
+      // Only apply faculty filter for proiect and cerere tabs
+      if (activeTab === "proiect" || activeTab === "cerere") {
+        const facultyName = getFacultyName(filters.university, filters.faculty);
+        result = result.filter(
+          (project) => project.faculty && project.faculty === facultyName
+        );
+        console.log("After faculty filter:", result.length, "projects");
+      }
     }
 
     // Apply city filter if needed
     if (filters.city && filters.city !== "_all") {
-      result = result.filter((project) => {
-        const projectCity = (project.city || "").trim().toLowerCase();
-        const filterCity = filters.city.trim().toLowerCase();
-        return projectCity === filterCity;
-      });
+      // Only apply city filter for diverse or joburi-servicii tabs
+      if (activeTab === "diverse" || activeTab === "joburi-servicii") {
+        result = result.filter((project) => {
+          const projectCity = (project.city || "").trim().toLowerCase();
+          const filterCity = filters.city.trim().toLowerCase();
+          return projectCity === filterCity;
+        });
+        console.log("After city filter:", result.length, "projects");
+      }
     }
 
     // Apply category filter if needed
     if (filters.category) {
-      result = result.filter(
-        (project) => 
-          (project.category && project.category === filters.category) || 
-          (project.subject && project.subject === filters.category)
-      );
-      console.log("After category filter:", result.length, "projects");
+      // Only apply category filter for proiect and cerere tabs
+      if (activeTab === "proiect" || activeTab === "cerere") {
+        result = result.filter(
+          (project) => 
+            (project.category && project.category === filters.category) || 
+            (project.subject && project.subject === filters.category)
+        );
+        console.log("After category filter:", result.length, "projects");
+      }
     }
 
     // Apply study level filter if needed
     if (filters.studyLevel) {
-      result = result.filter(
-        (project) => project.studyLevel === filters.studyLevel
-      );
-      console.log("After study level filter:", result.length, "projects");
+      // Only apply study level filter for proiect and cerere tabs
+      if (activeTab === "proiect" || activeTab === "cerere") {
+        result = result.filter(
+          (project) => project.studyLevel === filters.studyLevel
+        );
+        console.log("After study level filter:", result.length, "projects");
+      }
     }
 
     // Apply academic year filter if needed
     if (filters.academicYear && filters.academicYear !== "_all") {
-      result = result.filter(
-        (project) => project.academicYear === filters.academicYear
-      );
-      console.log("After academic year filter:", result.length, "projects");
+      // Only apply academic year filter for diverse (manuale-carti) or joburi-servicii (manuale-carti)
+      if ((activeTab === "diverse" && diverseSubcategory === "manuale-carti") || 
+          (activeTab === "joburi-servicii" && joburiServiciiSubcategory === "manuale-carti")) {
+        result = result.filter(
+          (project) => project.academicYear === filters.academicYear
+        );
+        console.log("After academic year filter:", result.length, "projects");
+      }
     }
 
     // Apply sort order
@@ -266,6 +310,7 @@ export default function BrowsePageClient({
   }, [
     activeTab,
     diverseSubcategory,
+    joburiServiciiSubcategory,
     safeProjects,
     searchQuery,
     filters,
@@ -273,11 +318,11 @@ export default function BrowsePageClient({
   ]);
 
   // Handlers
-  const handleTabChange = (value: string) => {
-    setActiveTab(value);
+  const handleTabChange = (tabId: string) => {
+    setActiveTab(tabId);
     setDiverseSubcategory("all"); // Reset subcategory when changing tabs
-    
-    // Reset all filters when changing tabs
+    setJoburiServiciiSubcategory("all"); // Reset joburi/servicii subcategory when changing tabs
+    setSearchQuery(""); // Reset search when changing tabs
     setFilters({
       university: "",
       faculty: "",
@@ -285,12 +330,7 @@ export default function BrowsePageClient({
       studyLevel: "",
       city: "",
       academicYear: "",
-    });
-    
-    // Reset search query
-    setSearchQuery("");
-    
-    router.push(`/browse?tab=${value}`);
+    }); // Reset filters when changing tabs
   };
 
   const handleSearch = (query: string) => {
@@ -497,6 +537,28 @@ export default function BrowsePageClient({
         </div>
       )}
 
+      {/* Show subcategories for joburi/servicii tab */}
+      {activeTab === "joburi-servicii" && (
+        <div className="flex flex-wrap gap-2 my-4 overflow-x-auto pb-2">
+          {translatedJoburiServiciiSubcategories.map((subcategory) => (
+            <Button
+              key={subcategory.id}
+              variant={
+                joburiServiciiSubcategory === subcategory.id ? "default" : "outline"
+              }
+              className={`whitespace-nowrap text-xs md:text-sm ${
+                joburiServiciiSubcategory === subcategory.id
+                  ? "bg-purple-600 hover:bg-purple-700"
+                  : ""
+              }`}
+              onClick={() => setJoburiServiciiSubcategory(subcategory.id)}
+            >
+              {subcategory.label}
+            </Button>
+          ))}
+        </div>
+      )}
+
       <div className="flex flex-col md:flex-row items-stretch md:items-center space-y-4 md:space-y-0 md:space-x-4">
         <div className="flex-grow">
           <SearchBar onSearch={handleSearch} />
@@ -558,10 +620,10 @@ export default function BrowsePageClient({
         onClose={() => setIsFilterDialogOpen(false)}
         onApplyFilters={handleApplyFilters}
         currentFilters={filters}
-        showCategoryFilter={activeTab !== "diverse"}
-        showCityFilter={activeTab === "diverse"}
-        showAcademicYearFilter={activeTab === "diverse" && diverseSubcategory === "manuale-carti"}
-        showStudyLevelFilter={activeTab !== "diverse"}
+        showCategoryFilter={activeTab !== "diverse" && activeTab !== "joburi-servicii"}
+        showCityFilter={activeTab === "diverse" || activeTab === "joburi-servicii"}
+        showAcademicYearFilter={(activeTab === "diverse" && diverseSubcategory === "manuale-carti") || (activeTab === "joburi-servicii" && joburiServiciiSubcategory === "manuale-carti")}
+        showStudyLevelFilter={activeTab !== "diverse" && activeTab !== "joburi-servicii"}
       />
 
       <AccessDeniedDialog

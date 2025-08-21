@@ -34,8 +34,8 @@ export default function NewsManagementPage() {
     title: "",
     description: "",
     image: "",
-    city: "",
-    university: "",
+    city: "oricare",
+    university: "oricare",
   })
   const [error, setError] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -83,21 +83,38 @@ export default function NewsManagementPage() {
   }
 
   const handleSubmit = async () => {
-    if (!formData.title || !formData.description || !formData.city) {
-      setError("Please fill in all required fields")
+    // Reset error state
+    setError("")
+
+    // Check if required fields are filled
+    if (!formData.title.trim()) {
+      setError("Titlul este obligatoriu")
       return
     }
+
+    if (!formData.description.trim()) {
+      setError("Descrierea este obligatorie")
+      return
+    }
+
+    // City is not required - can be "oricare" or a specific city
+    // if (!formData.city || formData.city === "oricare") {
+    //   setError("Orașul este obligatoriu")
+    //   return
+    // }
 
     if (formData.description.length < 300) {
-      setError("News description must be at least 300 characters")
+      setError("Descrierea trebuie să aibă cel puțin 300 de caractere")
       return
     }
 
-    // If "oricare" is selected, set to empty string for the database
+    // Prepare data for submission
     const dataToSubmit = {
-      ...formData,
-      university: formData.university === "oricare" ? "" : formData.university,
+      title: formData.title.trim(),
+      description: formData.description.trim(),
+      image: formData.image || null,
       city: formData.city === "oricare" ? "" : formData.city,
+      university: formData.university === "oricare" ? null : formData.university,
     }
 
     setIsSubmitting(true)
@@ -111,16 +128,16 @@ export default function NewsManagementPage() {
       })
 
       if (!response.ok) {
-        throw new Error(await response.text())
+        const errorText = await response.text()
+        throw new Error(errorText)
       }
 
       await fetchNews()
       setIsDialogOpen(false)
-      setFormData({ title: "", description: "", image: "", city: "", university: "" })
-      setEditingNews(null)
+      resetForm()
     } catch (error) {
       console.error("Error saving news:", error)
-      setError(error instanceof Error ? error.message : "Failed to save news")
+      setError(error instanceof Error ? error.message : "Eroare la salvarea știrii")
     } finally {
       setIsSubmitting(false)
     }
@@ -152,8 +169,8 @@ export default function NewsManagementPage() {
       title: item.title,
       description: item.description,
       image: item.image || "",
-      city: item.city || "",
-      university: item.university || "",
+      city: item.city || "oricare",
+      university: item.university || "oricare",
     })
     setIsDialogOpen(true)
   }
@@ -170,7 +187,7 @@ export default function NewsManagementPage() {
       setFormData((prev) => ({
         ...prev,
         university: "oricare",
-        // Don't auto-populate city when "oricare" is selected
+        city: "", // Reset city when university is "oricare"
       }))
     } else {
       setFormData((prev) => ({
@@ -182,11 +199,35 @@ export default function NewsManagementPage() {
   }
 
   const handleCityChange = (city: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      city: city,
-      university: "",
-    }))
+    if (city === "oricare") {
+      setFormData((prev) => ({
+        ...prev,
+        city: "oricare",
+        university: "", // Reset university when city is "oricare"
+      }))
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        city: city,
+        university: "", // Reset university when city is manually selected
+      }))
+    }
+  }
+
+  const resetForm = () => {
+    setFormData({ title: "", description: "", image: "", city: "oricare", university: "oricare" })
+    setError("")
+    setEditingNews(null)
+  }
+
+  const openAddDialog = () => {
+    resetForm()
+    setIsDialogOpen(true)
+  }
+
+  const closeDialog = () => {
+    setIsDialogOpen(false)
+    resetForm()
   }
 
   if (loading || universitiesLoading) {
@@ -207,7 +248,7 @@ export default function NewsManagementPage() {
         <CardHeader>
           <div className="flex justify-between items-center">
             <CardTitle>All News</CardTitle>
-            <Button onClick={() => setIsDialogOpen(true)}>
+            <Button onClick={openAddDialog}>
               <Plus className="mr-2 h-4 w-4" />
               Add News
             </Button>
@@ -277,9 +318,9 @@ export default function NewsManagementPage() {
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               />
             </div>
-            <Select onValueChange={handleUniversityChange}>
+            <Select onValueChange={handleUniversityChange} value={formData.university}>
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select University (optional)" />
+                <SelectValue placeholder="Selectează universitatea (opțional)" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="oricare">Oricare</SelectItem>
@@ -291,9 +332,9 @@ export default function NewsManagementPage() {
               </SelectContent>
             </Select>
             {!formData.university || formData.university === "oricare" ? (
-              <Select onValueChange={handleCityChange}>
+              <Select onValueChange={handleCityChange} value={formData.city}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select City (required)" />
+                  <SelectValue placeholder="Selectează orașul (opțional)" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="oricare">Oricare</SelectItem>
@@ -305,7 +346,7 @@ export default function NewsManagementPage() {
                 </SelectContent>
               </Select>
             ) : (
-              <Input placeholder="City (auto-populated)" value={formData.city} readOnly />
+              <Input placeholder="Oraș (completat automat)" value={formData.city} readOnly />
             )}
             <div>
               <Textarea
@@ -320,7 +361,7 @@ export default function NewsManagementPage() {
             </div>
             <div>
               {formData.image && (
-                <div className="relative w-full h-64 mb-4 rounded-lg overflow-hidden">
+                <div className="relative w-full h-40 mb-4 rounded-lg overflow-hidden">
                   <Image src={formData.image || "/placeholder.svg"} alt="News image" fill className="object-contain" />
                   <Button
                     variant="destructive"
@@ -364,7 +405,7 @@ export default function NewsManagementPage() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+            <Button variant="outline" onClick={closeDialog}>
               Cancel
             </Button>
             <Button onClick={handleSubmit} disabled={isSubmitting}>

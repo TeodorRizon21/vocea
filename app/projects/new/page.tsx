@@ -220,6 +220,7 @@ export default function NewProjectPage() {
       },
       // Add translations for diverse categories
       diverseCategories: {
+        "manuale-carti": language === "ro" ? "Manuale / Carti" : "Manuals / Books",
         "job-offers": language === "ro" ? "Oferte muncă" : "Job offers",
         "services": language === "ro" ? "Servicii" : "Services",
         "cars": language === "ro" ? "Autoturisme" : "Cars",
@@ -227,7 +228,6 @@ export default function NewProjectPage() {
         "electronics": language === "ro" ? "Electronice" : "Electronics",
         "cosmetics": language === "ro" ? "Cosmetice" : "Cosmetics",
         "appliances": language === "ro" ? "Electrocasnice" : "Appliances",
-        "manuale-carti": language === "ro" ? "Manuale / Carti" : "Manuals / Books",
         "other": language === "ro" ? "Altele" : "Other",
       },
       price: language === "ro" ? "Preț (RON)" : "Price (RON)",

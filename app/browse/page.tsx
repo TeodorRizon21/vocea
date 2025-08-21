@@ -65,8 +65,15 @@ export default function BrowsePage() {
         label: translations.diverse,
         description: translations.diverseDescription,
       },
+      {
+        id: "joburi-servicii",
+        label: language === "ro" ? "Joburi / Servicii" : "Jobs / Services",
+        description: language === "ro" 
+          ? "Găsește oferte de muncă part-time și servicii de mentoring pentru studenți."
+          : "Find part-time job offers and mentoring services for students.",
+      },
     ],
-    [translations]
+    [translations, language]
   );
 
   useEffect(() => {

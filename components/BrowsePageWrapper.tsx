@@ -24,7 +24,12 @@ const tabsData = [
     label: "Diverse",
     description: "Discover a variety of other opportunities and resources.",
   },
-]
+  {
+    id: "joburi-servicii",
+    label: "Joburi / Servicii",
+    description: "Find part-time job offers and mentoring services for students.",
+  },
+];
 
 // Add this type definition based on the expected project structure
 interface ExtendedProject {
