@@ -79,7 +79,8 @@ export default function NewProjectPage() {
       pageTitle: {
         proiect: language === "ro" ? "Creează Proiect Nou" : "Create New Project",
         cerere: language === "ro" ? "Creează Cerere de Proiect" : "Create Project Request",
-        diverse: language === "ro" ? "Creează Anunț Nou" : "Create New Announcement"
+        diverse: language === "ro" ? "Creează Anunț Nou" : "Create New Announcement",
+        "joburi-servicii": language === "ro" ? "Creează Anunț Joburi/Servicii" : "Create Jobs/Services Announcement"
       },
       pageSubtitle: {
         proiect: language === "ro" 
@@ -89,15 +90,21 @@ export default function NewProjectPage() {
           ? "Solicită ajutor pentru proiectul tău și găsește experți care te pot ghida"
           : "Request help for your project and find experts who can guide you",
         diverse: language === "ro"
-          ? "Publică un anunț pentru comunitatea studenților - oferte de muncă, servicii, produse și multe altele"
-          : "Post an announcement for the student community - job offers, services, products, and more"
+          ? "Publică un anunț pentru comunitatea studenților - produse, electronice, cărți și multe altele"
+          : "Post an announcement for the student community - products, electronics, books and more",
+        "joburi-servicii": language === "ro"
+          ? "Publică un anunț pentru comunitatea studenților - oferte de muncă, servicii, mentoring și multe altele"
+          : "Post an announcement for the student community - job offers, services, mentoring and more"
       },
       projectType: language === "ro" ? "Tipul Anunțului" : "Announcement Type",
       projectLabel: language === "ro" ? "Proiect" : "Academic Project",
       requestLabel: language === "ro" ? "Cerere de Proiect" : "Project Request",
       diverseLabel: language === "ro" ? "Anunț Diverse" : "Various Announcement",
-      diverseCategory:
-        language === "ro" ? "Categorie Diverse" : "Diverse Category",
+      joburiServiciiLabel: language === "ro" ? "Joburi / Servicii" : "Jobs / Services",
+              diverseCategory:
+          language === "ro" ? "Categorie Diverse" : "Diverse Category",
+        joburiServiciiCategory:
+          language === "ro" ? "Categorie Joburi/Servicii" : "Jobs/Services Category",
       selectCategory:
         language === "ro"
           ? "Te rugăm să selectezi o categorie pentru elementul tău divers"
@@ -220,15 +227,15 @@ export default function NewProjectPage() {
       },
       // Add translations for diverse categories
       diverseCategories: {
+        "oferte-munca": language === "ro" ? "Oferte muncă" : "Job offers",
+        "servicii": language === "ro" ? "Servicii" : "Services",
+        "autoturisme": language === "ro" ? "Autoturisme" : "Cars",
+        "sport": language === "ro" ? "Sport" : "Sports",
+        "electronice": language === "ro" ? "Electronice" : "Electronics",
+        "cosmetice": language === "ro" ? "Cosmetice" : "Cosmetics",
+        "electrocasnice": language === "ro" ? "Electrocasnice" : "Appliances",
         "manuale-carti": language === "ro" ? "Manuale / Carti" : "Manuals / Books",
-        "job-offers": language === "ro" ? "Oferte muncă" : "Job offers",
-        "services": language === "ro" ? "Servicii" : "Services",
-        "cars": language === "ro" ? "Autoturisme" : "Cars",
-        "sports": language === "ro" ? "Sport" : "Sports",
-        "electronics": language === "ro" ? "Electronice" : "Electronics",
-        "cosmetics": language === "ro" ? "Cosmetice" : "Cosmetics",
-        "appliances": language === "ro" ? "Electrocasnice" : "Appliances",
-        "other": language === "ro" ? "Altele" : "Other",
+        "altele": language === "ro" ? "Altele" : "Other",
       },
       price: language === "ro" ? "Preț (RON)" : "Price (RON)",
       pricePlaceholder: language === "ro" ? "Introdu prețul în RON" : "Enter price in RON",
@@ -306,9 +313,9 @@ export default function NewProjectPage() {
       return;
     }
 
-    // Validate that diverse projects have a diverse category
+    // Validate that diverse and joburi-servicii projects have a diverse category
     if (
-      projectType === "diverse" &&
+      (projectType === "diverse" || projectType === "joburi-servicii") &&
       !DIVERSE_CATEGORIES.some((cat) => cat.id === formData.category)
     ) {
       setError(translations.diverseCatError);
@@ -352,7 +359,7 @@ export default function NewProjectPage() {
         university: selectedUniversity.name,
         faculty: selectedFaculty.name,
         phoneNumber: formData.phoneNumber,
-        type: projectType,
+        type: projectType === "joburi-servicii" ? "diverse" : projectType,
         images: uploadedImages,
         studyLevel: formData.studyLevel,
         price: formattedPrice,
@@ -436,12 +443,23 @@ export default function NewProjectPage() {
                 {translations.diverseLabel}
               </Label>
             </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="joburi-servicii" id="joburi-servicii" />
+              <Label htmlFor="joburi-servicii" className="cursor-pointer">
+                {translations.joburiServiciiLabel}
+              </Label>
+            </div>
           </RadioGroup>
         </div>
 
-        {projectType === "diverse" && (
+        {(projectType === "diverse" || projectType === "joburi-servicii") && (
           <div className="space-y-4">
-            <Label>{translations.diverseCategory}</Label>
+            <Label>
+              {projectType === "diverse" 
+                ? translations.diverseCategory 
+                : translations.joburiServiciiCategory
+              }
+            </Label>
             <Select
               value={formData.category}
               onValueChange={(value) =>
@@ -453,7 +471,18 @@ export default function NewProjectPage() {
                 <SelectValue placeholder={translations.selectCategoryPlaceholder} />
               </SelectTrigger>
               <SelectContent>
-              {DIVERSE_CATEGORIES.map((category) => (
+              {DIVERSE_CATEGORIES
+                .filter(category => {
+                  if (projectType === "diverse") {
+                    // Pentru diverse, exclude oferte-munca și servicii
+                    return category.id !== "oferte-munca" && category.id !== "servicii";
+                  } else if (projectType === "joburi-servicii") {
+                    // Pentru joburi-servicii, include doar oferte-munca și servicii
+                    return category.id === "oferte-munca" || category.id === "servicii";
+                  }
+                  return true;
+                })
+                .map((category) => (
                   <SelectItem key={category.id} value={category.id}>
                     {translations.diverseCategories[category.id as keyof typeof translations.diverseCategories] || category.label}
                   </SelectItem>
@@ -565,7 +594,7 @@ export default function NewProjectPage() {
           />
         </div>
 
-        {projectType !== "diverse" && (
+        {(projectType === "proiect" || projectType === "cerere") && (
           <div>
             <Label htmlFor="category">{translations.category}</Label>
             <Select
@@ -591,7 +620,7 @@ export default function NewProjectPage() {
           </div>
         )}
 
-        {projectType !== "diverse" && (
+        {(projectType === "proiect" || projectType === "cerere") && (
           <div>
             <Label htmlFor="studyLevel">{translations.studyLevel}</Label>
             <Select
@@ -771,6 +800,8 @@ export default function NewProjectPage() {
               projectType === "cerere"
                 ? translations.createRequest
                 : projectType === "diverse"
+                ? translations.createDiverse
+                : projectType === "joburi-servicii"
                 ? translations.createDiverse
                 : translations.createProject
             }`

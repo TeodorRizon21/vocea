@@ -20,7 +20,12 @@ import { ProjectQuota } from "@/components/ProjectQuota";
 interface ProjectWithRating {
   id: string;
   title: string;
+  description: string;
+  subject: string;
+  category: string;
   type: string;
+  university: string;
+  faculty: string;
   images: string[];
   reviews: Array<{
     id: string;
@@ -30,6 +35,7 @@ interface ProjectWithRating {
   reviewCount?: number;
   isActive: boolean;
   createdAt: Date;
+  expiresAt?: Date;
 }
 
 export default function UserProjects() {
@@ -55,6 +61,10 @@ export default function UserProjects() {
         language === "ro"
           ? "Ești sigur că vrei să ștergi acest proiect?"
           : "Are you sure you want to delete this project?",
+      deactivateConfirm:
+        language === "ro"
+          ? "Ești sigur că vrei să dezactivezi acest proiect?"
+          : "Are you sure you want to deactivate this project?",
     }),
     [language, forceRefresh]
   );
@@ -141,7 +151,7 @@ export default function UserProjects() {
       if (!response.ok) {
         const error = await response.json();
         console.error("Failed to reactivate project:", error);
-        // You might want to show an error message to the user here
+        alert(error.message || (language === "ro" ? "Nu s-a putut reactiva proiectul" : "Failed to reactivate project"));
         return;
       }
 
@@ -153,6 +163,35 @@ export default function UserProjects() {
     } catch (error) {
       console.error("Error reactivating project:", error);
       // You might want to show an error message to the user here
+    }
+  };
+
+  const handleDeactivate = async (projectId: string) => {
+    try {
+      const response = await fetch(`/api/projects/${projectId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ 
+          isActive: false
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        console.error("Failed to deactivate project:", error);
+        alert(error.message || (language === "ro" ? "Nu s-a putut dezactiva proiectul" : "Failed to deactivate project"));
+        return;
+      }
+
+      console.log("Project deactivated successfully");
+      // Force a refresh of the projects list
+      router.refresh();
+      // Optional: You could also refresh the current page
+      window.location.reload();
+    } catch (error) {
+      console.error("Error deactivating project:", error);
     }
   };
 
@@ -204,57 +243,124 @@ export default function UserProjects() {
         ) : (
           <div className="space-y-4">
             {displayedProjects.map((project) => (
-              <Card key={project.id} className="mb-4">
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <CardTitle className="text-xl font-bold">{project.title}</CardTitle>
-                  <div className="flex items-center gap-2">
-                    {!project.isActive && (
-                      <Badge variant="secondary" className="mr-2">
-                        Inactive
-                        </Badge>
-                    )}
-                    <div className="flex items-center">
-                      {project.averageRating !== undefined && (
-                        <>
-                          <Star className="w-4 h-4 text-yellow-400 mr-1" />
-                          <span className="mr-2">{project.averageRating.toFixed(1)}</span>
-                        </>
+              <Card key={project.id} className={`mb-4 ${!project.isActive ? 'opacity-90 border-gray-300' : 'border-gray-200'}`}>
+                <CardHeader>
+                  <div className="flex flex-row items-start justify-between">
+                    <div className="flex items-start gap-4 flex-1">
+                      {project.images && project.images.length > 0 && (
+                        <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
+                          <Image
+                            src={project.images[0]}
+                            alt={project.title}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
                       )}
-                      {project.reviewCount !== undefined && (
-                        <span className="text-sm text-gray-500">
-                          ({project.reviewCount} {language === "ro" ? "recenzii" : "reviews"})
-                        </span>
-                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-2">
+                          <CardTitle className="text-xl font-bold truncate">{project.title}</CardTitle>
+                          {!project.isActive && (
+                            <Badge variant="outline" className="text-xs flex-shrink-0 border-orange-300 text-orange-600 bg-orange-50">
+                              {language === "ro" ? "Inactiv" : "Inactive"}
+                            </Badge>
+                          )}
+                        </div>
+                      <div className="space-y-1">
+                        <p className="text-sm text-gray-600 overflow-hidden" style={{
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical'
+                        }}>{project.description}</p>
+                        <div className="flex items-center gap-4 text-xs text-gray-500">
+                          <span className="capitalize">{project.type}</span>
+                          <span>•</span>
+                          <span>{project.subject}</span>
+                          <span>•</span>
+                          <span>{new Date(project.createdAt).toLocaleDateString('ro-RO')}</span>
+                          {project.averageRating !== undefined && project.averageRating > 0 && (
+                            <>
+                              <span>•</span>
+                              <div className="flex items-center">
+                                <Star className="w-3 h-3 text-yellow-400 mr-1" />
+                                <span>{project.averageRating.toFixed(1)}</span>
+                                {project.reviewCount !== undefined && (
+                                  <span className="text-gray-400 ml-1">
+                                    ({project.reviewCount})
+                                  </span>
+                                )}
+                              </div>
+                            </>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-4 text-xs text-gray-400">
+                          <span>{project.university}</span>
+                          {project.faculty && (
+                            <>
+                              <span>•</span>
+                              <span>{project.faculty}</span>
+                            </>
+                          )}
+                          {!project.isActive && project.expiresAt && (
+                            <>
+                              <span>•</span>
+                              <span className="text-orange-600 font-medium">
+                                {language === "ro" ? "Expirat pe" : "Expired on"} {new Date(project.expiresAt).toLocaleDateString('ro-RO')}
+                              </span>
+                            </>
+                          )}
+                        </div>
+                        </div>
                       </div>
-                    {!project.isActive && (
+                    </div>
+                    <div className="flex items-center gap-1 ml-2 md:ml-4 flex-shrink-0">
+                      {!project.isActive ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-xs px-2 md:px-3 py-1 h-8 text-green-600 border-green-600 hover:bg-green-50"
+                          onClick={() => handleReactivate(project.id)}
+                          title={language === "ro" ? "Reactivează proiectul pentru 30 de zile" : "Reactivate project for 30 days"}
+                        >
+                          {language === "ro" ? "Reactivează" : "Reactivate"}
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-xs px-2 md:px-3 py-1 h-8 text-orange-600 border-orange-600 hover:bg-orange-50"
+                          onClick={() => {
+                            if (confirm(translations.deactivateConfirm)) {
+                              handleDeactivate(project.id);
+                            }
+                          }}
+                          title={language === "ro" ? "Dezactivează proiectul manual" : "Manually deactivate project"}
+                        >
+                          {language === "ro" ? "Dezactivează" : "Deactivate"}
+                        </Button>
+                      )}
                       <Button
-                        variant="outline"
-                        size="sm"
-                        className="text-xs px-2 py-1 h-7"
-                        onClick={() => handleReactivate(project.id)}
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => router.push(`/projects/edit/${project.id}`)}
                       >
-                        {language === "ro" ? "Reactivează" : "Reactivate"}
+                        <Pencil className="h-4 w-4" />
                       </Button>
-                    )}
-                  <Button
-                      variant="ghost"
-                    size="icon"
-                    onClick={() => router.push(`/projects/edit/${project.id}`)}
-                  >
-                      <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button
-                      variant="ghost"
-                    size="icon"
-                      onClick={() => {
-                      if (confirm(translations.deleteConfirm)) {
-                          handleDelete(project.id);
-                      }
-                    }}
-                  >
-                      <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-red-600 hover:bg-red-50"
+                        onClick={() => {
+                          if (confirm(translations.deleteConfirm)) {
+                            handleDelete(project.id);
+                          }
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
                 </CardHeader>
               </Card>
             ))}

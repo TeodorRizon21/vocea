@@ -1,4 +1,4 @@
-export type ProjectType = "proiect" | "cerere" | "diverse"
+export type ProjectType = "proiect" | "cerere" | "diverse" | "joburi-servicii"
 
 export interface Project {
   id: string

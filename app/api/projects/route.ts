@@ -28,14 +28,27 @@ export async function GET(req: NextRequest) {
     // Then fetch projects
     const projects = await prisma.project.findMany({
       where: type
-        ? {
-            type: type,
-            isActive: true,
-            OR: [
-              { expiresAt: null },
-              { expiresAt: { gt: now } }
-            ]
-          }
+        ? type === "joburi-servicii"
+          ? {
+              // Pentru joburi-servicii, include proiecte cu tipul "diverse" dar cu categoriile oferte-munca sau servicii
+              type: "diverse",
+              category: {
+                in: ["oferte-munca", "servicii"]
+              },
+              isActive: true,
+              OR: [
+                { expiresAt: null },
+                { expiresAt: { gt: now } }
+              ]
+            }
+          : {
+              type: type,
+              isActive: true,
+              OR: [
+                { expiresAt: null },
+                { expiresAt: { gt: now } }
+              ]
+            }
         : {
             isActive: true,
             OR: [

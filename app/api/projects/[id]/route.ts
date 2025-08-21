@@ -1,6 +1,7 @@
 import { getAuth } from "@clerk/nextjs/server"
 import { prisma } from "@/lib/prisma"
 import { type NextRequest, NextResponse } from "next/server"
+import { PROJECT_LIMITS, type SubscriptionType } from "@/lib/constants"
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -117,11 +118,68 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
     // If isActive is being toggled, check if the project is older than 30 days
     if (updateData.isActive !== undefined) {
-      // If we're reactivating the project, set a new expiration date
-      if (updateData.isActive === true && !updateData.expiresAt) {
-        const newExpiresAt = new Date();
-        newExpiresAt.setDate(newExpiresAt.getDate() + 30);
-        updateData.expiresAt = newExpiresAt;
+      // If we're reactivating the project, check limits and set a new expiration date
+      if (updateData.isActive === true) {
+        // Check if user can have more active projects
+        const user = await prisma.user.findUnique({
+          where: { clerkId: userId },
+          select: { id: true, planType: true }
+        });
+
+        if (!user) {
+          return new NextResponse("User not found", { status: 404 });
+        }
+
+        // Get current subscription to determine plan limits
+        const subscription = await prisma.subscription.findFirst({
+          where: {
+            userId: user.id,
+            status: { in: ['active', 'cancelled'] }
+          },
+          orderBy: { createdAt: 'desc' }
+        });
+
+        const subscriptionType = (subscription?.plan || user.planType || "Basic") as SubscriptionType;
+        const limit = PROJECT_LIMITS[subscriptionType];
+
+        // Count current active projects
+        const startOfMonth = new Date();
+        startOfMonth.setDate(1);
+        startOfMonth.setHours(0, 0, 0, 0);
+
+        const activeProjectCount = await prisma.project.count({
+          where: {
+            userId: userId,
+            createdAt: {
+              gte: startOfMonth
+            },
+            isActive: true
+          }
+        });
+
+        // Don't count the current project if it's being reactivated
+        const currentProject = await prisma.project.findUnique({
+          where: { id: params.id },
+          select: { isActive: true }
+        });
+
+        // If the current project is already active, we're not adding a new active project
+        // If the current project is inactive, we're adding one more active project
+        const effectiveCount = currentProject?.isActive ? activeProjectCount : activeProjectCount;
+
+        if (limit !== Infinity && effectiveCount >= limit) {
+          return NextResponse.json({
+            error: "Project limit reached",
+            message: `Nu poți reactiva proiectul. Ai atins limita de ${limit} proiecte active pe lună pentru planul tău ${subscriptionType}.`
+          }, { status: 403 });
+        }
+
+        // Set new expiration date if not provided
+        if (!updateData.expiresAt) {
+          const newExpiresAt = new Date();
+          newExpiresAt.setDate(newExpiresAt.getDate() + 30);
+          updateData.expiresAt = newExpiresAt;
+        }
       }
     }
 

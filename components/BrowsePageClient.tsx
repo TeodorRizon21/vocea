@@ -16,6 +16,7 @@ import { useUser } from "@clerk/nextjs";
 import { useLanguage } from "@/components/LanguageToggle";
 import ProductCard from "@/components/ProductCard";
 import UserProfile from "@/components/UserProfile";
+import { DIVERSE_CATEGORIES } from "@/lib/constants";
 
 // Import the ExtendedProject type from ProductGrid
 interface ExtendedProject {
@@ -61,20 +62,15 @@ interface BrowsePageClientProps {
 // Diverse subcategories (reordered and without job offers and services)
 const diverseSubcategories = [
   { id: "all", label: "All" },
-  { id: "manuale-carti", label: "Manuale / Carti" },
-  { id: "electronice", label: "Electronice" },
-  { id: "electrocasnice", label: "Electrocasnice" },
-  { id: "autoturisme", label: "Autoturisme" },
-  { id: "sport", label: "Sport" },
-  { id: "cosmetice", label: "Cosmetice" },
-  { id: "altele", label: "Altele" },
+  ...DIVERSE_CATEGORIES.filter(cat => cat.id !== "oferte-munca" && cat.id !== "servicii")
 ];
 
-// New Joburi/Servicii subcategories
+
+
+// New Joburi/Servicii subcategories - extract from DIVERSE_CATEGORIES
 const joburiServiciiSubcategories = [
   { id: "all", label: "All" },
-  { id: "oferte-munca", label: "Oferte muncă" },
-  { id: "servicii", label: "Servicii" },
+  ...DIVERSE_CATEGORIES.filter(cat => cat.id === "oferte-munca" || cat.id === "servicii")
 ];
 
 export default function BrowsePageClient({
@@ -124,8 +120,12 @@ export default function BrowsePageClient({
           : "Are you a student needing help with your project? Post your request and find other students or professors who can help. Ideal for bachelor's, master's, or PhD projects, with personalized support for your academic needs.",
       diverseDescription:
         language === "ro"
-          ? "Tot ce ai nevoie ca student: oferte de muncă part-time, servicii de mentoring, cărți și materiale de studiu, și multe altele. O platformă dedicată exclusiv pentru studenți, cu tot ce necesită succesul tău academic."
-          : "Everything you need as a student: part-time job offers, mentoring services, books and study materials, and more. A platform dedicated exclusively to students, with everything required for your academic success.",
+          ? "Tot ce ai nevoie ca student: cărți și materiale de studiu, electronice, electrocasnice, autoturisme, sport, cosmetice și multe altele. O platformă dedicată exclusiv pentru studenți, cu tot ce necesită succesul tău academic."
+          : "Everything you need as a student: books and study materials, electronics, home appliances, cars, sports, cosmetics and more. A platform dedicated exclusively to students, with everything required for your academic success.",
+      joburiServiciiDescription:
+        language === "ro"
+          ? "Oportunități profesionale și servicii pentru studenți: oferte de muncă part-time, internship-uri, servicii de mentoring, consultanță academică și multe altele. Construiește-ți cariera și dezvoltă-ți abilitățile cu ajutorul comunității noastre."
+          : "Professional opportunities and services for students: part-time job offers, internships, mentoring services, academic consulting and more. Build your career and develop your skills with the help of our community.",
       projectsTitle:
         language === "ro" ? "Proiecte Academice" : "Academic Projects",
       projectRequestsTitle:
@@ -141,23 +141,24 @@ export default function BrowsePageClient({
   const translatedSubcategories = useMemo(
     () => [
       { id: "all", label: translations.all },
-      { id: "manuale-carti", label: translations.manuals },
-      { id: "electronice", label: language === "ro" ? "Electronice" : "Electronics" },
-      { id: "electrocasnice", label: language === "ro" ? "Electrocasnice" : "Home Appliances" },
-      { id: "autoturisme", label: language === "ro" ? "Autoturisme" : "Cars" },
-      { id: "sport", label: language === "ro" ? "Sport" : "Sport" },
-      { id: "cosmetice", label: language === "ro" ? "Cosmetice" : "Cosmetics" },
-      { id: "altele", label: language === "ro" ? "Altele" : "Other" },
+      ...DIVERSE_CATEGORIES.filter(cat => cat.id !== "oferte-munca" && cat.id !== "servicii")
+        .map(cat => ({
+          id: cat.id,
+          label: cat.label
+        }))
     ],
-    [translations, language]
+    [translations]
   );
 
   // Traducerea subcategoriilor Joburi/Servicii
   const translatedJoburiServiciiSubcategories = useMemo(
     () => [
       { id: "all", label: translations.all },
-      { id: "oferte-munca", label: translations.jobOffers },
-      { id: "servicii", label: translations.services },
+      ...DIVERSE_CATEGORIES.filter(cat => cat.id === "oferte-munca" || cat.id === "servicii")
+        .map(cat => ({
+          id: cat.id,
+          label: cat.label
+        }))
     ],
     [translations]
   );
@@ -194,7 +195,14 @@ export default function BrowsePageClient({
     });
 
     // First filter by tab
-    let result = safeProjects.filter((project) => project.type === activeTab);
+    let result = safeProjects.filter((project) => {
+      if (activeTab === "joburi-servicii") {
+        // Pentru joburi-servicii, include proiecte cu tipul "diverse" dar cu categoriile oferte-munca sau servicii
+        return project.type === "diverse" && 
+               (project.category === "oferte-munca" || project.category === "servicii");
+      }
+      return project.type === activeTab;
+    });
     console.log("After tab filter:", result.length, "projects");
 
     // Then apply subcategory filter for diverse items
@@ -400,6 +408,8 @@ export default function BrowsePageClient({
         return translations.addNewRequest;
       case "diverse":
         return translations.addNewAnnouncement;
+      case "joburi-servicii":
+        return translations.addNewAnnouncement;
       default:
         return translations.addNewProject;
     }
@@ -423,6 +433,7 @@ export default function BrowsePageClient({
             {activeTab === "proiect" && translations.projectsDescription}
             {activeTab === "cerere" && translations.projectRequestsDescription}
             {activeTab === "diverse" && translations.diverseDescription}
+            {activeTab === "joburi-servicii" && translations.joburiServiciiDescription}
           </p>
               <div className="pt-4 border-t border-white/20">
                 <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm md:text-base">
@@ -489,6 +500,28 @@ export default function BrowsePageClient({
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         {language === "ro" ? "Anunțuri verificate" : "Verified announcements"}
+                      </li>
+                    </>
+                  )}
+                  {activeTab === "joburi-servicii" && (
+                    <>
+                      <li className="flex items-center gap-2">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        {language === "ro" ? "Oportunități profesionale" : "Professional opportunities"}
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        {language === "ro" ? "Servicii verificate" : "Verified services"}
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        {language === "ro" ? "Dezvoltare carieră" : "Career development"}
                       </li>
                     </>
                   )}
